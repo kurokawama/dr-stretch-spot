@@ -1,0 +1,65 @@
+# Dr.stretch SPOT — Cursor AI Rules
+
+## CRITICAL: DO NOT modify any Japanese text content
+## CRITICAL: DO NOT modify any Japanese text content (repeated for emphasis)
+
+## Project
+Dr.ストレッチ認定トレーナー副業マッチングプラットフォーム
+
+## Tech Stack
+- Next.js 15 (App Router) + TypeScript
+- shadcn/ui + Tailwind CSS v4
+- Supabase (PostgreSQL + Auth)
+- Server Actions for data mutations
+
+## Design Tokens
+- Primary Red: #E60012 (use `primary` in Tailwind)
+- Accent Green: #DADF00 (use `accent` in Tailwind)
+- Font: Montserrat (headings), Inter (body), Noto Sans JP (Japanese)
+- Border radius: Card 12px, Button/Input 8px, Badge 16px (pill)
+
+## Coding Rules
+1. TypeScript strict mode — no `any` types
+2. Functional components only
+3. Server Components by default, `"use client"` only when needed
+4. Use shadcn/ui components from `@/components/ui/`
+5. Import Server Actions from `@/actions/`
+6. Import types from `@/types/`
+7. Use `@/lib/supabase/` for DB access
+8. No inline styles — use Tailwind classes
+9. Responsive design: mobile-first
+10. All forms use react-hook-form + zod validation
+
+## File Structure
+```
+src/app/(trainer)/   — Trainer-facing pages
+src/app/(store)/     — Store manager pages
+src/app/(hr)/        — HR control panel
+src/app/(auth)/      — Login/Register
+src/actions/         — Server Actions
+src/components/ui/   — shadcn/ui components
+src/components/shared/ — App-level shared components
+src/types/           — TypeScript type definitions
+src/lib/supabase/    — Supabase client utilities
+```
+
+## User Roles
+- `trainer` → (trainer)/ routes
+- `store_manager` → (store)/ routes
+- `hr` → (hr)/ routes
+
+## Component Patterns
+- Card-based layouts for lists
+- Table for admin/HR data views
+- Badge for status indicators
+- Sheet for mobile navigation
+- Dialog for confirmations
+- Sonner for toast notifications
+
+## DO NOT
+- Create new UI primitives (use shadcn/ui)
+- Use `any` type
+- Query Supabase directly in components
+- Hardcode colors (use CSS variables/Tailwind)
+- Skip form validation
+- Modify Japanese text content
