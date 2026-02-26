@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createShiftRequest } from "@/actions/shifts";
@@ -86,6 +86,10 @@ export function StoreShiftForm({
     () => templates.find((template) => template.id === selectedTemplateId),
     [selectedTemplateId, templates]
   );
+  const isEmergency = useWatch({
+    control: form.control,
+    name: "isEmergency",
+  });
 
   const applyTemplate = (templateId: string) => {
     setSelectedTemplateId(templateId);
@@ -305,7 +309,7 @@ export function StoreShiftForm({
             )}
           />
 
-          {form.watch("isEmergency") ? (
+          {isEmergency ? (
             <FormField
               control={form.control}
               name="emergencyBonusAmount"

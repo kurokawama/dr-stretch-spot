@@ -19,10 +19,22 @@ interface ClockPanelProps {
 }
 
 type GpsState =
-  | { status: "idle"; message: string; latitude?: number; longitude?: number }
   | { status: "loading"; message: string; latitude?: number; longitude?: number }
   | { status: "ready"; message: string; latitude: number; longitude: number }
   | { status: "error"; message: string; latitude?: number; longitude?: number };
+
+function getInitialGpsState(): GpsState {
+  if (typeof navigator !== "undefined" && !navigator.geolocation) {
+    return {
+      status: "error",
+      message: "この端末ではGPSが利用できません。",
+    };
+  }
+  return {
+    status: "loading",
+    message: "位置情報を取得中...",
+  };
+}
 
 const attendanceStatusLabel: Record<string, string> = {
   scheduled: "予定",
@@ -46,10 +58,7 @@ const attendanceStatusVariant: Record<
 export function ClockPanel({ initialRecords }: ClockPanelProps) {
   const router = useRouter();
   const [records, setRecords] = useState<AttendanceRecord[]>(initialRecords);
-  const [gpsState, setGpsState] = useState<GpsState>({
-    status: "idle",
-    message: "未取得",
-  });
+  const [gpsState, setGpsState] = useState<GpsState>(getInitialGpsState);
   const [now, setNow] = useState(new Date());
   const [isPending, startTransition] = useTransition();
 
@@ -59,15 +68,10 @@ export function ClockPanel({ initialRecords }: ClockPanelProps) {
   }, []);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setGpsState({
-        status: "error",
-        message: "この端末ではGPSが利用できません。",
-      });
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
       return;
     }
 
-    setGpsState({ status: "loading", message: "位置情報を取得中..." });
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setGpsState({
