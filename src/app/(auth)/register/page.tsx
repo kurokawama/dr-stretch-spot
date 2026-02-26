@@ -88,7 +88,9 @@ export default function RegisterPage() {
           full_name_kana: formData.fullNameKana || null,
           phone: formData.phone || null,
           tenure_years: parseFloat(formData.tenureYears) || 0,
-          employment_start_date: formData.employmentStartDate || null,
+          employment_start_date: formData.employmentStartDate
+            ? `${formData.employmentStartDate}-01`
+            : null,
           employment_end_date: formData.employmentEndDate || null,
           preferred_areas: formData.preferredArea
             ? [formData.preferredArea]
@@ -206,10 +208,10 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="startDate">入社日</Label>
+                <Label htmlFor="startDate">入社年月</Label>
                 <Input
                   id="startDate"
-                  type="date"
+                  type="month"
                   value={formData.employmentStartDate}
                   onChange={(e) =>
                     setFormData({
