@@ -148,7 +148,7 @@ export function AuditLogList({ initialData }: AuditLogListProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">
-                    {(log.changed_by_manager as { full_name?: string })?.full_name ?? "-"}
+                    {(log.changed_by_manager as unknown as { full_name?: string })?.full_name ?? "-"}
                   </TableCell>
                   <TableCell className="max-w-xs truncate text-sm">
                     {log.reason ?? "-"}
