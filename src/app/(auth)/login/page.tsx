@@ -39,6 +39,12 @@ export default function LoginPage() {
       });
 
       if (error) {
+        // Rate limit (429) - still show OTP input so user can use a previously sent code
+        if (error.message?.includes("rate") || error.message?.includes("limit") || error.status === 429) {
+          toast.warning("メール送信の制限に達しました。前回送信されたコードをお試しください。");
+          setStep("otp");
+          return;
+        }
         toast.error(error.message || "エラーが発生しました。もう一度お試しください。");
         return;
       }
@@ -58,6 +64,7 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
+      // Try email type first, then magiclink as fallback
       const { error } = await supabase.auth.verifyOtp({
         email: email.trim(),
         token: otp.trim(),
@@ -65,8 +72,16 @@ export default function LoginPage() {
       });
 
       if (error) {
-        toast.error("認証コードが正しくありません。もう一度お試しください。");
-        return;
+        const { error: mlError } = await supabase.auth.verifyOtp({
+          email: email.trim(),
+          token: otp.trim(),
+          type: "magiclink",
+        });
+
+        if (mlError) {
+          toast.error("認証コードが正しくありません。もう一度お試しください。");
+          return;
+        }
       }
 
       // Successful login - redirect will be handled by middleware
