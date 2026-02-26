@@ -34,16 +34,12 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          shouldCreateUser: false,
+          shouldCreateUser: true,
         },
       });
 
       if (error) {
-        if (error.message.includes("Signups not allowed")) {
-          toast.error("このメールアドレスは登録されていません。人事部にお問い合わせください。");
-        } else {
-          toast.error("エラーが発生しました。もう一度お試しください。");
-        }
+        toast.error(error.message || "エラーが発生しました。もう一度お試しください。");
         return;
       }
 
