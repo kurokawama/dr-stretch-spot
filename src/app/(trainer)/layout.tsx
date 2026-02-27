@@ -8,6 +8,7 @@ import {
   CalendarDays,
   Clock,
   Wallet,
+  User,
 } from "lucide-react";
 
 export default async function TrainerLayout({
@@ -30,56 +31,118 @@ export default async function TrainerLayout({
     .eq("id", user.id)
     .single();
 
-  if (!profile || (profile.role !== "trainer" && profile.role !== "admin")) {
+  if (
+    !profile ||
+    !["trainer", "admin", "employee"].includes(profile.role)
+  ) {
     redirect("/login");
   }
+
+  // Get spot_status for trainers
+  let spotStatus: string | null = null;
+  if (profile.role === "trainer") {
+    const { data: trainer } = await supabase
+      .from("alumni_trainers")
+      .select("spot_status")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    spotStatus = trainer?.spot_status ?? null;
+  }
+
+  const isEmployee = profile.role === "employee";
+  const isSpotActive = spotStatus === "active";
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        displayName={profile.display_name || "トレーナー"}
+        displayName={profile.display_name || (isEmployee ? "スタッフ" : "トレーナー")}
         role={profile.role}
       />
       <main className="flex-1 pb-16 md:pb-0">{children}</main>
 
-      {/* Mobile bottom navigation */}
+      {/* Mobile bottom navigation — adapts to user state */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white md:hidden">
         <div className="flex items-center justify-around py-2">
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-          >
-            <Home className="h-5 w-5" />
-            <span className="text-[10px]">ホーム</span>
-          </Link>
-          <Link
-            href="/shifts"
-            className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-          >
-            <Search className="h-5 w-5" />
-            <span className="text-[10px]">シフト検索</span>
-          </Link>
-          <Link
-            href="/my-shifts"
-            className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-          >
-            <CalendarDays className="h-5 w-5" />
-            <span className="text-[10px]">マイシフト</span>
-          </Link>
-          <Link
-            href="/clock"
-            className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-          >
-            <Clock className="h-5 w-5" />
-            <span className="text-[10px]">打刻</span>
-          </Link>
-          <Link
-            href="/earnings"
-            className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-          >
-            <Wallet className="h-5 w-5" />
-            <span className="text-[10px]">収入</span>
-          </Link>
+          {isEmployee ? (
+            <>
+              <Link
+                href="/"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <Home className="h-5 w-5" />
+                <span className="text-[10px]">ホーム</span>
+              </Link>
+              <Link
+                href="/profile"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <User className="h-5 w-5" />
+                <span className="text-[10px]">設定</span>
+              </Link>
+            </>
+          ) : !isSpotActive ? (
+            <>
+              <Link
+                href="/"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <Home className="h-5 w-5" />
+                <span className="text-[10px]">ホーム</span>
+              </Link>
+              <Link
+                href="/spot-setup"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <Search className="h-5 w-5" />
+                <span className="text-[10px]">SPOT登録</span>
+              </Link>
+              <Link
+                href="/profile"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <User className="h-5 w-5" />
+                <span className="text-[10px]">設定</span>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <Home className="h-5 w-5" />
+                <span className="text-[10px]">ホーム</span>
+              </Link>
+              <Link
+                href="/shifts"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <Search className="h-5 w-5" />
+                <span className="text-[10px]">シフト検索</span>
+              </Link>
+              <Link
+                href="/my-shifts"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <CalendarDays className="h-5 w-5" />
+                <span className="text-[10px]">マイシフト</span>
+              </Link>
+              <Link
+                href="/clock"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <Clock className="h-5 w-5" />
+                <span className="text-[10px]">打刻</span>
+              </Link>
+              <Link
+                href="/earnings"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
+              >
+                <Wallet className="h-5 w-5" />
+                <span className="text-[10px]">収入</span>
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </div>

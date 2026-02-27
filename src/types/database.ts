@@ -2,9 +2,12 @@
 // Dr.stretch SPOT - Database Types
 // =============================================
 
-export type UserRole = "trainer" | "store_manager" | "hr" | "admin" | "area_manager";
+export type UserRole = "trainer" | "store_manager" | "hr" | "admin" | "area_manager" | "employee";
 
 export type TrainerStatus = "pending" | "active" | "suspended" | "inactive";
+export type SpotStatus = "registered" | "active" | "inactive" | "paused";
+export type ResignationStatus = "draft" | "submitted" | "received" | "accepted" | "completed" | "cancelled";
+export type ResignationReason = "career_change" | "family" | "health" | "independence" | "relocation" | "other";
 export type BlankStatus = "ok" | "alert_60" | "skill_check_required" | "training_required";
 export type ShiftRequestStatus = "pending_approval" | "open" | "closed" | "cancelled" | "completed";
 export type ApplicationStatus = "pending" | "approved" | "rejected" | "cancelled" | "completed" | "no_show";
@@ -61,6 +64,8 @@ export interface AlumniTrainer {
   bank_account_type: string;
   bank_account_number: string | null;
   bank_account_holder: string | null;
+  spot_status: SpotStatus;
+  resignation_id: string | null;
   status: TrainerStatus;
   last_shift_date: string | null;
   blank_status: BlankStatus;
@@ -316,6 +321,36 @@ export interface RateChangeLog {
   created_at: string;
   // Joined fields
   changed_by_manager?: StoreManager;
+}
+
+// =============================================
+// Resignation Types
+// =============================================
+
+export interface ResignationRequest {
+  id: string;
+  auth_user_id: string;
+  employee_number: string | null;
+  store_id: string | null;
+  full_name: string;
+  full_name_kana: string | null;
+  phone: string | null;
+  employment_start_date: string | null;
+  desired_resignation_date: string;
+  last_working_date: string | null;
+  resignation_reason: ResignationReason | null;
+  resignation_reason_detail: string | null;
+  status: ResignationStatus;
+  submitted_at: string | null;
+  received_by: string | null;
+  received_at: string | null;
+  completed_by: string | null;
+  completed_at: string | null;
+  spot_interest: boolean;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  store?: Store;
 }
 
 // =============================================

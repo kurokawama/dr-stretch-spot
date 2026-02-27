@@ -22,6 +22,8 @@ export default async function RootPage() {
   }
 
   switch (profile.role) {
+    case "employee":
+      redirect("/home");
     case "trainer":
       redirect("/home");
     case "store_manager":
@@ -30,6 +32,8 @@ export default async function RootPage() {
       redirect("/hr/rates");
     case "admin":
       redirect("/hr/rates");
+    case "area_manager":
+      redirect("/hr");
     default:
       redirect("/login");
   }

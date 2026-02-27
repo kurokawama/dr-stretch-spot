@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Users,
   ClipboardCheck,
+  UserMinus,
 } from "lucide-react";
 
 export default async function HRLayout({
@@ -42,6 +43,7 @@ export default async function HRLayout({
     { href: "/hr", icon: LayoutDashboard, label: "ダッシュボード" },
     { href: "/hr/matchings", icon: Users, label: "マッチング管理" },
     { href: "/hr/attendance", icon: ClipboardCheck, label: "出勤管理" },
+    { href: "/hr/resignations", icon: UserMinus, label: "退職意向管理" },
     { href: "/hr/rates", icon: DollarSign, label: "時給テーブル" },
     { href: "/hr/simulation", icon: Calculator, label: "シミュレーション" },
     { href: "/hr/audit-log", icon: FileText, label: "変更履歴" },

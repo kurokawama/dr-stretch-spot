@@ -56,13 +56,25 @@ export async function middleware(request: NextRequest) {
     return supabaseResponse;
   }
 
+  // Employee can only access resignation routes and home
+  if (role === "employee") {
+    const employeeAllowed = ["/", "/home", "/resignation", "/profile"];
+    if (!employeeAllowed.some((route) => pathname === route || pathname.startsWith(route + "/"))) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/home";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
   // Check if trainer is accessing trainer routes
   if (role === "trainer") {
     // Root redirect is handled by page.tsx
     if (pathname === "/") {
       return supabaseResponse;
     }
-    const allowedPrefixes = ROLE_ROUTES.trainer;
+    // Trainers can also access spot-setup
+    const allowedPrefixes = [...ROLE_ROUTES.trainer, "/spot-setup"];
     if (!allowedPrefixes.some((prefix) => pathname.startsWith(prefix))) {
       const url = request.nextUrl.clone();
       url.pathname = "/home";
