@@ -110,7 +110,7 @@ export async function approveShiftRequest(
     .eq("auth_user_id", user.id)
     .maybeSingle();
 
-  const { error } = await admin
+  const { data: updatedShift, error } = await admin
     .from("shift_requests")
     .update({
       status: "open",
@@ -119,9 +119,41 @@ export async function approveShiftRequest(
       published_at: new Date().toISOString(),
     })
     .eq("id", shiftId)
-    .eq("status", "pending_approval");
+    .eq("status", "pending_approval")
+    .select("id, target_areas, title")
+    .single();
 
   if (error) return { success: false, error: error.message };
+
+  // Phase 2: Notify trainers in matching areas
+  if (updatedShift?.target_areas && updatedShift.target_areas.length > 0) {
+    const { data: matchingTrainers } = await admin
+      .from("alumni_trainers")
+      .select("auth_user_id, preferred_areas")
+      .eq("status", "active")
+      .eq("spot_status", "active");
+
+    if (matchingTrainers) {
+      const { createBatchNotifications } = await import("@/actions/notifications");
+      const targetUserIds = matchingTrainers
+        .filter((t) =>
+          t.preferred_areas.some((area: string) =>
+            updatedShift.target_areas.includes(area)
+          )
+        )
+        .map((t) => t.auth_user_id);
+
+      if (targetUserIds.length > 0) {
+        await createBatchNotifications(targetUserIds, {
+          type: "push",
+          category: "shift_published",
+          title: `New shift available: ${updatedShift.title}`,
+          shiftRequestId: shiftId,
+        });
+      }
+    }
+  }
+
   return { success: true };
 }
 

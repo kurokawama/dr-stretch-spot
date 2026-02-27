@@ -1,7 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateHourlyRate } from "./pricing";
+import { createNotification } from "@/actions/notifications";
 import type { ActionResult, ShiftApplication } from "@/types/database";
 
 export async function applyToShift(
@@ -121,6 +123,37 @@ export async function applyToShift(
     }
   }
 
+  // Phase 2: Notify store manager(s) about new application
+  if (data) {
+    const admin = createAdminClient();
+    const { data: storeManagers } = await admin
+      .from("store_managers")
+      .select("auth_user_id")
+      .eq("store_id", shift.store_id)
+      .eq("status", "active");
+
+    if (storeManagers && storeManagers.length > 0) {
+      const { data: trainerInfo } = await admin
+        .from("alumni_trainers")
+        .select("full_name")
+        .eq("id", trainer.id)
+        .single();
+
+      for (const mgr of storeManagers) {
+        await createNotification({
+          userId: mgr.auth_user_id,
+          type: "push",
+          category: "application_received",
+          title: `新規応募: ${trainerInfo?.full_name ?? "トレーナー"}`,
+          body: autoConfirm
+            ? "自動承認で確定しました"
+            : "応募を確認してください",
+          shiftRequestId,
+        });
+      }
+    }
+  }
+
   return { success: true, data };
 }
 
@@ -201,6 +234,25 @@ export async function approveApplication(
     }
   }
 
+  // Phase 2: Notify trainer about approval
+  const admin = createAdminClient();
+  const { data: trainerRecord } = await admin
+    .from("alumni_trainers")
+    .select("auth_user_id")
+    .eq("id", application.trainer_id)
+    .single();
+
+  if (trainerRecord) {
+    await createNotification({
+      userId: trainerRecord.auth_user_id,
+      type: "push",
+      category: "application_confirmed",
+      title: "応募が承認されました",
+      body: "シフトが確定しました。勤怠画面をご確認ください。",
+      shiftRequestId: application.shift_request_id,
+    });
+  }
+
   return { success: true };
 }
 
@@ -222,6 +274,13 @@ export async function rejectApplication(
 
   if (!manager) return { success: false, error: "Not a store manager" };
 
+  // Get application info before rejecting (need trainer_id + shift_request_id)
+  const { data: application } = await supabase
+    .from("shift_applications")
+    .select("trainer_id, shift_request_id")
+    .eq("id", applicationId)
+    .single();
+
   const { error } = await supabase
     .from("shift_applications")
     .update({
@@ -232,6 +291,28 @@ export async function rejectApplication(
     .eq("id", applicationId);
 
   if (error) return { success: false, error: error.message };
+
+  // Phase 2: Notify trainer about rejection
+  if (application) {
+    const admin = createAdminClient();
+    const { data: trainerRecord } = await admin
+      .from("alumni_trainers")
+      .select("auth_user_id")
+      .eq("id", application.trainer_id)
+      .single();
+
+    if (trainerRecord) {
+      await createNotification({
+        userId: trainerRecord.auth_user_id,
+        type: "push",
+        category: "application_rejected",
+        title: "応募が見送りとなりました",
+        body: "他のシフトをお探しください。",
+        shiftRequestId: application.shift_request_id,
+      });
+    }
+  }
+
   return { success: true };
 }
 

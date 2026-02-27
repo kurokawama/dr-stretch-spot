@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import type { RateBreakdown, HourlyRateConfig } from "@/types/database";
+import { createAdminClient } from "@/lib/supabase/admin";
+import type { ActionResult, RateBreakdown, HourlyRateConfig } from "@/types/database";
 
 /**
  * Calculate the confirmed hourly rate for a trainer applying to a shift.
@@ -71,7 +72,40 @@ export async function calculateHourlyRate(
     shiftRequest?.is_emergency ? (shiftRequest.emergency_bonus_amount ?? 0) : 0;
 
   // 5. Calculate total
-  const total = rateConfig.base_rate + attendanceBonus + emergencyBonus;
+  let total = rateConfig.base_rate + attendanceBonus + emergencyBonus;
+
+  // 6. Apply cost ceiling check (Phase 2)
+  const admin = createAdminClient();
+  const { data: ceilingConfig } = await admin
+    .from("cost_ceiling_config")
+    .select("max_hourly_rate")
+    .eq("is_active", true)
+    .limit(1)
+    .single();
+
+  // Check store-specific ceiling override
+  if (shiftRequest) {
+    const { data: shift } = await supabase
+      .from("shift_requests")
+      .select("store_id")
+      .eq("id", shiftRequestId)
+      .single();
+
+    if (shift) {
+      const { data: store } = await admin
+        .from("stores")
+        .select("cost_ceiling_override")
+        .eq("id", shift.store_id)
+        .single();
+
+      const maxRate = store?.cost_ceiling_override ?? ceilingConfig?.max_hourly_rate;
+      if (maxRate && total > maxRate) {
+        total = maxRate;
+      }
+    }
+  } else if (ceilingConfig?.max_hourly_rate && total > ceilingConfig.max_hourly_rate) {
+    total = ceilingConfig.max_hourly_rate;
+  }
 
   return {
     base_rate: rateConfig.base_rate,
@@ -81,6 +115,75 @@ export async function calculateHourlyRate(
     emergency_bonus: emergencyBonus,
     total,
   };
+}
+
+/**
+ * Check if a shift should auto-trigger emergency status.
+ * Triggers when: shift created > 24h ago AND fill rate < 50%
+ */
+export async function checkEmergencyAutoTrigger(
+  shiftRequestId: string
+): Promise<ActionResult<boolean>> {
+  const admin = createAdminClient();
+
+  const { data: shift } = await admin
+    .from("shift_requests")
+    .select("id, created_at, required_count, filled_count, is_emergency, emergency_bonus_amount, status, store_id")
+    .eq("id", shiftRequestId)
+    .single();
+
+  if (!shift) return { success: false, error: "Shift not found" };
+  if (shift.is_emergency) return { success: true, data: false }; // Already emergency
+  if (shift.status !== "open") return { success: true, data: false };
+
+  const createdAt = new Date(shift.created_at);
+  const now = new Date();
+  const hoursSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+
+  const fillRate = shift.required_count > 0
+    ? shift.filled_count / shift.required_count
+    : 1;
+
+  // Auto-trigger: 24h+ AND fill rate < 50%
+  if (hoursSinceCreation >= 24 && fillRate < 0.5) {
+    // Set default emergency bonus (500 yen)
+    const defaultBonus = 500;
+
+    await admin
+      .from("shift_requests")
+      .update({
+        is_emergency: true,
+        emergency_bonus_amount: defaultBonus,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", shiftRequestId);
+
+    // Create notification for HR/Admin
+    const { createNotification } = await import("@/actions/notifications");
+
+    // Get HR/Admin users
+    const { data: hrAdmins } = await admin
+      .from("store_managers")
+      .select("auth_user_id")
+      .in("role", ["hr", "admin"]);
+
+    if (hrAdmins) {
+      for (const user of hrAdmins) {
+        await createNotification({
+          userId: user.auth_user_id,
+          type: "push",
+          category: "emergency_auto_trigger",
+          title: "Emergency auto-triggered for unfilled shift",
+          body: `Shift ${shiftRequestId} auto-escalated to emergency after 24h with <50% fill rate`,
+          shiftRequestId: shiftRequestId,
+        });
+      }
+    }
+
+    return { success: true, data: true };
+  }
+
+  return { success: true, data: false };
 }
 
 /**
