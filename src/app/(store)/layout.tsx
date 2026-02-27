@@ -8,6 +8,9 @@ import {
   Users,
   ClipboardCheck,
   Star,
+  Copy,
+  BarChart3,
+  Bell,
 } from "lucide-react";
 
 export default async function StoreLayout({
@@ -43,6 +46,9 @@ export default async function StoreLayout({
     { href: "/store/applications", icon: Users, label: "応募者" },
     { href: "/store/attendance", icon: ClipboardCheck, label: "出勤管理" },
     { href: "/store/evaluations", icon: Star, label: "評価" },
+    { href: "/store/templates", icon: Copy, label: "テンプレート" },
+    { href: "/store/usage", icon: BarChart3, label: "利用実績" },
+    { href: "/store/notifications", icon: Bell, label: "通知" },
   ];
 
   return (

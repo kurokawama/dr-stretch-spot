@@ -15,6 +15,9 @@ import {
   Clock3,
   ArrowRight,
   TrendingUp,
+  Trophy,
+  Star as StarIcon,
+  Bell,
 } from "lucide-react";
 
 export default async function TrainerHomePage() {
@@ -338,6 +341,26 @@ export default async function TrainerHomePage() {
                 <CalendarDays className="h-4 w-4 text-blue-600" />
               </div>
               <span className="text-sm font-medium">マイシフト</span>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/rank" className="card-interactive">
+          <Card className="border-0 shadow-sm h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
+              <div className="rounded-lg bg-yellow-50 p-2">
+                <Trophy className="h-4 w-4 text-yellow-600" />
+              </div>
+              <span className="text-sm font-medium">ランク</span>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/notifications" className="card-interactive">
+          <Card className="border-0 shadow-sm h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
+              <div className="rounded-lg bg-red-50 p-2">
+                <Bell className="h-4 w-4 text-red-600" />
+              </div>
+              <span className="text-sm font-medium">通知</span>
             </CardContent>
           </Card>
         </Link>
