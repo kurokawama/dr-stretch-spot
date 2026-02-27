@@ -38,6 +38,7 @@ const navConfigs: Record<BottomNavProps["mode"], NavItem[]> = {
     { href: "/my-shifts", icon: CalendarDays, label: "マイシフト" },
     { href: "/clock", icon: Clock, label: "打刻" },
     { href: "/earnings", icon: Wallet, label: "収入" },
+    { href: "/profile", icon: User, label: "設定" },
   ],
 };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,21 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import type { NotificationLog } from "@/types/database";
 import { toast } from "sonner";
+
+// Deep-link mapping: notification category → target page
+const categoryLinks: Record<string, string> = {
+  shift_published: "/shifts",
+  application_confirmed: "/my-shifts",
+  application_rejected: "/shifts",
+  application_cancelled: "/my-shifts",
+  pre_day_reminder: "/my-shifts",
+  day_reminder: "/clock",
+  clock_in: "/clock",
+  clock_out: "/clock",
+  rank_update: "/rank",
+  blank_alert: "/profile",
+  skill_check_scheduled: "/home",
+};
 
 const categoryLabels: Record<string, string> = {
   shift_published: "新着シフト",
@@ -29,6 +45,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function TrainerNotificationsPage() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -53,14 +70,22 @@ export default function TrainerNotificationsPage() {
     loadData();
   }, [loadData]);
 
-  const handleMarkRead = async (id: string) => {
-    const result = await markNotificationRead(id);
-    if (result.success) {
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === id ? { ...n, read_at: new Date().toISOString() } : n
-        )
-      );
+  const handleNotificationClick = async (notif: NotificationLog) => {
+    // Mark as read
+    if (!notif.read_at) {
+      const result = await markNotificationRead(notif.id);
+      if (result.success) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notif.id ? { ...n, read_at: new Date().toISOString() } : n
+          )
+        );
+      }
+    }
+    // Navigate to relevant page
+    const link = categoryLinks[notif.category];
+    if (link) {
+      router.push(link);
     }
   };
 
@@ -131,7 +156,7 @@ export default function TrainerNotificationsPage() {
                 className={`border-0 shadow-sm cursor-pointer transition-colors ${
                   notif.read_at ? "opacity-70" : "ring-1 ring-primary/20"
                 }`}
-                onClick={() => !notif.read_at && handleMarkRead(notif.id)}
+                onClick={() => handleNotificationClick(notif)}
               >
                 <CardContent className="flex items-start gap-3 p-4">
                   <div className="mt-0.5">

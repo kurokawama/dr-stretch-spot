@@ -118,6 +118,39 @@ export async function calculateHourlyRate(
 }
 
 /**
+ * Preview the hourly rate for the currently authenticated trainer.
+ * Read-only — does not write any data.
+ * Used by the apply page to show the estimated rate breakdown.
+ */
+export async function previewHourlyRate(
+  shiftRequestId: string
+): Promise<ActionResult<RateBreakdown>> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    const { data: trainer } = await supabase
+      .from("alumni_trainers")
+      .select("id, tenure_years")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    if (!trainer) return { success: false, error: "Trainer not found" };
+
+    const breakdown = await calculateHourlyRate(trainer.id, shiftRequestId);
+    return { success: true, data: breakdown };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to preview rate",
+    };
+  }
+}
+
+/**
  * Check if a shift should auto-trigger emergency status.
  * Triggers when: shift created > 24h ago AND fill rate < 50%
  */

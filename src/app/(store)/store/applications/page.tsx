@@ -4,7 +4,9 @@ import { ApplicationList } from "./ApplicationList";
 
 export default async function StoreApplicationsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: manager } = await supabase
@@ -15,18 +17,19 @@ export default async function StoreApplicationsPage() {
 
   if (!manager) redirect("/login");
 
-  // Get pending applications for this store's shifts
+  // Get ALL applications for this store's shifts (all statuses)
   const { data: applications } = await supabase
     .from("shift_applications")
-    .select(`
+    .select(
+      `
       *,
       trainer:alumni_trainers(id, full_name, tenure_years, blank_status, avatar_url),
       shift_request:shift_requests!inner(id, title, shift_date, start_time, end_time, store_id, is_emergency)
-    `)
+    `
+    )
     .eq("shift_request.store_id", manager.store_id)
-    .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(100);
 
   return (
     <div className="p-4 md:p-6 space-y-6">

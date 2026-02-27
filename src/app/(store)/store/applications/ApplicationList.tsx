@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,164 +69,180 @@ export function ApplicationList({ initialData }: ApplicationListProps) {
 
   const pending = applications.filter((a) => a.status === "pending");
   const approved = applications.filter((a) => a.status === "approved");
+  const rejected = applications.filter(
+    (a) => a.status === "rejected" || a.status === "cancelled"
+  );
 
-  return (
-    <div className="space-y-6">
-      {/* Pending Applications */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">
-          未審査の応募
-          {pending.length > 0 && (
-            <Badge variant="destructive" className="ml-2">
-              {pending.length}
+  const statusLabels: Record<string, string> = {
+    pending: "審査待ち",
+    approved: "承認済",
+    rejected: "却下",
+    cancelled: "キャンセル",
+  };
+
+  const renderApplicationRow = (
+    app: ShiftApplication,
+    showActions: boolean
+  ) => {
+    const trainer = app.trainer as unknown as {
+      full_name: string;
+      tenure_years: number;
+      blank_status: string;
+    } | null;
+    const shift = app.shift_request as unknown as {
+      title: string;
+      shift_date: string;
+      start_time: string;
+      end_time: string;
+      is_emergency: boolean;
+    } | null;
+
+    return (
+      <TableRow key={app.id}>
+        <TableCell>
+          <div>
+            <p className="text-sm font-medium">
+              {trainer?.full_name ?? "-"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              在籍{trainer?.tenure_years ?? 0}年
+            </p>
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-1">
+            <span className="text-sm">{shift?.title}</span>
+            {shift?.is_emergency && (
+              <Badge variant="destructive" className="text-xs">
+                緊急
+              </Badge>
+            )}
+          </div>
+        </TableCell>
+        <TableCell className="text-sm">
+          {shift?.shift_date} {shift?.start_time}〜{shift?.end_time}
+        </TableCell>
+        <TableCell className="text-right text-sm font-medium">
+          {app.confirmed_rate
+            ? `¥${app.confirmed_rate.toLocaleString()}`
+            : "-"}
+        </TableCell>
+        <TableCell className="text-right">
+          {showActions ? (
+            <div className="flex justify-end gap-1">
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => handleApprove(app.id)}
+                disabled={processing === app.id}
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                承認
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setRejectTarget(app.id)}
+                disabled={processing === app.id}
+              >
+                <XCircle className="h-4 w-4 mr-1" />
+                拒否
+              </Button>
+            </div>
+          ) : (
+            <Badge
+              variant={
+                app.status === "approved"
+                  ? "secondary"
+                  : app.status === "rejected"
+                    ? "destructive"
+                    : "outline"
+              }
+            >
+              {statusLabels[app.status] ?? app.status}
             </Badge>
           )}
-        </h2>
+        </TableCell>
+      </TableRow>
+    );
+  };
 
-        {pending.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center border rounded-md">
-            未審査の応募はありません
-          </p>
-        ) : (
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>トレーナー</TableHead>
-                  <TableHead>シフト</TableHead>
-                  <TableHead>日時</TableHead>
-                  <TableHead className="text-right">確定時給</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pending.map((app) => {
-                  const trainer = app.trainer as unknown as {
-                    full_name: string;
-                    tenure_years: number;
-                    blank_status: string;
-                  } | null;
-                  const shift = app.shift_request as unknown as {
-                    title: string;
-                    shift_date: string;
-                    start_time: string;
-                    end_time: string;
-                    is_emergency: boolean;
-                  } | null;
+  const renderTable = (items: ShiftApplication[], showActions: boolean) => {
+    if (items.length === 0) {
+      return (
+        <p className="text-sm text-muted-foreground py-8 text-center border rounded-md">
+          該当する応募はありません
+        </p>
+      );
+    }
 
-                  return (
-                    <TableRow key={app.id}>
-                      <TableCell>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {trainer?.full_name ?? "-"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            在籍{trainer?.tenure_years ?? 0}年
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <span className="text-sm">{shift?.title}</span>
-                          {shift?.is_emergency && (
-                            <Badge variant="destructive" className="text-xs">
-                              緊急
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {shift?.shift_date} {shift?.start_time}〜
-                        {shift?.end_time}
-                      </TableCell>
-                      <TableCell className="text-right text-sm font-medium">
-                        ¥{app.confirmed_rate?.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => handleApprove(app.id)}
-                            disabled={processing === app.id}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            承認
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setRejectTarget(app.id)}
-                            disabled={processing === app.id}
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            拒否
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+    return (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>トレーナー</TableHead>
+              <TableHead>シフト</TableHead>
+              <TableHead>日時</TableHead>
+              <TableHead className="text-right">確定時給</TableHead>
+              <TableHead className="text-right">
+                {showActions ? "操作" : "ステータス"}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((app) => renderApplicationRow(app, showActions))}
+          </TableBody>
+        </Table>
       </div>
+    );
+  };
 
-      {/* Approved Applications */}
-      {approved.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold">承認済み</h2>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>トレーナー</TableHead>
-                  <TableHead>シフト</TableHead>
-                  <TableHead>日時</TableHead>
-                  <TableHead className="text-right">確定時給</TableHead>
-                  <TableHead className="text-right">ステータス</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {approved.map((app) => {
-                  const trainer = app.trainer as unknown as {
-                    full_name: string;
-                  } | null;
-                  const shift = app.shift_request as unknown as {
-                    title: string;
-                    shift_date: string;
-                    start_time: string;
-                    end_time: string;
-                  } | null;
+  return (
+    <div className="space-y-4">
+      <Tabs defaultValue="pending">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="pending" className="relative">
+            審査待ち
+            {pending.length > 0 && (
+              <Badge
+                variant="destructive"
+                className="ml-1.5 h-5 min-w-5 px-1 text-xs"
+              >
+                {pending.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="approved">
+            承認済み
+            {approved.length > 0 && (
+              <span className="ml-1 text-xs text-muted-foreground">
+                ({approved.length})
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="history">
+            却下・キャンセル
+            {rejected.length > 0 && (
+              <span className="ml-1 text-xs text-muted-foreground">
+                ({rejected.length})
+              </span>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-                  return (
-                    <TableRow key={app.id}>
-                      <TableCell className="text-sm font-medium">
-                        {trainer?.full_name ?? "-"}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {shift?.title}
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {shift?.shift_date} {shift?.start_time}〜
-                        {shift?.end_time}
-                      </TableCell>
-                      <TableCell className="text-right text-sm font-medium">
-                        ¥{app.confirmed_rate?.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant="secondary">承認済</Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      )}
+        <TabsContent value="pending" className="mt-4">
+          {renderTable(pending, true)}
+        </TabsContent>
+
+        <TabsContent value="approved" className="mt-4">
+          {renderTable(approved, false)}
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-4">
+          {renderTable(rejected, false)}
+        </TabsContent>
+      </Tabs>
 
       {/* Reject Confirmation Dialog */}
       <AlertDialog

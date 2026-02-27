@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Shield, Award, TrendingUp } from "lucide-react";
+import { Trophy, Star, Shield, Award, TrendingUp, ChevronRight, History } from "lucide-react";
 
 const rankConfig: Record<
   string,
@@ -194,6 +195,80 @@ export default async function RankPage() {
               })}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Evaluation History Link */}
+      <Link href="/evaluation-history">
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+          <CardContent className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <History className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-medium">評価履歴を見る</p>
+                <p className="text-xs text-muted-foreground">
+                  過去の評価詳細・カテゴリ別スコアを確認
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </Link>
+
+      {/* Rank Criteria Table */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            ランク昇格基準
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-hidden rounded-lg border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-muted/50">
+                  <th className="px-3 py-2 text-left font-medium">ランク</th>
+                  <th className="px-3 py-2 text-center font-medium">勤務回数</th>
+                  <th className="px-3 py-2 text-center font-medium">平均評価</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(rankThresholds).map(([key, threshold]) => {
+                  const rc = rankConfig[key];
+                  const isCurrent = key === rank;
+                  return (
+                    <tr
+                      key={key}
+                      className={isCurrent ? "bg-primary/5 font-medium" : ""}
+                    >
+                      <td className="px-3 py-2 flex items-center gap-2">
+                        <Badge
+                          className={`${rc?.color ?? ""} text-xs px-2 py-0.5`}
+                        >
+                          {rc?.label ?? key}
+                        </Badge>
+                        {isCurrent && (
+                          <span className="text-xs text-primary">
+                            (現在)
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {threshold.shifts === 0 ? "-" : `${threshold.shifts}回以上`}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {threshold.rating === 0
+                          ? "-"
+                          : `${threshold.rating.toFixed(1)}以上`}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
 

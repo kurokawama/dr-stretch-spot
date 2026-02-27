@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,22 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import type { NotificationLog } from "@/types/database";
 import { toast } from "sonner";
+
+// Deep-link mapping: notification category → target page
+const storeCategoryLinks: Record<string, string> = {
+  application_received: "/store/applications",
+  application_confirmed: "/store/applications",
+  application_rejected: "/store/applications",
+  application_cancelled: "/store/applications",
+  shift_published: "/store/shifts",
+  shift_approval_request: "/store/shifts",
+  shift_approved: "/store/shifts",
+  clock_in: "/store/attendance",
+  clock_out: "/store/attendance",
+  cost_alert: "/store/usage",
+  emergency_auto_trigger: "/store/shifts",
+  blank_alert: "/store",
+};
 
 const categoryLabels: Record<string, string> = {
   application_received: "応募受信",
@@ -28,6 +45,7 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function StoreNotificationsPage() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -52,14 +70,22 @@ export default function StoreNotificationsPage() {
     loadData();
   }, [loadData]);
 
-  const handleMarkRead = async (id: string) => {
-    const result = await markNotificationRead(id);
-    if (result.success) {
-      setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === id ? { ...n, read_at: new Date().toISOString() } : n
-        )
-      );
+  const handleNotificationClick = async (notif: NotificationLog) => {
+    // Mark as read
+    if (!notif.read_at) {
+      const result = await markNotificationRead(notif.id);
+      if (result.success) {
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notif.id ? { ...n, read_at: new Date().toISOString() } : n
+          )
+        );
+      }
+    }
+    // Navigate to relevant page
+    const link = storeCategoryLinks[notif.category];
+    if (link) {
+      router.push(link);
     }
   };
 
@@ -125,7 +151,7 @@ export default function StoreNotificationsPage() {
                       ? "bg-muted/30"
                       : "bg-primary/5 hover:bg-primary/10"
                   }`}
-                  onClick={() => !notif.read_at && handleMarkRead(notif.id)}
+                  onClick={() => handleNotificationClick(notif)}
                 >
                   <div className="mt-1">
                     {notif.read_at ? (
