@@ -3,19 +3,14 @@ import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/shared/Header";
 import Link from "next/link";
 import {
-  DollarSign,
-  Calculator,
-  FileText,
   LayoutDashboard,
   Users,
+  Building,
+  DollarSign,
   ClipboardCheck,
-  UserMinus,
-  Shield,
-  TrendingUp,
-  RotateCcw,
 } from "lucide-react";
 
-export default async function HRLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -35,33 +30,26 @@ export default async function HRLayout({
     .eq("id", user.id)
     .single();
 
-  if (
-    !profile ||
-    !["hr", "admin", "area_manager"].includes(profile.role)
-  ) {
+  if (!profile || profile.role !== "admin") {
     redirect("/login");
   }
 
   const navItems = [
-    { href: "/hr", icon: LayoutDashboard, label: "ダッシュボード" },
-    { href: "/hr/matchings", icon: Users, label: "マッチング管理" },
-    { href: "/hr/attendance", icon: ClipboardCheck, label: "出勤管理" },
-    { href: "/hr/resignations", icon: UserMinus, label: "退職意向管理" },
-    { href: "/hr/rates", icon: DollarSign, label: "時給テーブル" },
-    { href: "/hr/simulation", icon: Calculator, label: "シミュレーション" },
-    { href: "/hr/audit-log", icon: FileText, label: "変更履歴" },
-    { href: "/hr/blank-rules", icon: Shield, label: "ブランクルール" },
-    { href: "/hr/cost-ceiling", icon: TrendingUp, label: "コスト上限" },
-    { href: "/hr/rollback", icon: RotateCcw, label: "ロールバック" },
+    { href: "/admin", icon: LayoutDashboard, label: "ダッシュボード" },
+    { href: "/admin/trainers", icon: Users, label: "トレーナー管理" },
+    { href: "/admin/stores", icon: Building, label: "店舗管理" },
+    { href: "/admin/costs", icon: DollarSign, label: "コスト管理" },
+    {
+      href: "/admin/skill-checks",
+      icon: ClipboardCheck,
+      label: "技術チェック管理",
+    },
   ];
-
-  const displayRole =
-    profile.role === "area_manager" ? "エリアマネージャー" : "人事部";
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header
-        displayName={profile.display_name || displayRole}
+        displayName={profile.display_name || "本部管理"}
         role={profile.role}
       />
       <div className="flex flex-1">

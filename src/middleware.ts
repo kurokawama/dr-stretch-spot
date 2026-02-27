@@ -6,10 +6,10 @@ const PUBLIC_ROUTES = ["/login", "/register", "/auth/callback", "/auth/magic"];
 
 // Role-based route prefixes
 const ROLE_ROUTES: Record<string, string[]> = {
-  trainer: ["/home", "/shifts", "/my-shifts", "/clock", "/earnings", "/profile", "/alerts"],
+  trainer: ["/home", "/shifts", "/my-shifts", "/clock", "/earnings", "/profile", "/alerts", "/rank", "/evaluation-history", "/notifications"],
   store_manager: ["/store"],
   hr: ["/hr"],
-  admin: ["/"], // admin can access everything
+  admin: ["/admin", "/hr", "/store", "/"], // admin can access everything
 };
 
 export async function middleware(request: NextRequest) {

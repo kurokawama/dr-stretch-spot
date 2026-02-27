@@ -15,7 +15,7 @@ export type AttendanceStatus = "scheduled" | "clocked_in" | "clocked_out" | "ver
 export type SkillCheckType = "skill_check" | "training";
 export type SkillCheckResult = "pass" | "fail" | "pending";
 export type BlankRuleType = "alert_60" | "skill_check_required" | "training_required";
-export type ChangeLogType = "rate_update" | "rate_create" | "rate_delete" | "blank_rule_update" | "simulation";
+export type ChangeLogType = "rate_update" | "rate_create" | "rate_delete" | "blank_rule_update" | "simulation" | "cost_ceiling_update" | "config_rollback" | "store_budget_update";
 export type QrTokenType = "clock_in" | "clock_out";
 export type NotificationType = "email" | "push" | "line";
 export type NotificationCategory =
@@ -30,7 +30,15 @@ export type NotificationCategory =
   | "clock_out"
   | "shift_approval_request"
   | "shift_approved"
-  | "blank_alert";
+  | "blank_alert"
+  | "cost_alert"
+  | "rank_update"
+  | "skill_check_scheduled"
+  | "emergency_auto_trigger";
+
+// Phase 2 Types
+export type TrainerRank = "bronze" | "silver" | "gold" | "platinum";
+export type ConfigSnapshotType = "rate_config" | "blank_rule_config" | "cost_ceiling";
 
 // =============================================
 // Table Types
@@ -71,6 +79,8 @@ export interface AlumniTrainer {
   blank_status: BlankStatus;
   skill_check_completed_at: string | null;
   training_completed_at: string | null;
+  rank: TrainerRank;
+  badges: string[];
   created_at: string;
   updated_at: string;
 }
@@ -89,6 +99,7 @@ export interface Store {
   emergency_budget_used: number;
   emergency_budget_reset_at: string | null;
   auto_confirm: boolean;
+  cost_ceiling_override: number | null;
   status: "active" | "inactive";
   created_at: string;
   updated_at: string;
@@ -147,6 +158,9 @@ export interface ShiftTemplate {
   break_minutes: number;
   required_count: number;
   required_certifications: string[];
+  is_recurring: boolean;
+  recurring_days: number[];
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -228,6 +242,7 @@ export interface NotificationLog {
   user_id: string;
   type: NotificationType;
   category: NotificationCategory;
+  title: string | null;
   matching_id: string | null;
   shift_request_id: string | null;
   subject: string | null;
@@ -236,6 +251,7 @@ export interface NotificationLog {
   delivered: boolean;
   responded: boolean;
   responded_at: string | null;
+  read_at: string | null;
   error_message: string | null;
   created_at: string;
 }
@@ -351,6 +367,75 @@ export interface ResignationRequest {
   updated_at: string;
   // Joined fields
   store?: Store;
+}
+
+// =============================================
+// Phase 2 - New Table Types
+// =============================================
+
+export interface ConfigSnapshot {
+  id: string;
+  snapshot_type: ConfigSnapshotType;
+  snapshot_data: Record<string, unknown>;
+  description: string | null;
+  created_by: string;
+  created_at: string;
+}
+
+export interface CostCeilingConfig {
+  id: string;
+  max_hourly_rate: number;
+  active_employee_ratio_threshold: number;
+  per_store_emergency_budget_default: number;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// =============================================
+// Phase 2 - Composite / KPI Types
+// =============================================
+
+export interface AdminKPIs {
+  total_trainers: number;
+  active_trainers: number;
+  active_rate: number;
+  monthly_shifts: number;
+  monthly_fill_rate: number;
+  monthly_cost: number;
+  blank_distribution: Record<BlankStatus, number>;
+  budget_alerts: Array<{
+    store_id: string;
+    store_name: string;
+    budget: number;
+    used: number;
+    usage_rate: number;
+  }>;
+}
+
+export interface StoreWithManager extends Store {
+  managers: StoreManager[];
+}
+
+export interface BudgetReport {
+  store_id: string;
+  store_name: string;
+  area: string;
+  emergency_budget: number;
+  emergency_used: number;
+  total_shift_cost: number;
+  shift_count: number;
+  trainer_count: number;
+}
+
+export interface TrainerRankProgress {
+  current_rank: TrainerRank;
+  completed_shifts: number;
+  avg_rating: number;
+  next_rank: TrainerRank | null;
+  shifts_needed: number;
+  rating_needed: number;
 }
 
 // =============================================
