@@ -209,7 +209,37 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      <p className="relative mt-8 text-center text-xs text-muted-foreground leading-relaxed">
+      {/* Demo Quick Login */}
+      <div className="relative mt-8 w-full max-w-sm space-y-3">
+        <p className="text-center text-xs text-muted-foreground">
+          Demo Quick Login
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          <a
+            href="/api/auth/demo-login?role=store"
+            className="flex flex-col items-center gap-1 rounded-lg border bg-white/80 p-3 text-center transition-colors hover:bg-primary/5"
+          >
+            <span className="text-lg">🏪</span>
+            <span className="text-xs font-medium">Store</span>
+          </a>
+          <a
+            href="/api/auth/demo-login?role=hr"
+            className="flex flex-col items-center gap-1 rounded-lg border bg-white/80 p-3 text-center transition-colors hover:bg-primary/5"
+          >
+            <span className="text-lg">👔</span>
+            <span className="text-xs font-medium">HR</span>
+          </a>
+          <a
+            href="/api/auth/demo-login?role=admin"
+            className="flex flex-col items-center gap-1 rounded-lg border bg-white/80 p-3 text-center transition-colors hover:bg-primary/5"
+          >
+            <span className="text-lg">⚙️</span>
+            <span className="text-xs font-medium">Admin</span>
+          </a>
+        </div>
+      </div>
+
+      <p className="relative mt-6 text-center text-xs text-muted-foreground leading-relaxed">
         Dr.ストレッチ認定トレーナー<br />副業マッチングプラットフォーム
       </p>
     </div>
