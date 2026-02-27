@@ -70,7 +70,7 @@ export async function hrCancelMatching(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -79,7 +79,7 @@ export async function hrCancelMatching(
     .single();
 
   if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
-    return { success: false, error: "Insufficient permissions" };
+    return { success: false, error: "この操作を行う権限がありません" };
   }
 
   const admin = createAdminClient();
@@ -91,7 +91,7 @@ export async function hrCancelMatching(
     .eq("id", applicationId)
     .single();
 
-  if (!application) return { success: false, error: "Application not found" };
+  if (!application) return { success: false, error: "応募情報が見つかりません" };
 
   const { error } = await admin
     .from("shift_applications")

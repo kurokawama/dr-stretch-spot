@@ -19,7 +19,7 @@ export async function generateQrToken(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Verify the application exists and is approved
   const admin = createAdminClient();
@@ -29,9 +29,9 @@ export async function generateQrToken(
     .eq("id", applicationId)
     .single();
 
-  if (!application) return { success: false, error: "Application not found" };
+  if (!application) return { success: false, error: "応募情報が見つかりません" };
   if (application.status !== "approved" && application.status !== "completed") {
-    return { success: false, error: "Application is not confirmed" };
+    return { success: false, error: "この応募はまだ確定していません" };
   }
 
   // Invalidate any existing unused tokens of the same type
@@ -76,10 +76,10 @@ export async function verifyQrToken(
     .eq("token", token)
     .single();
 
-  if (!qrToken) return { success: false, error: "Invalid QR code" };
-  if (qrToken.used_at) return { success: false, error: "QR code already used" };
+  if (!qrToken) return { success: false, error: "無効なQRコードです" };
+  if (qrToken.used_at) return { success: false, error: "このQRコードは使用済みです" };
   if (new Date(qrToken.expires_at) < new Date()) {
-    return { success: false, error: "QR code expired" };
+    return { success: false, error: "QRコードの有効期限が切れています" };
   }
 
   // Mark token as used
@@ -89,7 +89,7 @@ export async function verifyQrToken(
     .eq("id", qrToken.id);
 
   const app = qrToken.application;
-  if (!app) return { success: false, error: "Application not found" };
+  if (!app) return { success: false, error: "応募情報が見つかりません" };
 
   const shift = app.shift_request;
 
@@ -132,8 +132,8 @@ export async function verifyQrToken(
       .eq("application_id", app.id)
       .single();
 
-    if (!record) return { success: false, error: "No clock-in record found" };
-    if (!record.clock_in_at) return { success: false, error: "Not clocked in yet" };
+    if (!record) return { success: false, error: "出勤記録が見つかりません" };
+    if (!record.clock_in_at) return { success: false, error: "まだ出勤していません" };
 
     const clockOutTime = new Date();
     const clockInTime = new Date(record.clock_in_at);

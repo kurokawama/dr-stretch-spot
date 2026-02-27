@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { LogOut, UserCircle } from "lucide-react";
+import { LogOut, UserCircle, ArrowLeftRight } from "lucide-react";
 
 interface HeaderProps {
   displayName: string;
@@ -94,6 +94,17 @@ export function Header({ displayName, role }: HeaderProps) {
                   </Link>
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <Link href="/login" className="flex items-center gap-2" onClick={async (e) => {
+                  e.preventDefault();
+                  await supabase.auth.signOut();
+                  router.push("/login");
+                  router.refresh();
+                }}>
+                  <ArrowLeftRight className="h-4 w-4" />
+                  アカウント切替
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer flex items-center gap-2">
                 <LogOut className="h-4 w-4" />
                 ログアウト

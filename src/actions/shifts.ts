@@ -27,7 +27,7 @@ export async function createShiftRequest(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Get store_manager record
   const { data: manager } = await supabase
@@ -36,9 +36,9 @@ export async function createShiftRequest(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Not a store manager" };
+  if (!manager) return { success: false, error: "店舗マネージャー権限が必要です" };
   if (manager.store_id !== input.store_id) {
-    return { success: false, error: "Store mismatch" };
+    return { success: false, error: "店舗情報が一致しません" };
   }
 
   // Check emergency budget if emergency shift
@@ -57,7 +57,7 @@ export async function createShiftRequest(
       if (estimatedCost > remaining) {
         return {
           success: false,
-          error: `Emergency budget insufficient. Remaining: ¥${remaining}`,
+          error: `緊急シフトの予算が不足しています（残高: ¥${remaining}）`,
         };
       }
     }
@@ -89,7 +89,7 @@ export async function approveShiftRequest(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Verify HR/admin role
   const { data: profile } = await supabase
@@ -99,7 +99,7 @@ export async function approveShiftRequest(
     .single();
 
   if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
-    return { success: false, error: "Insufficient permissions" };
+    return { success: false, error: "この操作を行う権限がありません" };
   }
 
   // Get manager record for approved_by
@@ -168,7 +168,7 @@ export async function rejectShiftRequest(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -177,7 +177,7 @@ export async function rejectShiftRequest(
     .single();
 
   if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
-    return { success: false, error: "Insufficient permissions" };
+    return { success: false, error: "この操作を行う権限がありません" };
   }
 
   const admin = createAdminClient();
@@ -264,7 +264,7 @@ export async function cancelShiftRequest(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { error } = await supabase
     .from("shift_requests")

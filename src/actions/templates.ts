@@ -20,7 +20,7 @@ export async function getShiftTemplates(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data, error } = await supabase
     .from("shift_templates")
@@ -50,7 +50,7 @@ export async function createShiftTemplate(input: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data, error } = await supabase
     .from("shift_templates")
@@ -100,7 +100,7 @@ export async function updateShiftTemplate(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data, error } = await supabase
     .from("shift_templates")
@@ -121,7 +121,7 @@ export async function deleteShiftTemplate(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Soft delete by setting is_active = false
   const { error } = await supabase
@@ -150,7 +150,7 @@ export async function createShiftFromTemplate(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Get the template
   const { data: template, error: templateError } = await supabase
@@ -160,7 +160,7 @@ export async function createShiftFromTemplate(
     .single();
 
   if (templateError || !template) {
-    return { success: false, error: "Template not found" };
+    return { success: false, error: "テンプレートが見つかりません" };
   }
 
   // Get store info for target areas fallback

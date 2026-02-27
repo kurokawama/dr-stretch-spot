@@ -41,7 +41,7 @@ export async function updateRateConfig(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Verify HR/Admin role
   const { data: profile } = await supabase
@@ -51,7 +51,7 @@ export async function updateRateConfig(
     .single();
 
   if (!profile || (profile.role !== "hr" && profile.role !== "admin")) {
-    return { success: false, error: "Insufficient permissions" };
+    return { success: false, error: "この操作を行う権限がありません" };
   }
 
   // Get manager record for logging
@@ -61,7 +61,7 @@ export async function updateRateConfig(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Manager record not found" };
+  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
 
   // Get old values for audit log
   const { data: oldConfig } = await supabase
@@ -70,7 +70,7 @@ export async function updateRateConfig(
     .eq("id", configId)
     .single();
 
-  if (!oldConfig) return { success: false, error: "Config not found" };
+  if (!oldConfig) return { success: false, error: "設定が見つかりません" };
 
   // Update config
   const { data: newConfig, error } = await supabase
@@ -125,7 +125,7 @@ export async function createRateConfig(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -133,7 +133,7 @@ export async function createRateConfig(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Manager record not found" };
+  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
 
   const { data, error } = await supabase
     .from("hourly_rate_config")
@@ -171,7 +171,7 @@ export async function deleteRateConfig(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -179,7 +179,7 @@ export async function deleteRateConfig(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Manager record not found" };
+  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
 
   // Get old values
   const { data: oldConfig } = await supabase
@@ -243,7 +243,7 @@ export async function updateBlankRule(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -251,7 +251,7 @@ export async function updateBlankRule(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Manager record not found" };
+  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
 
   const { data: oldRule } = await supabase
     .from("blank_rule_config")

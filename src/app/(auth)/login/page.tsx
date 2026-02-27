@@ -35,7 +35,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          shouldCreateUser: true,
+          shouldCreateUser: false,
         },
       });
 
@@ -44,6 +44,11 @@ export default function LoginPage() {
         if (error.message?.includes("rate") || error.message?.includes("limit") || error.status === 429) {
           toast.warning("メール送信の制限に達しました。前回送信されたコードをお試しください。");
           setStep("otp");
+          return;
+        }
+        // User not found (shouldCreateUser: false)
+        if (error.message?.includes("Signups not allowed") || error.message?.includes("User not found")) {
+          toast.error("このメールアドレスは登録されていません。管理者にお問い合わせください。");
           return;
         }
         toast.error(error.message || "エラーが発生しました。もう一度お試しください。");

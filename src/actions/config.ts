@@ -21,7 +21,7 @@ export async function getCostCeilingConfig(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -47,7 +47,7 @@ export async function updateCostCeilingConfig(updates: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Verify HR/Admin role
   const { data: profile } = await supabase
@@ -57,7 +57,7 @@ export async function updateCostCeilingConfig(updates: {
     .single();
 
   if (!profile || !["hr", "admin"].includes(profile.role)) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: "この操作を行う権限がありません" };
   }
 
   const admin = createAdminClient();
@@ -120,7 +120,7 @@ export async function updateStoreEmergencyBudget(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -163,7 +163,7 @@ export async function createConfigSnapshot(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -200,7 +200,7 @@ export async function createConfigSnapshot(
       break;
     }
     default:
-      return { success: false, error: "Invalid snapshot type" };
+      return { success: false, error: "無効なスナップショットタイプです" };
   }
 
   const { data, error } = await admin
@@ -226,7 +226,7 @@ export async function getConfigSnapshots(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
   let query = admin
@@ -252,7 +252,7 @@ export async function rollbackToSnapshot(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Verify HR/Admin
   const { data: profile } = await supabase
@@ -262,7 +262,7 @@ export async function rollbackToSnapshot(
     .single();
 
   if (!profile || !["hr", "admin"].includes(profile.role)) {
-    return { success: false, error: "Unauthorized" };
+    return { success: false, error: "この操作を行う権限がありません" };
   }
 
   const admin = createAdminClient();
@@ -275,7 +275,7 @@ export async function rollbackToSnapshot(
     .single();
 
   if (snapError || !snapshot) {
-    return { success: false, error: "Snapshot not found" };
+    return { success: false, error: "スナップショットが見つかりません" };
   }
 
   const snapshotData = snapshot.snapshot_data as Record<string, unknown>;
@@ -369,7 +369,7 @@ export async function runBlankStatusBatch(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -381,7 +381,7 @@ export async function runBlankStatusBatch(): Promise<
     .order("threshold_days", { ascending: false });
 
   if (!rules || rules.length === 0) {
-    return { success: false, error: "No blank rules configured" };
+    return { success: false, error: "ブランクルールが未設定です" };
   }
 
   // Get active trainers

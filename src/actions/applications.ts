@@ -14,7 +14,7 @@ export async function applyToShift(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Get trainer record
   const { data: trainer } = await supabase
@@ -23,9 +23,9 @@ export async function applyToShift(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!trainer) return { success: false, error: "Trainer record not found" };
+  if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
   if (trainer.status !== "active") {
-    return { success: false, error: "Account is not active" };
+    return { success: false, error: "アカウントが無効です" };
   }
 
   // Check blank status
@@ -35,7 +35,9 @@ export async function applyToShift(
   ) {
     return {
       success: false,
-      error: `Applications blocked: ${trainer.blank_status}. Please complete the required check/training.`,
+      error: trainer.blank_status === "skill_check_required"
+        ? "スキルチェックの受講が必要です。完了後に応募できます。"
+        : "研修の受講が必要です。完了後に応募できます。",
     };
   }
 
@@ -43,7 +45,7 @@ export async function applyToShift(
   if (trainer.tenure_years < 2) {
     return {
       success: false,
-      error: "Minimum 2 years of tenure required to apply",
+      error: "応募には2年以上の在籍経験が必要です",
     };
   }
 
@@ -54,12 +56,12 @@ export async function applyToShift(
     .eq("id", shiftRequestId)
     .single();
 
-  if (!shift) return { success: false, error: "Shift not found" };
+  if (!shift) return { success: false, error: "シフトが見つかりません" };
   if (shift.status !== "open") {
-    return { success: false, error: "Shift is no longer open" };
+    return { success: false, error: "このシフトは既に締め切られています" };
   }
   if (shift.filled_count >= shift.required_count) {
-    return { success: false, error: "Shift is fully booked" };
+    return { success: false, error: "このシフトは定員に達しています" };
   }
 
   // Check duplicate application
@@ -71,7 +73,7 @@ export async function applyToShift(
     .maybeSingle();
 
   if (existing) {
-    return { success: false, error: "Already applied to this shift" };
+    return { success: false, error: "既にこのシフトに応募済みです" };
   }
 
   // Calculate rate (FIXED at application time)
@@ -165,7 +167,7 @@ export async function approveApplication(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Get manager record
   const { data: manager } = await supabase
@@ -174,7 +176,7 @@ export async function approveApplication(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Not a store manager" };
+  if (!manager) return { success: false, error: "店舗マネージャー権限が必要です" };
 
   // Get application with shift info
   const { data: application } = await supabase
@@ -183,14 +185,14 @@ export async function approveApplication(
     .eq("id", applicationId)
     .single();
 
-  if (!application) return { success: false, error: "Application not found" };
+  if (!application) return { success: false, error: "応募情報が見つかりません" };
   if (application.status !== "pending") {
-    return { success: false, error: "Application is not pending" };
+    return { success: false, error: "この応募は審査待ち状態ではありません" };
   }
 
   const shift = application.shift_request;
   if (shift && shift.filled_count >= shift.required_count) {
-    return { success: false, error: "Shift is already fully booked" };
+    return { success: false, error: "このシフトは既に定員に達しています" };
   }
 
   // Approve application
@@ -264,7 +266,7 @@ export async function rejectApplication(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -272,7 +274,7 @@ export async function rejectApplication(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Not a store manager" };
+  if (!manager) return { success: false, error: "店舗マネージャー権限が必要です" };
 
   // Get application info before rejecting (need trainer_id + shift_request_id)
   const { data: application } = await supabase
@@ -325,7 +327,7 @@ export async function cancelApplication(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: trainer } = await supabase
     .from("alumni_trainers")
@@ -333,7 +335,7 @@ export async function cancelApplication(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!trainer) return { success: false, error: "Trainer not found" };
+  if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
 
   const { error } = await supabase
     .from("shift_applications")
@@ -358,7 +360,7 @@ export async function getMyApplications(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: trainer } = await supabase
     .from("alumni_trainers")
@@ -366,7 +368,7 @@ export async function getMyApplications(): Promise<
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!trainer) return { success: false, error: "Trainer not found" };
+  if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
 
   const { data, error } = await supabase
     .from("shift_applications")

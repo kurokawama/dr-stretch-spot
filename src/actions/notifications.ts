@@ -26,7 +26,7 @@ export async function getNotifications(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
   let query = admin
@@ -60,7 +60,7 @@ export async function getUnreadNotificationCount(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -86,7 +86,7 @@ export async function markNotificationRead(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -112,7 +112,7 @@ export async function markAllNotificationsRead(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 

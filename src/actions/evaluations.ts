@@ -18,7 +18,7 @@ export async function createEvaluation(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -26,7 +26,7 @@ export async function createEvaluation(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "Not a store manager" };
+  if (!manager) return { success: false, error: "店舗マネージャー権限が必要です" };
 
   // Get application to find trainer_id
   const { data: application } = await supabase
@@ -35,11 +35,11 @@ export async function createEvaluation(
     .eq("id", input.application_id)
     .single();
 
-  if (!application) return { success: false, error: "Application not found" };
+  if (!application) return { success: false, error: "応募情報が見つかりません" };
 
   // Validate rating
   if (input.rating < 1 || input.rating > 5) {
-    return { success: false, error: "Rating must be between 1 and 5" };
+    return { success: false, error: "評価は1〜5の範囲で入力してください" };
   }
 
   const { data, error } = await supabase

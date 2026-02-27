@@ -24,7 +24,7 @@ export async function getAdminKPIs(): Promise<ActionResult<AdminKPIs>> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -160,7 +160,7 @@ export async function getAllTrainers(filters?: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
   let query = admin.from("alumni_trainers").select("*").order("full_name");
@@ -197,7 +197,7 @@ export async function getStoresWithManagers(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -241,7 +241,7 @@ export async function updateStoreConfig(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -268,7 +268,7 @@ export async function getMonthlyBudgetReport(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -343,7 +343,7 @@ export async function getSkillCheckSchedule(filters?: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
   let query = admin
@@ -375,7 +375,7 @@ export async function createSkillCheck(input: {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -406,7 +406,7 @@ export async function updateSkillCheckResult(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 
@@ -417,7 +417,7 @@ export async function updateSkillCheckResult(
     .eq("id", checkId)
     .single();
 
-  if (!check) return { success: false, error: "Skill check not found" };
+  if (!check) return { success: false, error: "スキルチェックが見つかりません" };
 
   // Update the skill check
   const { error } = await admin
@@ -464,7 +464,7 @@ export async function getTrainersRequiringChecks(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const admin = createAdminClient();
 

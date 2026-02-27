@@ -130,7 +130,7 @@ export async function previewHourlyRate(
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated" };
+    if (!user) return { success: false, error: "ログインが必要です" };
 
     const { data: trainer } = await supabase
       .from("alumni_trainers")
@@ -138,7 +138,7 @@ export async function previewHourlyRate(
       .eq("auth_user_id", user.id)
       .single();
 
-    if (!trainer) return { success: false, error: "Trainer not found" };
+    if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
 
     const breakdown = await calculateHourlyRate(trainer.id, shiftRequestId);
     return { success: true, data: breakdown };
@@ -165,7 +165,7 @@ export async function checkEmergencyAutoTrigger(
     .eq("id", shiftRequestId)
     .single();
 
-  if (!shift) return { success: false, error: "Shift not found" };
+  if (!shift) return { success: false, error: "シフトが見つかりません" };
   if (shift.is_emergency) return { success: true, data: false }; // Already emergency
   if (shift.status !== "open") return { success: true, data: false };
 

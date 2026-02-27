@@ -37,7 +37,7 @@ export async function clockIn(input: ClockInput): Promise<ActionResult> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   // Get attendance record
   const { data: record } = await supabase
@@ -46,9 +46,9 @@ export async function clockIn(input: ClockInput): Promise<ActionResult> {
     .eq("id", input.attendance_id)
     .single();
 
-  if (!record) return { success: false, error: "Attendance record not found" };
+  if (!record) return { success: false, error: "出勤記録が見つかりません" };
   if (record.status !== "scheduled") {
-    return { success: false, error: "Already clocked in or invalid status" };
+    return { success: false, error: "既に出勤済みか、無効な状態です" };
   }
 
   // Verify location if store has coordinates
@@ -90,7 +90,7 @@ export async function clockOut(input: ClockInput): Promise<ActionResult> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: record } = await supabase
     .from("attendance_records")
@@ -98,9 +98,9 @@ export async function clockOut(input: ClockInput): Promise<ActionResult> {
     .eq("id", input.attendance_id)
     .single();
 
-  if (!record) return { success: false, error: "Attendance record not found" };
+  if (!record) return { success: false, error: "出勤記録が見つかりません" };
   if (!record.clock_in_at) {
-    return { success: false, error: "Not clocked in yet" };
+    return { success: false, error: "まだ出勤していません" };
   }
 
   const clockOutTime = new Date();
@@ -154,7 +154,7 @@ export async function getTodayAttendance(): Promise<
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Not authenticated" };
+  if (!user) return { success: false, error: "ログインが必要です" };
 
   const { data: trainer } = await supabase
     .from("alumni_trainers")
@@ -162,7 +162,7 @@ export async function getTodayAttendance(): Promise<
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!trainer) return { success: false, error: "Trainer not found" };
+  if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
 
   const today = new Date().toISOString().split("T")[0];
 
