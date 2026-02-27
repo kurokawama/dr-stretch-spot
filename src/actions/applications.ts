@@ -48,7 +48,7 @@ export async function applyToShift(
   // Check shift is still open
   const { data: shift } = await supabase
     .from("shift_requests")
-    .select("status, filled_count, required_count")
+    .select("status, filled_count, required_count, store_id, shift_date, start_time, end_time, break_minutes")
     .eq("id", shiftRequestId)
     .single();
 
@@ -75,6 +75,16 @@ export async function applyToShift(
   // Calculate rate (FIXED at application time)
   const rateBreakdown = await calculateHourlyRate(trainer.id, shiftRequestId);
 
+  // Check if store has auto_confirm enabled
+  const { data: store } = await supabase
+    .from("stores")
+    .select("auto_confirm")
+    .eq("id", shift.store_id)
+    .single();
+
+  const autoConfirm = store?.auto_confirm ?? true;
+  const applicationStatus = autoConfirm ? "approved" : "pending";
+
   // Create application
   const { data, error } = await supabase
     .from("shift_applications")
@@ -83,12 +93,34 @@ export async function applyToShift(
       trainer_id: trainer.id,
       confirmed_rate: rateBreakdown.total,
       rate_breakdown: rateBreakdown,
-      status: "pending",
+      status: applicationStatus,
+      reviewed_at: autoConfirm ? new Date().toISOString() : null,
     })
     .select()
     .single();
 
   if (error) return { success: false, error: error.message };
+
+  // If auto-confirmed, increment filled_count and create attendance record
+  if (autoConfirm && data) {
+    await supabase.rpc("increment_filled_count", {
+      shift_id: shiftRequestId,
+    });
+
+    if (shift) {
+      await supabase.from("attendance_records").insert({
+        application_id: data.id,
+        trainer_id: trainer.id,
+        store_id: shift.store_id,
+        shift_date: shift.shift_date,
+        scheduled_start: shift.start_time,
+        scheduled_end: shift.end_time,
+        break_minutes: shift.break_minutes ?? 0,
+        status: "scheduled",
+      });
+    }
+  }
+
   return { success: true, data };
 }
 

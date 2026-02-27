@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult, ShiftRequest } from "@/types/database";
 
 interface CreateShiftInput {
@@ -15,6 +16,7 @@ interface CreateShiftInput {
   required_certifications?: string[];
   is_emergency?: boolean;
   emergency_bonus_amount?: number;
+  target_areas?: string[];
 }
 
 export async function createShiftRequest(
@@ -66,14 +68,111 @@ export async function createShiftRequest(
     .insert({
       ...input,
       created_by: manager.id,
-      status: "open",
-      published_at: new Date().toISOString(),
+      status: "pending_approval",
+      target_areas: input.target_areas ?? [],
     })
     .select()
     .single();
 
   if (error) return { success: false, error: error.message };
   return { success: true, data };
+}
+
+/**
+ * Approve a shift request (HR/admin only)
+ */
+export async function approveShiftRequest(
+  shiftId: string
+): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
+
+  // Verify HR/admin role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
+    return { success: false, error: "Insufficient permissions" };
+  }
+
+  // Get manager record for approved_by
+  const admin = createAdminClient();
+  const { data: manager } = await admin
+    .from("store_managers")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .maybeSingle();
+
+  const { error } = await admin
+    .from("shift_requests")
+    .update({
+      status: "open",
+      approved_by: manager?.id ?? null,
+      approved_at: new Date().toISOString(),
+      published_at: new Date().toISOString(),
+    })
+    .eq("id", shiftId)
+    .eq("status", "pending_approval");
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+/**
+ * Reject a shift request (HR/admin only)
+ */
+export async function rejectShiftRequest(
+  shiftId: string
+): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
+    return { success: false, error: "Insufficient permissions" };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("shift_requests")
+    .update({ status: "cancelled" })
+    .eq("id", shiftId)
+    .eq("status", "pending_approval");
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+/**
+ * Get pending shift requests for HR approval
+ */
+export async function getPendingShifts(): Promise<ActionResult<ShiftRequest[]>> {
+  const admin = createAdminClient();
+
+  const { data, error } = await admin
+    .from("shift_requests")
+    .select("*, store:stores(name, area, prefecture), created_by_manager:store_managers!created_by(full_name)")
+    .eq("status", "pending_approval")
+    .order("created_at", { ascending: true });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, data: data ?? [] };
 }
 
 export async function searchShifts(filters: {

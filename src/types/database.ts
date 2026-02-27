@@ -2,17 +2,32 @@
 // Dr.stretch SPOT - Database Types
 // =============================================
 
-export type UserRole = "trainer" | "store_manager" | "hr" | "admin";
+export type UserRole = "trainer" | "store_manager" | "hr" | "admin" | "area_manager";
 
 export type TrainerStatus = "pending" | "active" | "suspended" | "inactive";
 export type BlankStatus = "ok" | "alert_60" | "skill_check_required" | "training_required";
-export type ShiftRequestStatus = "open" | "closed" | "cancelled" | "completed";
+export type ShiftRequestStatus = "pending_approval" | "open" | "closed" | "cancelled" | "completed";
 export type ApplicationStatus = "pending" | "approved" | "rejected" | "cancelled" | "completed" | "no_show";
 export type AttendanceStatus = "scheduled" | "clocked_in" | "clocked_out" | "verified" | "disputed";
 export type SkillCheckType = "skill_check" | "training";
 export type SkillCheckResult = "pass" | "fail" | "pending";
 export type BlankRuleType = "alert_60" | "skill_check_required" | "training_required";
 export type ChangeLogType = "rate_update" | "rate_create" | "rate_delete" | "blank_rule_update" | "simulation";
+export type QrTokenType = "clock_in" | "clock_out";
+export type NotificationType = "email" | "push" | "line";
+export type NotificationCategory =
+  | "shift_published"
+  | "application_received"
+  | "application_confirmed"
+  | "application_rejected"
+  | "application_cancelled"
+  | "pre_day_reminder"
+  | "day_reminder"
+  | "clock_in"
+  | "clock_out"
+  | "shift_approval_request"
+  | "shift_approved"
+  | "blank_alert";
 
 // =============================================
 // Table Types
@@ -68,6 +83,7 @@ export interface Store {
   emergency_budget_monthly: number;
   emergency_budget_used: number;
   emergency_budget_reset_at: string | null;
+  auto_confirm: boolean;
   status: "active" | "inactive";
   created_at: string;
   updated_at: string;
@@ -81,6 +97,7 @@ export interface StoreManager {
   phone: string | null;
   store_id: string;
   role: UserRole;
+  managed_areas: string[];
   status: "active" | "inactive";
   created_at: string;
   updated_at: string;
@@ -102,11 +119,15 @@ export interface ShiftRequest {
   is_emergency: boolean;
   emergency_bonus_amount: number;
   status: ShiftRequestStatus;
+  approved_by: string | null;
+  approved_at: string | null;
+  target_areas: string[];
   published_at: string | null;
   created_at: string;
   updated_at: string;
   // Joined fields
   store?: Store;
+  created_by_manager?: StoreManager;
 }
 
 export interface ShiftTemplate {
@@ -146,6 +167,10 @@ export interface ShiftApplication {
   reviewed_by: string | null;
   cancel_reason: string | null;
   cancelled_at: string | null;
+  pre_day_reminder_sent: boolean;
+  pre_day_confirmed: boolean;
+  pre_day_confirmed_at: string | null;
+  day_reminder_sent: boolean;
   created_at: string;
   updated_at: string;
   // Joined fields
@@ -178,6 +203,36 @@ export interface AttendanceRecord {
   // Joined fields
   trainer?: AlumniTrainer;
   store?: Store;
+  application?: ShiftApplication;
+}
+
+export interface QrToken {
+  id: string;
+  matching_id: string;
+  type: QrTokenType;
+  token: string;
+  expires_at: string;
+  used_at: string | null;
+  created_at: string;
+  // Joined fields
+  application?: ShiftApplication;
+}
+
+export interface NotificationLog {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  category: NotificationCategory;
+  matching_id: string | null;
+  shift_request_id: string | null;
+  subject: string | null;
+  body: string | null;
+  sent_at: string;
+  delivered: boolean;
+  responded: boolean;
+  responded_at: string | null;
+  error_message: string | null;
+  created_at: string;
 }
 
 export interface SkillCheck {

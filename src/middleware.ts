@@ -81,8 +81,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Check if hr is accessing hr routes
-  if (role === "hr") {
+  // Check if hr or area_manager is accessing hr routes
+  if (role === "hr" || role === "area_manager") {
     if (pathname === "/hr" || pathname.startsWith("/hr/")) {
       return supabaseResponse;
     }

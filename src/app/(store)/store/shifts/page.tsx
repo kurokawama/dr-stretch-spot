@@ -29,6 +29,7 @@ export default async function StoreShiftsPage() {
     .limit(20);
 
   const statusLabels: Record<string, string> = {
+    pending_approval: "承認待ち",
     open: "募集中",
     closed: "締切",
     cancelled: "キャンセル",
@@ -36,6 +37,7 @@ export default async function StoreShiftsPage() {
   };
 
   const statusVariants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+    pending_approval: "secondary",
     open: "default",
     closed: "secondary",
     cancelled: "destructive",

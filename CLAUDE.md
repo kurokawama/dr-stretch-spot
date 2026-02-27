@@ -71,6 +71,7 @@ Border:           #E5E5E5  (borders/dividers)
 trainer        → (trainer)/ routes
 store_manager  → (store)/ routes
 hr             → (hr)/ routes
+area_manager   → (hr)/ routes (filtered by managed areas)
 admin          → all routes
 ```
 
@@ -94,10 +95,60 @@ confirmed_rate = base_rate(tenure) + attendance_bonus(recent_30_days) + emergenc
 - Emergency bonus: triggered when shift is < 24h old AND < 50% filled
 - Emergency budget: per-store monthly cap
 
-## Supabase Tables (14 tables)
+## Supabase Tables (16 tables)
 alumni_trainers, stores, store_managers, shift_requests, shift_templates,
 shift_applications, attendance_records, skill_checks, evaluations,
-notification_preferences, hourly_rate_config, blank_rule_config, rate_change_logs
+notification_preferences, hourly_rate_config, blank_rule_config, rate_change_logs,
+profiles, qr_tokens, notification_logs
+
+## Matching & Attendance Flow
+
+### Shift Lifecycle
+```
+Store creates shift → status: pending_approval
+  → HR approves → status: open (visible to trainers)
+  → HR rejects → status: cancelled
+  → Trainer applies → auto-confirm (first come first served)
+  → All slots filled → auto-close trigger → status: closed
+```
+
+### Auto-Confirm Matching
+- Controlled by `stores.auto_confirm` (default: true)
+- When true: application → approved immediately → attendance_records created
+- When false: application → pending → store manager reviews
+
+### QR Attendance (unified direction: trainer shows → store scans)
+```
+Clock-in:
+  Trainer taps "Show QR" → qr_tokens created (15min expiry)
+  → Store scans token → POST /api/attendance/verify → clock_in_at recorded
+
+Clock-out:
+  Store taps "退勤リクエスト" → clock_out QR token created
+  → Trainer's app auto-detects via 5s polling → shows QR
+  → Store scans → clock_out_at recorded → status: clocked_out
+```
+
+### Pre-day Confirmation
+- Cron at 18:00 JST → email with OK button → GET /api/confirm?id=xxx
+- Unconfirmed trainers → alert on HR dashboard (no auto-cancel)
+- HR can manually cancel, reassign, or add people
+
+### Cron Schedule (vercel.json)
+```
+0 9 * * *   → 18:00 JST (pre-day reminders for tomorrow)
+0 22 * * *  → 07:00 JST (day-of reminders for today)
+```
+
+### Area Manager
+- Same HR dashboard, filtered by `store_managers.managed_areas`
+- Role: `area_manager` in profiles table
+- Routes: same /hr/* paths
+
+### Email Notifications (Resend)
+- Gracefully skips if RESEND_API_KEY not configured
+- Templates: matchingConfirmedEmail, preDayReminderEmail, dayReminderEmail
+- LINE integration: planned for future phase
 
 ## Important Notes
 - `preview_screenshot` is BANNED (freezes) — use `preview_snapshot` / `preview_eval`

@@ -6,6 +6,9 @@ import {
   DollarSign,
   Calculator,
   FileText,
+  LayoutDashboard,
+  Users,
+  ClipboardCheck,
 } from "lucide-react";
 
 export default async function HRLayout({
@@ -28,20 +31,29 @@ export default async function HRLayout({
     .eq("id", user.id)
     .single();
 
-  if (!profile || (profile.role !== "hr" && profile.role !== "admin")) {
+  if (
+    !profile ||
+    !["hr", "admin", "area_manager"].includes(profile.role)
+  ) {
     redirect("/login");
   }
 
   const navItems = [
+    { href: "/hr", icon: LayoutDashboard, label: "ダッシュボード" },
+    { href: "/hr/matchings", icon: Users, label: "マッチング管理" },
+    { href: "/hr/attendance", icon: ClipboardCheck, label: "出勤管理" },
     { href: "/hr/rates", icon: DollarSign, label: "時給テーブル" },
     { href: "/hr/simulation", icon: Calculator, label: "シミュレーション" },
     { href: "/hr/audit-log", icon: FileText, label: "変更履歴" },
   ];
 
+  const displayRole =
+    profile.role === "area_manager" ? "エリアマネージャー" : "人事部";
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        displayName={profile.display_name || "人事部"}
+        displayName={profile.display_name || displayRole}
         role={profile.role}
       />
       <div className="flex flex-1">
