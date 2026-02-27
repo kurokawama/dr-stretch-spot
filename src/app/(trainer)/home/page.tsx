@@ -15,6 +15,9 @@ import {
   Clock3,
   ArrowRight,
   TrendingUp,
+  Award,
+  Star,
+  Bell,
 } from "lucide-react";
 
 export default async function TrainerHomePage() {
@@ -341,6 +344,53 @@ export default async function TrainerHomePage() {
             </CardContent>
           </Card>
         </Link>
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="font-heading text-base font-semibold">その他</h2>
+        <div className="space-y-2">
+          <Link href="/rank" className="block card-interactive">
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="rounded-lg bg-amber-100 p-2">
+                  <Award className="h-4 w-4 text-amber-700" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">ランク・バッジ</p>
+                  <p className="text-xs text-muted-foreground">ランクと獲得バッジを確認</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/evaluation-history" className="block card-interactive">
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="rounded-lg bg-yellow-100 p-2">
+                  <Star className="h-4 w-4 text-yellow-600" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">評価履歴</p>
+                  <p className="text-xs text-muted-foreground">店舗からの評価を確認</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/notifications" className="block card-interactive">
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="rounded-lg bg-blue-100 p-2">
+                  <Bell className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">通知</p>
+                  <p className="text-xs text-muted-foreground">お知らせを確認</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
       </div>
 
       {/* Today's shifts */}
