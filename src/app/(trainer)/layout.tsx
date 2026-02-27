@@ -1,15 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Header } from "@/components/shared/Header";
-import Link from "next/link";
-import {
-  Home,
-  Search,
-  CalendarDays,
-  Clock,
-  Wallet,
-  User,
-} from "lucide-react";
+import { BottomNav } from "@/components/shared/BottomNav";
 
 export default async function TrainerLayout({
   children,
@@ -52,99 +44,25 @@ export default async function TrainerLayout({
   const isEmployee = profile.role === "employee";
   const isSpotActive = spotStatus === "active";
 
+  // Determine nav mode
+  const navMode = isEmployee
+    ? ("employee" as const)
+    : !isSpotActive
+      ? ("registered" as const)
+      : ("active" as const);
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header
         displayName={profile.display_name || (isEmployee ? "スタッフ" : "トレーナー")}
         role={profile.role}
       />
-      <main className="flex-1 pb-16 md:pb-0">{children}</main>
-
-      {/* Mobile bottom navigation — adapts to user state */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white md:hidden">
-        <div className="flex items-center justify-around py-2">
-          {isEmployee ? (
-            <>
-              <Link
-                href="/"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <Home className="h-5 w-5" />
-                <span className="text-[10px]">ホーム</span>
-              </Link>
-              <Link
-                href="/profile"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <User className="h-5 w-5" />
-                <span className="text-[10px]">設定</span>
-              </Link>
-            </>
-          ) : !isSpotActive ? (
-            <>
-              <Link
-                href="/"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <Home className="h-5 w-5" />
-                <span className="text-[10px]">ホーム</span>
-              </Link>
-              <Link
-                href="/spot-setup"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <Search className="h-5 w-5" />
-                <span className="text-[10px]">SPOT登録</span>
-              </Link>
-              <Link
-                href="/profile"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <User className="h-5 w-5" />
-                <span className="text-[10px]">設定</span>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <Home className="h-5 w-5" />
-                <span className="text-[10px]">ホーム</span>
-              </Link>
-              <Link
-                href="/shifts"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <Search className="h-5 w-5" />
-                <span className="text-[10px]">シフト検索</span>
-              </Link>
-              <Link
-                href="/my-shifts"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <CalendarDays className="h-5 w-5" />
-                <span className="text-[10px]">マイシフト</span>
-              </Link>
-              <Link
-                href="/clock"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <Clock className="h-5 w-5" />
-                <span className="text-[10px]">打刻</span>
-              </Link>
-              <Link
-                href="/earnings"
-                className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary"
-              >
-                <Wallet className="h-5 w-5" />
-                <span className="text-[10px]">収入</span>
-              </Link>
-            </>
-          )}
+      <main className="flex-1 pb-20 md:pb-0">
+        <div className="animate-fade-in-up">
+          {children}
         </div>
-      </nav>
+      </main>
+      <BottomNav mode={navMode} />
     </div>
   );
 }

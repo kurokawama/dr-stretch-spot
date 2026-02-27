@@ -53,7 +53,7 @@ export default async function HRLayout({
     profile.role === "area_manager" ? "エリアマネージャー" : "人事部";
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header
         displayName={profile.display_name || displayRole}
         role={profile.role}
@@ -66,7 +66,7 @@ export default async function HRLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
@@ -75,7 +75,9 @@ export default async function HRLayout({
           </nav>
         </aside>
 
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          <div className="animate-fade-in-up">{children}</div>
+        </main>
       </div>
     </div>
   );
