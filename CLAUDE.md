@@ -134,10 +134,9 @@ Clock-out:
 - Unconfirmed trainers → alert on HR dashboard (no auto-cancel)
 - HR can manually cancel, reassign, or add people
 
-### Cron Schedule (vercel.json)
+### Cron Schedule (vercel.json — Hobby plan: 1 cron/day)
 ```
-0 9 * * *   → 18:00 JST (pre-day reminders for tomorrow)
-0 22 * * *  → 07:00 JST (day-of reminders for today)
+0 22 * * *  → 07:00 JST — sends BOTH day-of and pre-day reminders in one run
 ```
 
 ### Area Manager
