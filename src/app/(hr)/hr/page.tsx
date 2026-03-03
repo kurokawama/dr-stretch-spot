@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AlertCircle, CheckCircle, Clock, ClipboardCheck, DollarSign, Users } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, ClipboardCheck, DollarSign, Users, HandHeart } from "lucide-react";
 import { approveShiftRequest, rejectShiftRequest } from "@/actions/shifts";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -96,6 +96,22 @@ export default async function HRDashboardPage() {
     (a) => !a.application?.pre_day_confirmed
   ).length;
 
+  // Shift availabilities (all stores)
+  const { data: allAvailabilities } = await admin
+    .from("shift_availabilities")
+    .select("*, trainer:alumni_trainers(full_name, tenure_years, rank), store:stores(name, area)")
+    .in("status", ["open", "offered"])
+    .gte("available_date", today)
+    .order("available_date", { ascending: true })
+    .limit(20);
+
+  let filteredAvailabilities = allAvailabilities ?? [];
+  if (managedAreas.length > 0) {
+    filteredAvailabilities = filteredAvailabilities.filter((a) =>
+      managedAreas.includes(a.store?.area ?? "")
+    );
+  }
+
   // Stats
   const clockedInCount = filteredAttendance.filter(
     (a) => a.status === "clocked_in"
@@ -123,7 +139,7 @@ export default async function HRDashboardPage() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">承認待ち</CardTitle>
@@ -171,6 +187,18 @@ export default async function HRDashboardPage() {
             <div className="text-2xl font-bold">{unconfirmedCount}</div>
             <p className="text-xs text-muted-foreground">
               {unconfirmedCount > 0 ? "要確認フォローアップ" : "全員確認済み"}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">シフト希望</CardTitle>
+            <HandHeart className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{filteredAvailabilities.length}</div>
+            <p className="text-xs text-muted-foreground">
+              トレーナー申告
             </p>
           </CardContent>
         </Card>
@@ -384,6 +412,61 @@ export default async function HRDashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Shift availabilities from trainers */}
+      {filteredAvailabilities.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <HandHeart className="h-5 w-5 text-purple-500" />
+              トレーナーのシフト希望（{filteredAvailabilities.length}件）
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>トレーナー</TableHead>
+                  <TableHead>ランク</TableHead>
+                  <TableHead>店舗</TableHead>
+                  <TableHead>エリア</TableHead>
+                  <TableHead>希望日</TableHead>
+                  <TableHead>時間</TableHead>
+                  <TableHead>ステータス</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAvailabilities.map((avail) => (
+                  <TableRow key={avail.id}>
+                    <TableCell className="font-medium">
+                      {avail.trainer?.full_name}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">
+                        {avail.trainer?.rank}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{avail.store?.name}</TableCell>
+                    <TableCell>{avail.store?.area}</TableCell>
+                    <TableCell>{avail.available_date}</TableCell>
+                    <TableCell>
+                      {avail.start_time?.slice(0, 5)}〜
+                      {avail.end_time?.slice(0, 5)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={avail.status === "open" ? "secondary" : "default"}
+                      >
+                        {avail.status === "open" ? "未対応" : "オファー済"}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick links */}
       <div className="grid gap-4 sm:grid-cols-3">

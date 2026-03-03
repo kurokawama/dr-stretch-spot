@@ -18,6 +18,7 @@ import {
   Trophy,
   Star as StarIcon,
   Bell,
+  CalendarPlus,
 } from "lucide-react";
 
 export default async function TrainerHomePage() {
@@ -323,14 +324,14 @@ export default async function TrainerHomePage() {
       )}
 
       {/* Quick actions */}
-      <div className="grid gap-3 grid-cols-2">
+      <div className="grid gap-3 grid-cols-3">
         <Link href="/shifts" className="card-interactive">
           <Card className="border-0 shadow-sm h-full">
             <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
               <div className="rounded-lg bg-primary/10 p-2">
                 <Search className="h-4 w-4 text-primary" />
               </div>
-              <span className="text-sm font-medium">シフト検索</span>
+              <span className="text-xs font-medium">シフト検索</span>
             </CardContent>
           </Card>
         </Link>
@@ -340,7 +341,27 @@ export default async function TrainerHomePage() {
               <div className="rounded-lg bg-blue-50 p-2">
                 <CalendarDays className="h-4 w-4 text-blue-600" />
               </div>
-              <span className="text-sm font-medium">マイシフト</span>
+              <span className="text-xs font-medium">マイシフト</span>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/clock" className="card-interactive">
+          <Card className="border-0 shadow-sm h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
+              <div className="rounded-lg bg-green-50 p-2">
+                <Clock className="h-4 w-4 text-green-600" />
+              </div>
+              <span className="text-xs font-medium">打刻</span>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/availability" className="card-interactive">
+          <Card className="border-0 shadow-sm h-full">
+            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
+              <div className="rounded-lg bg-purple-50 p-2">
+                <CalendarPlus className="h-4 w-4 text-purple-600" />
+              </div>
+              <span className="text-xs font-medium">シフト希望</span>
             </CardContent>
           </Card>
         </Link>
@@ -350,7 +371,7 @@ export default async function TrainerHomePage() {
               <div className="rounded-lg bg-yellow-50 p-2">
                 <Trophy className="h-4 w-4 text-yellow-600" />
               </div>
-              <span className="text-sm font-medium">ランク</span>
+              <span className="text-xs font-medium">ランク</span>
             </CardContent>
           </Card>
         </Link>
@@ -360,7 +381,7 @@ export default async function TrainerHomePage() {
               <div className="rounded-lg bg-red-50 p-2">
                 <Bell className="h-4 w-4 text-red-600" />
               </div>
-              <span className="text-sm font-medium">通知</span>
+              <span className="text-xs font-medium">通知</span>
             </CardContent>
           </Card>
         </Link>

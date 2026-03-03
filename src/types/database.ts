@@ -16,6 +16,9 @@ export type SkillCheckType = "skill_check" | "training";
 export type SkillCheckResult = "pass" | "fail" | "pending";
 export type BlankRuleType = "alert_60" | "skill_check_required" | "training_required";
 export type ChangeLogType = "rate_update" | "rate_create" | "rate_delete" | "blank_rule_update" | "simulation" | "cost_ceiling_update" | "config_rollback" | "store_budget_update";
+export type AvailabilityStatus = "open" | "offered" | "matched" | "expired" | "cancelled";
+export type OfferStatus = "pending" | "accepted" | "declined" | "expired" | "cancelled";
+export type ShiftSource = "store_created" | "direct_offer";
 export type QrTokenType = "clock_in" | "clock_out";
 export type NotificationType = "email" | "push" | "line";
 export type NotificationCategory =
@@ -134,6 +137,8 @@ export interface ShiftRequest {
   required_certifications: string[];
   is_emergency: boolean;
   emergency_bonus_amount: number;
+  source: ShiftSource;
+  offer_id: string | null;
   status: ShiftRequestStatus;
   approved_by: string | null;
   approved_at: string | null;
@@ -436,6 +441,50 @@ export interface TrainerRankProgress {
   next_rank: TrainerRank | null;
   shifts_needed: number;
   rating_needed: number;
+}
+
+// =============================================
+// Shift Availability & Offer Types
+// =============================================
+
+export interface ShiftAvailability {
+  id: string;
+  trainer_id: string;
+  store_id: string;
+  available_date: string;
+  start_time: string;
+  end_time: string;
+  note: string | null;
+  status: AvailabilityStatus;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  trainer?: AlumniTrainer;
+  store?: Store;
+}
+
+export interface ShiftOffer {
+  id: string;
+  availability_id: string;
+  trainer_id: string;
+  store_id: string;
+  created_by: string;
+  title: string;
+  shift_date: string;
+  start_time: string;
+  end_time: string;
+  break_minutes: number;
+  offered_rate: number;
+  rate_breakdown: RateBreakdown;
+  status: OfferStatus;
+  responded_at: string | null;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  availability?: ShiftAvailability;
+  trainer?: AlumniTrainer;
+  store?: Store;
+  created_by_manager?: StoreManager;
 }
 
 // =============================================

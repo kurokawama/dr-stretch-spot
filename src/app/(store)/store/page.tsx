@@ -12,6 +12,7 @@ import {
   MapPin,
   Calendar,
   TrendingUp,
+  HandHeart,
 } from "lucide-react";
 
 export default async function StoreDashboardPage() {
@@ -60,6 +61,14 @@ export default async function StoreDashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("store_id", manager.store_id)
     .eq("shift_date", today);
+
+  // Shift availabilities for this store
+  const { count: availabilityCount } = await supabase
+    .from("shift_availabilities")
+    .select("*", { count: "exact", head: true })
+    .eq("store_id", manager.store_id)
+    .in("status", ["open", "offered"])
+    .gte("available_date", today);
 
   // Monthly stats
   const startOfMonth = new Date();
@@ -145,16 +154,17 @@ export default async function StoreDashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="flex items-center gap-3 p-4">
-            <Star className="h-8 w-8 text-yellow-500 shrink-0" />
-            <div>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/store/evaluations">評価入力</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/store/availability">
+          <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+            <CardContent className="flex items-center gap-3 p-4">
+              <HandHeart className="h-8 w-8 text-purple-500 shrink-0" />
+              <div>
+                <p className="text-2xl font-bold">{availabilityCount ?? 0}</p>
+                <p className="text-xs text-muted-foreground">シフト希望</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       {/* Pending Applications Alert */}
