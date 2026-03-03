@@ -6,7 +6,7 @@ const PUBLIC_ROUTES = ["/login", "/register", "/auth/callback", "/auth/magic"];
 
 // Role-based route prefixes
 const ROLE_ROUTES: Record<string, string[]> = {
-  trainer: ["/home", "/shifts", "/my-shifts", "/clock", "/earnings", "/profile", "/alerts", "/rank", "/evaluation-history", "/notifications"],
+  trainer: ["/home", "/shifts", "/my-shifts", "/clock", "/earnings", "/profile", "/alerts", "/rank", "/evaluation-history", "/notifications", "/availability"],
   store_manager: ["/store"],
   hr: ["/hr"],
   admin: ["/admin", "/hr", "/store", "/"], // admin can access everything
