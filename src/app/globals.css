@@ -125,6 +125,21 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Polish: Input/Textarea focus ring with brand color */
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select,
+  [role="combobox"] {
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [role="combobox"]:focus-visible {
+    border-color: oklch(0.53 0.22 29);
+    box-shadow: 0 0 0 3px oklch(0.53 0.22 29 / 0.15);
+    outline: none;
+  }
 }
 
 /* ===== Page & Element Animations ===== */
@@ -254,7 +269,7 @@
 
 /* Smooth button transitions */
 button, a {
-  transition: opacity 0.15s ease, transform 0.1s ease;
+  transition: opacity 0.15s ease, transform 0.1s ease, color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 button:active, a:active {
   transform: scale(0.97);

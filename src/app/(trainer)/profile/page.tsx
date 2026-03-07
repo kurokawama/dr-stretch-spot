@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -152,7 +153,9 @@ export default function ProfilePage() {
       </Card>
 
       <Button className="w-full rounded-xl bg-primary text-primary-foreground" onClick={handleSave} disabled={saving}>
-        {saving ? "保存中..." : "保存する"}
+        {saving ? (
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" />保存中...</>
+        ) : "保存する"}
       </Button>
     </div>
   );
