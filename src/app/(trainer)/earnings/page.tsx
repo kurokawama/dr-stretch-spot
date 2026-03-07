@@ -87,28 +87,28 @@ export default async function EarningsPage({
   const remainingMinutes = totalMinutes % 60;
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="animate-fade-in-up p-4 md:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-2xl font-bold">収入明細</h1>
 
         {/* Month Navigation */}
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" asChild>
+        <div className="flex items-center gap-2 rounded-xl border bg-card px-2 py-1 shadow-sm">
+          <Button variant="ghost" size="icon" asChild className="rounded-xl">
             <Link href={`/earnings?month=${prevMonthStr}`}>
               <ChevronLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <span className="text-sm font-medium min-w-24 text-center">
+          <span className="font-heading text-sm font-semibold min-w-24 text-center tabular-nums">
             {monthLabel}
           </span>
           {!isCurrentMonth ? (
-            <Button variant="outline" size="icon" asChild>
+            <Button variant="ghost" size="icon" asChild className="rounded-xl">
               <Link href={`/earnings?month=${nextMonthStr}`}>
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>
           ) : (
-            <Button variant="outline" size="icon" disabled>
+            <Button variant="ghost" size="icon" disabled className="rounded-xl">
               <ChevronRight className="h-4 w-4" />
             </Button>
           )}
@@ -116,7 +116,7 @@ export default async function EarningsPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
+        <Card className="rounded-xl border bg-card shadow-sm">
           <CardContent className="flex items-center gap-4 p-4">
             <div className="rounded-full bg-primary/10 p-3">
               <Wallet className="h-6 w-6 text-primary" />
@@ -125,13 +125,13 @@ export default async function EarningsPage({
               <p className="text-sm text-muted-foreground">
                 {monthLabel}の収入
               </p>
-              <p className="text-2xl font-bold">
+              <p className="text-gradient-brand font-heading text-3xl font-bold tabular-nums">
                 ¥{totalEarnings.toLocaleString()}
               </p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-xl border bg-card shadow-sm">
           <CardContent className="flex items-center gap-4 p-4">
             <div className="rounded-full bg-accent/20 p-3">
               <Clock className="h-6 w-6 text-accent-foreground" />
@@ -140,7 +140,7 @@ export default async function EarningsPage({
               <p className="text-sm text-muted-foreground">
                 {monthLabel}の勤務時間
               </p>
-              <p className="text-2xl font-bold">
+              <p className="font-heading text-2xl font-bold tabular-nums">
                 {totalHours}h {remainingMinutes}m
               </p>
             </div>
@@ -148,9 +148,9 @@ export default async function EarningsPage({
         </Card>
       </div>
 
-      <Card>
+      <Card className="rounded-xl border bg-card shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">
+          <CardTitle className="font-heading text-base font-semibold">
             {monthLabel}の完了シフト
           </CardTitle>
         </CardHeader>
@@ -160,7 +160,7 @@ export default async function EarningsPage({
               {monthLabel}の完了したシフトはありません
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 stagger-children">
               {items.map((item) => {
                 const sr = item.shift_request as unknown as {
                   title: string;
@@ -186,7 +186,7 @@ export default async function EarningsPage({
                 return (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded-md border p-3"
+                    className="flex items-center justify-between rounded-xl border p-3"
                   >
                     <div className="space-y-0.5">
                       <p className="text-sm font-medium">{sr?.title}</p>
@@ -199,7 +199,7 @@ export default async function EarningsPage({
                       </p>
                     </div>
                     <div className="text-right space-y-0.5">
-                      <p className="font-bold">
+                      <p className="font-heading font-bold tabular-nums">
                         ¥{earned.toLocaleString()}
                       </p>
                       <p className="text-xs text-muted-foreground">

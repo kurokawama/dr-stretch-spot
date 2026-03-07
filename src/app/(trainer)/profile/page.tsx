@@ -85,73 +85,73 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) return <div className="p-6 text-center text-muted-foreground">読み込み中...</div>;
+  if (loading) return <div className="animate-fade-in-up p-6 text-center text-muted-foreground">読み込み中...</div>;
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-lg">
+    <div className="animate-fade-in-up p-4 md:p-6 space-y-6 max-w-lg">
       <h1 className="font-heading text-2xl font-bold">プロフィール</h1>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">基本情報</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
+      <Card className="rounded-xl border bg-card shadow-sm">
+        <CardHeader><CardTitle className="font-heading font-semibold text-base">基本情報</CardTitle></CardHeader>
+        <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label>氏名</Label>
-            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+            <Input className="rounded-xl" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
           </div>
           <div className="space-y-2">
             <Label>氏名（カナ）</Label>
-            <Input value={form.full_name_kana} onChange={(e) => setForm({ ...form, full_name_kana: e.target.value })} />
+            <Input className="rounded-xl" value={form.full_name_kana} onChange={(e) => setForm({ ...form, full_name_kana: e.target.value })} />
           </div>
           <div className="space-y-2">
             <Label>電話番号</Label>
-            <Input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input className="rounded-xl" type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div className="space-y-2">
             <Label>在籍年数</Label>
-            <Input type="number" value={form.tenure_years} disabled className="bg-muted" />
+            <Input type="number" value={form.tenure_years} disabled className="rounded-xl bg-muted" />
             <p className="text-xs text-muted-foreground">※ 変更は人事部にお問い合わせください</p>
           </div>
           <div className="space-y-2">
             <Label>希望エリア</Label>
             <Select value={form.preferred_area} onValueChange={(v) => setForm({ ...form, preferred_area: v })}>
-              <SelectTrigger><SelectValue placeholder="選択" /></SelectTrigger>
+              <SelectTrigger className="rounded-xl"><SelectValue placeholder="選択" /></SelectTrigger>
               <SelectContent>{AREAS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
             <Label>自己紹介</Label>
-            <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} />
+            <Textarea className="rounded-xl" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} />
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">振込先情報</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
+      <Card className="rounded-xl border bg-card shadow-sm">
+        <CardHeader><CardTitle className="font-heading font-semibold text-base">振込先情報</CardTitle></CardHeader>
+        <CardContent className="space-y-5">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>銀行名</Label>
-              <Input value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} />
+              <Input className="rounded-xl" value={form.bank_name} onChange={(e) => setForm({ ...form, bank_name: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>支店名</Label>
-              <Input value={form.bank_branch} onChange={(e) => setForm({ ...form, bank_branch: e.target.value })} />
+              <Input className="rounded-xl" value={form.bank_branch} onChange={(e) => setForm({ ...form, bank_branch: e.target.value })} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>口座番号</Label>
-              <Input value={form.bank_account_number} onChange={(e) => setForm({ ...form, bank_account_number: e.target.value })} />
+              <Input className="rounded-xl" value={form.bank_account_number} onChange={(e) => setForm({ ...form, bank_account_number: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>口座名義</Label>
-              <Input value={form.bank_account_holder} onChange={(e) => setForm({ ...form, bank_account_holder: e.target.value })} />
+              <Input className="rounded-xl" value={form.bank_account_holder} onChange={(e) => setForm({ ...form, bank_account_holder: e.target.value })} />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Button className="w-full" onClick={handleSave} disabled={saving}>
+      <Button className="w-full rounded-xl bg-primary text-primary-foreground" onClick={handleSave} disabled={saving}>
         {saving ? "保存中..." : "保存する"}
       </Button>
     </div>
