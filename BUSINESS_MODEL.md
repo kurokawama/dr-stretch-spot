@@ -1,7 +1,6 @@
 # Dr.stretch SPOT - Business Model Book
 
 > **Last Updated:** 2026-03-08
-> **URL:** https://dr-stretch-spot.vercel.app
 > **Status:** MVP Phase 1 (Production)
 
 ---
@@ -26,14 +25,14 @@ Alumni trainer registers on SPOT
 
 ## 2. Who uses it?
 
-| Role | Description | How they log in | Access |
-|------|-------------|-----------------|--------|
-| **Trainer** | Retired Dr.stretch trainer | Email/Password or OTP | `/home`, `/shifts`, `/clock`, `/earnings`, etc. |
-| **Store Manager** | Dr.stretch store staff | Email/Password or OTP | `/store/*` |
-| **HR** | Headquarters HR staff | Email/Password or OTP | `/hr/*` |
-| **Area Manager** | Regional manager | Email/Password or OTP | `/hr/*` (filtered by area) |
-| **Admin** | System administrator | Email/Password or OTP | All routes |
-| **Employee** | Current employee (pre-resignation) | Email/Password or OTP | `/home`, `/resignation`, `/profile` only |
+| Role | Description | How they log in |
+|------|-------------|-----------------|
+| **Trainer** | Retired Dr.stretch trainer | Email/Password or OTP |
+| **Store Manager** | Dr.stretch store staff | Email/Password or OTP |
+| **HR** | Headquarters HR staff | Email/Password or OTP |
+| **Area Manager** | Regional manager | Email/Password or OTP |
+| **Admin** | System administrator | Email/Password or OTP |
+| **Employee** | Current employee (pre-resignation) | Email/Password or OTP |
 
 ---
 
@@ -41,60 +40,113 @@ Alumni trainer registers on SPOT
 
 ### Trainer Pages
 
-| Page | URL | Purpose |
-|------|-----|---------|
-| Home | `/home` | Dashboard: upcoming shifts, new postings, blank alerts, rank |
-| Browse Shifts | `/shifts` | Search and apply for available shifts |
-| My Shifts | `/my-shifts` | View applied/confirmed/past shifts |
-| Clock In/Out | `/clock` | Show QR code for store to scan |
-| Availability | `/availability` | Declare when/where you can work |
-| Earnings | `/earnings` | View pay history with rate breakdowns |
-| Rank | `/rank` | View current rank and progression |
-| Evaluation History | `/evaluation-history` | See store evaluations received |
-| Alerts | `/alerts` | Blank period warnings |
-| Notifications | `/notifications` | All notifications |
-| Profile | `/profile` | Edit personal info, bank details |
-| Resignation | `/resignation` | Submit resignation request |
-| SPOT Setup | `/spot-setup` | Initial SPOT registration for new alumni |
+- **Home** - Dashboard: upcoming shifts, new postings, blank alerts, rank
+  https://dr-stretch-spot.vercel.app/home
+
+- **Browse Shifts** - Search and apply for available shifts
+  https://dr-stretch-spot.vercel.app/shifts
+
+- **My Shifts** - View applied/confirmed/past shifts
+  https://dr-stretch-spot.vercel.app/my-shifts
+
+- **Clock In/Out** - Show QR code for store to scan
+  https://dr-stretch-spot.vercel.app/clock
+
+- **Availability** - Declare when/where you can work
+  https://dr-stretch-spot.vercel.app/availability
+
+- **Earnings** - View pay history with rate breakdowns
+  https://dr-stretch-spot.vercel.app/earnings
+
+- **Rank** - View current rank and progression
+  https://dr-stretch-spot.vercel.app/rank
+
+- **Alerts** - Blank period warnings
+  https://dr-stretch-spot.vercel.app/alerts
+
+- **Notifications** - All notifications
+  https://dr-stretch-spot.vercel.app/notifications
+
+- **Profile** - Edit personal info, bank details
+  https://dr-stretch-spot.vercel.app/profile
+
+- **Resignation** - Submit resignation request
+  https://dr-stretch-spot.vercel.app/resignation
 
 ### Store Manager Pages
 
-| Page | URL | Purpose |
-|------|-----|---------|
-| Dashboard | `/store` | Today's shifts, applications, attendance summary |
-| Shift Management | `/store/shifts` | Create/edit shifts, use templates |
-| Applications | `/store/applications` | Review trainer applications |
-| Attendance | `/store/attendance` | QR scan for clock-in/out |
-| Evaluations | `/store/evaluations` | Rate trainers after shifts |
-| Templates | `/store/templates` | Manage recurring shift templates |
-| Usage Stats | `/store/usage` | Monthly shift/cost/fill-rate statistics |
-| Availability | `/store/availability` | View trainer availability declarations |
-| Notifications | `/store/notifications` | Store notifications |
+- **Dashboard** - Today's shifts, applications, attendance summary
+  https://dr-stretch-spot.vercel.app/store
+
+- **Shift Management** - Create/edit shifts, use templates
+  https://dr-stretch-spot.vercel.app/store/shifts
+
+- **Applications** - Review trainer applications
+  https://dr-stretch-spot.vercel.app/store/applications
+
+- **Attendance** - QR scan for clock-in/out
+  https://dr-stretch-spot.vercel.app/store/attendance
+
+- **Evaluations** - Rate trainers after shifts
+  https://dr-stretch-spot.vercel.app/store/evaluations
+
+- **Templates** - Manage recurring shift templates
+  https://dr-stretch-spot.vercel.app/store/templates
+
+- **Usage Stats** - Monthly shift/cost/fill-rate statistics
+  https://dr-stretch-spot.vercel.app/store/usage
+
+- **Availability** - View trainer availability declarations
+  https://dr-stretch-spot.vercel.app/store/availability
 
 ### HR Pages
 
-| Page | URL | Purpose |
-|------|-----|---------|
-| Dashboard | `/hr` | Pending approvals, today's attendance, tomorrow's prep |
-| Matchings | `/hr/matchings` | All applications across all stores |
-| Attendance | `/hr/attendance` | Company-wide attendance board |
-| Hourly Rates | `/hr/rates` | Configure pay rate tables |
-| Rate Simulation | `/hr/simulation` | Simulate cost impact of rate changes |
-| Blank Rules | `/hr/blank-rules` | Configure blank period rules (60/90/120 days) |
-| Cost Ceiling | `/hr/cost-ceiling` | Set maximum hourly rates and budgets |
-| Resignations | `/hr/resignations` | Process resignation requests |
-| Audit Log | `/hr/audit-log` | All configuration change history |
-| Rollback | `/hr/rollback` | Restore previous configurations |
+- **Dashboard** - Pending approvals, today's attendance, tomorrow's prep
+  https://dr-stretch-spot.vercel.app/hr
+
+- **Matchings** - All applications across all stores
+  https://dr-stretch-spot.vercel.app/hr/matchings
+
+- **Attendance** - Company-wide attendance board
+  https://dr-stretch-spot.vercel.app/hr/attendance
+
+- **Hourly Rates** - Configure pay rate tables
+  https://dr-stretch-spot.vercel.app/hr/rates
+
+- **Rate Simulation** - Simulate cost impact of rate changes
+  https://dr-stretch-spot.vercel.app/hr/simulation
+
+- **Blank Rules** - Configure blank period rules (60/90/120 days)
+  https://dr-stretch-spot.vercel.app/hr/blank-rules
+
+- **Cost Ceiling** - Set maximum hourly rates and budgets
+  https://dr-stretch-spot.vercel.app/hr/cost-ceiling
+
+- **Resignations** - Process resignation requests
+  https://dr-stretch-spot.vercel.app/hr/resignations
+
+- **Audit Log** - All configuration change history
+  https://dr-stretch-spot.vercel.app/hr/audit-log
+
+- **Rollback** - Restore previous configurations
+  https://dr-stretch-spot.vercel.app/hr/rollback
 
 ### Admin Pages
 
-| Page | URL | Purpose |
-|------|-----|---------|
-| Dashboard | `/admin` | HQ overview with key metrics |
-| Trainers | `/admin/trainers` | Manage all trainers |
-| Stores | `/admin/stores` | Manage all stores |
-| Costs | `/admin/costs` | Company-wide cost analysis |
-| Skill Checks | `/admin/skill-checks` | Manage skill check schedules |
+- **Dashboard** - HQ overview with key metrics
+  https://dr-stretch-spot.vercel.app/admin
+
+- **Trainers** - Manage all trainers
+  https://dr-stretch-spot.vercel.app/admin/trainers
+
+- **Stores** - Manage all stores
+  https://dr-stretch-spot.vercel.app/admin/stores
+
+- **Costs** - Company-wide cost analysis
+  https://dr-stretch-spot.vercel.app/admin/costs
+
+- **Skill Checks** - Manage skill check schedules
+  https://dr-stretch-spot.vercel.app/admin/skill-checks
 
 ---
 
@@ -291,22 +343,7 @@ Platform charges are managed through the rate system:
 
 ---
 
-## 8. Test Accounts
-
-Access via demo login buttons at the login page:
-
-| Role | How to login |
-|------|-------------|
-| Trainer | Click "Trainer Demo Login" button |
-| Store Manager | Click "Store Demo Login" button |
-| HR | Click "HR Demo Login" button |
-| Admin | Click "Admin Demo Login" button |
-
-All demo accounts use the `/api/auth/demo-login?role=[role]` endpoint.
-
----
-
-## 9. Cross-System Integration
+## 8. Cross-System Integration
 
 ```
 Dr.stretch Meister (Career Credentials)
@@ -321,3 +358,34 @@ Dr.stretch SELECT (Member EC)
   -> Independent system (no direct integration)
   -> Same brand, different user base (customers vs trainers)
 ```
+
+---
+
+## 9. Test It Yourself
+
+### Site URL
+
+https://dr-stretch-spot.vercel.app
+
+### Login Page
+
+https://dr-stretch-spot.vercel.app/login
+
+Login page has demo buttons for each role. Click the button for the role you want to test:
+
+- **Trainer** - Click "Trainer Demo Login" button
+- **Store Manager** - Click "Store Demo Login" button
+- **HR** - Click "HR Demo Login" button
+- **Admin** - Click "Admin Demo Login" button
+
+### Recommended Test Flow
+
+1. Open the login page: https://dr-stretch-spot.vercel.app/login
+2. Click "Trainer Demo Login" to see the trainer experience
+3. Log out, then click "Store Demo Login" to see the store manager view
+4. Log out, then click "HR Demo Login" to see the HR dashboard
+5. Log out, then click "Admin Demo Login" to see the admin overview
+
+### Source Code
+
+https://github.com/kurokawama/dr-stretch-spot
