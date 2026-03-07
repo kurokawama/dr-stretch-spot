@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 const DEMO_ACCOUNTS: Record<string, { email: string; password: string }> = {
-  trainer: { email: "m-kurokawa@fubic.com", password: "" }, // OTP only
+  trainer: { email: "trainer@test.com", password: "test1234" },
   store: { email: "store@test.com", password: "test1234" },
   hr: { email: "hr@test.com", password: "test1234" },
   admin: { email: "admin@test.com", password: "test1234" },

@@ -219,7 +219,14 @@ export default function LoginPage() {
         <p className="text-center text-xs text-muted-foreground">
           Demo Quick Login
         </p>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-2">
+          <a
+            href="/api/auth/demo-login?role=trainer"
+            className="flex flex-col items-center gap-1 rounded-lg border bg-white/80 p-3 text-center transition-colors hover:bg-primary/5"
+          >
+            <span className="text-lg">💪</span>
+            <span className="text-xs font-medium">Trainer</span>
+          </a>
           <a
             href="/api/auth/demo-login?role=store"
             className="flex flex-col items-center gap-1 rounded-lg border bg-white/80 p-3 text-center transition-colors hover:bg-primary/5"
