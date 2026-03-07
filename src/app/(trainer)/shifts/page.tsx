@@ -20,17 +20,24 @@ const AREAS = [
   "すべて", "北海道", "東北", "関東", "中部", "関西", "中国", "四国", "九州・沖縄",
 ];
 
+const statusBadgeStyles: Record<string, string> = {
+  open: "bg-primary/10 text-primary border-primary/30",
+  closed: "bg-muted text-muted-foreground border-border",
+  cancelled: "bg-destructive/10 text-destructive border-destructive/30",
+  pending_approval: "bg-accent/30 text-accent-foreground border-accent/60",
+};
+
 function ShiftCardSkeleton() {
   return (
-    <Card className="border-0 shadow-sm">
+    <Card className="rounded-xl border bg-card shadow-sm">
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div className="space-y-2 flex-1">
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-44" />
+            <Skeleton className="h-5 w-40 shimmer" />
+            <Skeleton className="h-4 w-32 shimmer" />
+            <Skeleton className="h-4 w-44 shimmer" />
           </div>
-          <Skeleton className="h-5 w-12" />
+          <Skeleton className="h-5 w-12 shimmer" />
         </div>
       </CardContent>
     </Card>
@@ -72,10 +79,10 @@ export default function ShiftSearchPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-4 max-w-lg mx-auto">
+    <div className="animate-fade-in-up p-4 md:p-6 space-y-4 max-w-lg mx-auto">
       <h1 className="font-heading text-2xl font-bold">シフト検索</h1>
 
-      <Card className="border-0 shadow-sm">
+      <Card className="rounded-xl border bg-card shadow-sm animate-fade-in">
         <CardContent className="p-4">
           <form onSubmit={handleSearch} className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-3">
@@ -85,7 +92,7 @@ export default function ShiftSearchPage() {
                   value={filters.area}
                   onValueChange={(v) => setFilters({ ...filters, area: v })}
                 >
-                  <SelectTrigger><SelectValue placeholder="エリア" /></SelectTrigger>
+                  <SelectTrigger className="rounded-xl"><SelectValue placeholder="エリア" /></SelectTrigger>
                   <SelectContent>
                     {AREAS.map((a) => (
                       <SelectItem key={a} value={a}>{a}</SelectItem>
@@ -99,6 +106,7 @@ export default function ShiftSearchPage() {
                   type="date"
                   value={filters.date_from}
                   onChange={(e) => setFilters({ ...filters, date_from: e.target.value })}
+                  className="rounded-xl"
                 />
               </div>
               <div className="space-y-1">
@@ -107,6 +115,7 @@ export default function ShiftSearchPage() {
                   type="date"
                   value={filters.date_to}
                   onChange={(e) => setFilters({ ...filters, date_to: e.target.value })}
+                  className="rounded-xl"
                 />
               </div>
             </div>
@@ -117,11 +126,11 @@ export default function ShiftSearchPage() {
                   onCheckedChange={(v) => setFilters({ ...filters, is_emergency: v })}
                 />
                 <Label className="text-sm flex items-center gap-1">
-                  <Zap className="h-3 w-3 text-amber-500" />
+                  <Zap className="h-3 w-3 text-accent-foreground" />
                   緊急シフトのみ
                 </Label>
               </div>
-              <Button type="submit" size="sm" className="px-4">
+              <Button type="submit" size="sm" className="px-4 rounded-xl">
                 <Search className="mr-1.5 h-4 w-4" />
                 検索
               </Button>
@@ -137,7 +146,7 @@ export default function ShiftSearchPage() {
           <ShiftCardSkeleton />
         </div>
       ) : shifts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 space-y-4">
+        <div className="flex flex-col items-center justify-center py-16 space-y-4 rounded-xl border border-dashed bg-muted/30">
           <div className="rounded-full bg-muted p-4">
             <CalendarSearch className="h-8 w-8 text-muted-foreground" />
           </div>
@@ -147,19 +156,29 @@ export default function ShiftSearchPage() {
               フィルター条件を変えて検索してみましょう
             </p>
           </div>
+          <Button type="button" size="sm" className="rounded-xl" onClick={fetchShifts}>
+            <Search className="mr-1.5 h-4 w-4" />
+            検索
+          </Button>
         </div>
       ) : (
         <div className="space-y-3 stagger-children">
           {shifts.map((shift) => (
             <Link key={shift.id} href={`/shifts/${shift.id}`} className="block card-interactive">
-              <Card className="border-0 shadow-sm">
+              <Card className="rounded-xl border bg-card shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium">{shift.title}</h3>
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${statusBadgeStyles[shift.status] ?? "bg-muted text-muted-foreground border-border"}`}
+                        >
+                          {shift.status}
+                        </Badge>
                         {shift.is_emergency && (
-                          <Badge className="bg-amber-100 text-amber-800 border-amber-200 text-xs">
+                          <Badge className="bg-accent/30 text-accent-foreground border-accent/60 text-xs">
                             <Zap className="mr-0.5 h-3 w-3" />
                             緊急
                           </Badge>
@@ -179,7 +198,7 @@ export default function ShiftSearchPage() {
                         {shift.filled_count}/{shift.required_count}名
                       </Badge>
                       {shift.is_emergency && shift.emergency_bonus_amount > 0 && (
-                        <p className="text-xs font-semibold text-amber-600">
+                        <p className="text-xs font-semibold text-accent-foreground">
                           +¥{shift.emergency_bonus_amount}
                         </p>
                       )}

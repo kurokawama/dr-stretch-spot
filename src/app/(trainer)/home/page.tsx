@@ -16,7 +16,6 @@ import {
   ArrowRight,
   TrendingUp,
   Trophy,
-  Star as StarIcon,
   Bell,
   CalendarPlus,
 } from "lucide-react";
@@ -61,7 +60,7 @@ export default async function TrainerHomePage() {
   // =============================================
   if (isEmployee) {
     return (
-      <div className="p-4 md:p-6 space-y-6 max-w-lg mx-auto">
+      <div className="animate-fade-in-up p-4 md:p-6 space-y-6 max-w-lg mx-auto">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">ようこそ</p>
           <h1 className="font-heading text-2xl font-bold">
@@ -177,7 +176,7 @@ export default async function TrainerHomePage() {
   // =============================================
   if (spotStatus && spotStatus !== "active") {
     return (
-      <div className="p-4 md:p-6 space-y-6 max-w-lg mx-auto">
+      <div className="animate-fade-in-up p-4 md:p-6 space-y-6 max-w-lg mx-auto">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">お疲れ様でした</p>
           <h1 className="font-heading text-2xl font-bold">
@@ -285,7 +284,7 @@ export default async function TrainerHomePage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-5 max-w-lg mx-auto">
+    <div className="animate-fade-in-up p-4 md:p-6 space-y-5 max-w-lg mx-auto">
       {/* Greeting section */}
       <div className="flex items-center justify-between">
         <div className="space-y-0.5">
@@ -324,9 +323,9 @@ export default async function TrainerHomePage() {
       )}
 
       {/* Quick actions */}
-      <div className="grid gap-3 grid-cols-3">
+      <div className="grid gap-3 grid-cols-3 stagger-children">
         <Link href="/shifts" className="card-interactive">
-          <Card className="border-0 shadow-sm h-full">
+          <Card className="h-full rounded-xl border bg-card shadow-sm">
             <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
               <div className="rounded-lg bg-primary/10 p-2">
                 <Search className="h-4 w-4 text-primary" />
@@ -336,50 +335,50 @@ export default async function TrainerHomePage() {
           </Card>
         </Link>
         <Link href="/my-shifts" className="card-interactive">
-          <Card className="border-0 shadow-sm h-full">
+          <Card className="h-full rounded-xl border bg-card shadow-sm">
             <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-blue-50 p-2">
-                <CalendarDays className="h-4 w-4 text-blue-600" />
+              <div className="rounded-lg bg-muted p-2">
+                <CalendarDays className="h-4 w-4 text-primary" />
               </div>
               <span className="text-xs font-medium">マイシフト</span>
             </CardContent>
           </Card>
         </Link>
         <Link href="/clock" className="card-interactive">
-          <Card className="border-0 shadow-sm h-full">
+          <Card className="h-full rounded-xl border bg-card shadow-sm">
             <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-green-50 p-2">
-                <Clock className="h-4 w-4 text-green-600" />
+              <div className="rounded-lg bg-muted p-2">
+                <Clock className="h-4 w-4 text-primary" />
               </div>
               <span className="text-xs font-medium">打刻</span>
             </CardContent>
           </Card>
         </Link>
         <Link href="/availability" className="card-interactive">
-          <Card className="border-0 shadow-sm h-full">
+          <Card className="h-full rounded-xl border bg-card shadow-sm">
             <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-purple-50 p-2">
-                <CalendarPlus className="h-4 w-4 text-purple-600" />
+              <div className="rounded-lg bg-muted p-2">
+                <CalendarPlus className="h-4 w-4 text-primary" />
               </div>
               <span className="text-xs font-medium">シフト希望</span>
             </CardContent>
           </Card>
         </Link>
         <Link href="/rank" className="card-interactive">
-          <Card className="border-0 shadow-sm h-full">
+          <Card className="h-full rounded-xl border bg-card shadow-sm">
             <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-yellow-50 p-2">
-                <Trophy className="h-4 w-4 text-yellow-600" />
+              <div className="rounded-lg bg-muted p-2">
+                <Trophy className="h-4 w-4 text-primary" />
               </div>
               <span className="text-xs font-medium">ランク</span>
             </CardContent>
           </Card>
         </Link>
         <Link href="/notifications" className="card-interactive">
-          <Card className="border-0 shadow-sm h-full">
+          <Card className="h-full rounded-xl border bg-card shadow-sm">
             <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-red-50 p-2">
-                <Bell className="h-4 w-4 text-red-600" />
+              <div className="rounded-lg bg-muted p-2">
+                <Bell className="h-4 w-4 text-primary" />
               </div>
               <span className="text-xs font-medium">通知</span>
             </CardContent>
@@ -388,66 +387,80 @@ export default async function TrainerHomePage() {
       </div>
 
       {/* Today's shifts */}
-      {todayShifts && todayShifts.length > 0 && (
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary" />
-              本日のシフト
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 stagger-children">
-            {todayShifts.map((shift) => (
-              <div key={shift.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
-                <div>
-                  <p className="font-medium text-sm">{(shift.store as unknown as { name: string })?.name}</p>
-                  <p className="text-xs text-muted-foreground">{shift.scheduled_start} - {shift.scheduled_end}</p>
+      <Card className="rounded-xl border bg-card shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-heading text-base font-semibold flex items-center gap-2">
+            <Clock className="h-4 w-4 text-primary" />
+            本日のシフト
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {todayShifts && todayShifts.length > 0 ? (
+            <div className="space-y-2 stagger-children">
+              {todayShifts.map((shift) => (
+                <div key={shift.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
+                  <div>
+                    <p className="font-medium text-sm">{(shift.store as unknown as { name: string })?.name}</p>
+                    <p className="text-xs text-muted-foreground">{shift.scheduled_start} - {shift.scheduled_end}</p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      shift.status === "clocked_in"
+                        ? "bg-green-100 text-green-800 border-green-200"
+                        : shift.status === "clocked_out"
+                          ? "bg-primary/10 text-primary border-primary/30"
+                          : "bg-accent/30 text-accent-foreground border-accent/60"
+                    }
+                  >
+                    {shift.status === "scheduled" ? "予定" : shift.status === "clocked_in" ? "出勤中" : "退勤済"}
+                  </Badge>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={
-                    shift.status === "clocked_in"
-                      ? "bg-green-100 text-green-800 border-green-200"
-                      : shift.status === "clocked_out"
-                        ? "bg-blue-100 text-blue-800 border-blue-200"
-                        : "bg-amber-100 text-amber-800 border-amber-200"
-                  }
-                >
-                  {shift.status === "scheduled" ? "予定" : shift.status === "clocked_in" ? "出勤中" : "退勤済"}
-                </Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed bg-muted/40 p-5 text-center space-y-2">
+              <CalendarDays className="mx-auto h-6 w-6 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">本日のシフト</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Recent applications */}
-      {recentApps && recentApps.length > 0 && (
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">最近の応募</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 stagger-children">
-            {recentApps.map((app) => {
-              const sr = app.shift_request as unknown as { title: string; shift_date: string; store: { name: string } } | null;
-              return (
-                <div key={app.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
-                  <div>
-                    <p className="font-medium text-sm">{sr?.title ?? "シフト"}</p>
-                    <p className="text-xs text-muted-foreground">{sr?.store?.name} / {sr?.shift_date}</p>
+      <Card className="rounded-xl border bg-card shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-heading text-base font-semibold">最近の応募</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recentApps && recentApps.length > 0 ? (
+            <div className="space-y-2 stagger-children">
+              {recentApps.map((app) => {
+                const sr = app.shift_request as unknown as { title: string; shift_date: string; store: { name: string } } | null;
+                return (
+                  <div key={app.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
+                    <div>
+                      <p className="font-medium text-sm">{sr?.title ?? "シフト"}</p>
+                      <p className="text-xs text-muted-foreground">{sr?.store?.name} / {sr?.shift_date}</p>
+                    </div>
+                    <div className="text-right space-y-1">
+                      <Badge variant="outline" className={statusColors[app.status] ?? ""}>
+                        {statusLabels[app.status] ?? app.status}
+                      </Badge>
+                      <p className="text-xs font-mono text-muted-foreground">¥{app.confirmed_rate}/h</p>
+                    </div>
                   </div>
-                  <div className="text-right space-y-1">
-                    <Badge variant="outline" className={statusColors[app.status] ?? ""}>
-                      {statusLabels[app.status] ?? app.status}
-                    </Badge>
-                    <p className="text-xs font-mono text-muted-foreground">¥{app.confirmed_rate}/h</p>
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-      )}
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed bg-muted/40 p-5 text-center space-y-2">
+              <FileText className="mx-auto h-6 w-6 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">最近の応募</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

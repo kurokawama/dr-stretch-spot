@@ -8,7 +8,6 @@ import {
   CalendarPlus,
   Users,
   ClipboardCheck,
-  Star,
   MapPin,
   Calendar,
   TrendingUp,
@@ -103,7 +102,7 @@ export default async function StoreDashboardPage() {
     .limit(10);
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="animate-fade-in-up p-4 md:p-6 space-y-6">
       {/* Store Info Header */}
       <div>
         <h1 className="font-heading text-2xl font-bold">ダッシュボード</h1>
@@ -126,40 +125,40 @@ export default async function StoreDashboardPage() {
       </div>
 
       {/* Today's KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
+        <Card className="card-interactive rounded-xl border bg-card shadow-sm">
           <CardContent className="flex items-center gap-3 p-4">
             <CalendarPlus className="h-8 w-8 text-primary shrink-0" />
             <div>
-              <p className="text-2xl font-bold">{todayCount ?? 0}</p>
+              <p className="font-heading text-2xl font-bold tabular-nums">{todayCount ?? 0}</p>
               <p className="text-xs text-muted-foreground">本日のシフト</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="card-interactive rounded-xl border bg-card shadow-sm">
           <CardContent className="flex items-center gap-3 p-4">
-            <Users className="h-8 w-8 text-amber-500 shrink-0" />
+            <Users className="h-8 w-8 text-accent-foreground shrink-0" />
             <div>
-              <p className="text-2xl font-bold">{pendingCount ?? 0}</p>
+              <p className="font-heading text-2xl font-bold tabular-nums">{pendingCount ?? 0}</p>
               <p className="text-xs text-muted-foreground">未審査の応募</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="card-interactive rounded-xl border bg-card shadow-sm">
           <CardContent className="flex items-center gap-3 p-4">
             <ClipboardCheck className="h-8 w-8 text-green-600 shrink-0" />
             <div>
-              <p className="text-2xl font-bold">{attendanceCount ?? 0}</p>
+              <p className="font-heading text-2xl font-bold tabular-nums">{attendanceCount ?? 0}</p>
               <p className="text-xs text-muted-foreground">本日の出勤者</p>
             </div>
           </CardContent>
         </Card>
         <Link href="/store/availability">
-          <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+          <Card className="card-interactive rounded-xl border bg-card shadow-sm h-full">
             <CardContent className="flex items-center gap-3 p-4">
-              <HandHeart className="h-8 w-8 text-purple-500 shrink-0" />
+              <HandHeart className="h-8 w-8 text-primary shrink-0" />
               <div>
-                <p className="text-2xl font-bold">{availabilityCount ?? 0}</p>
+                <p className="font-heading text-2xl font-bold tabular-nums">{availabilityCount ?? 0}</p>
                 <p className="text-xs text-muted-foreground">シフト希望</p>
               </div>
             </CardContent>
@@ -182,32 +181,32 @@ export default async function StoreDashboardPage() {
       ) : null}
 
       {/* Monthly Stats */}
-      <Card>
+      <Card className="rounded-xl border bg-card shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
+          <CardTitle className="font-heading text-base font-semibold flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
             今月のサマリー
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg bg-muted/50 p-3 text-center">
+            <div className="rounded-xl border bg-muted/40 p-4 text-center shadow-sm">
               <p className="text-xs text-muted-foreground">シフト数</p>
-              <p className="text-xl font-bold">{monthlyShiftCount ?? 0}</p>
+              <p className="font-heading text-xl font-bold tabular-nums">{monthlyShiftCount ?? 0}</p>
             </div>
-            <div className="rounded-lg bg-muted/50 p-3 text-center">
+            <div className="rounded-xl border bg-muted/40 p-4 text-center shadow-sm">
               <p className="text-xs text-muted-foreground">出勤回数</p>
-              <p className="text-xl font-bold">{monthlyAttendance ?? 0}</p>
+              <p className="font-heading text-xl font-bold tabular-nums">{monthlyAttendance ?? 0}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Upcoming Shifts (Next 7 days) */}
-      <Card>
+      <Card className="rounded-xl border bg-card shadow-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2">
+            <CardTitle className="font-heading text-base font-semibold flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               今週のシフト予定
             </CardTitle>
@@ -216,51 +215,51 @@ export default async function StoreDashboardPage() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent>
           {!upcomingShifts || upcomingShifts.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
               今後7日間の予定はありません
             </p>
           ) : (
-            upcomingShifts.map((shift) => (
-              <div
-                key={shift.id}
-                className="flex items-center justify-between rounded-md border p-3"
-              >
-                <div>
-                  <p className="text-sm font-medium">{shift.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {shift.shift_date} {shift.start_time}〜{shift.end_time}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <Badge
-                    variant={
-                      shift.filled_count >= shift.required_count
-                        ? "default"
-                        : "secondary"
-                    }
-                  >
-                    {shift.filled_count}/{shift.required_count}名
-                  </Badge>
-                </div>
-              </div>
-            ))
+            <div className="overflow-x-auto rounded-xl border">
+              <table className="w-full text-sm">
+                <tbody>
+                  {upcomingShifts.map((shift) => (
+                    <tr key={shift.id} className="border-b last:border-b-0 hover:bg-muted/40">
+                      <td className="px-3 py-3 align-middle">
+                        <p className="font-medium">{shift.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {shift.shift_date} {shift.start_time}〜{shift.end_time}
+                        </p>
+                      </td>
+                      <td className="px-3 py-3 text-right align-middle">
+                        <Badge
+                          variant={shift.filled_count >= shift.required_count ? "default" : "secondary"}
+                          className="tabular-nums"
+                        >
+                          {shift.filled_count}/{shift.required_count}名
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardContent>
       </Card>
 
       {/* Today's Shifts Detail */}
       {todayShifts && todayShifts.length > 0 && (
-        <Card>
+        <Card className="rounded-xl border bg-card shadow-sm">
           <CardHeader>
-            <CardTitle className="text-base">本日のシフト</CardTitle>
+            <CardTitle className="font-heading text-base font-semibold">本日のシフト</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             {todayShifts.map((shift) => (
               <div
                 key={shift.id}
-                className="flex items-center justify-between rounded-md border p-3"
+                className="flex items-center justify-between rounded-xl border p-3 hover:bg-muted/40"
               >
                 <div>
                   <p className="text-sm font-medium">{shift.title}</p>
