@@ -361,7 +361,24 @@ Dr.stretch SELECT (Member EC)
 
 ---
 
-## 9. Test It Yourself
+## 9. Currently NOT Connected (Important for Testing)
+
+Below is a list of features that exist in the UI but are NOT yet fully working. When testing, these areas will not function as expected.
+
+| Feature | Current Status | What You'll See | What's Needed to Connect |
+|---------|---------------|-----------------|--------------------------|
+| **Email Notifications** | NOT CONNECTED | Shift reminders, application confirmations, and blank alerts are NOT sent by email. Notification logs appear in the system but emails don't actually deliver. | Resend API key needs to be configured |
+| **Push Notifications** | NOT IMPLEMENTED | The "Notifications" page shows notification records, but no push notifications are sent to phones. | Firebase Cloud Messaging or LINE Messaging API integration needed |
+| **LINE Notifications** | NOT IMPLEMENTED | No LINE messages are sent to trainers. | LINE Messaging API channel access token needed |
+| **Payment / Payout** | NOT IMPLEMENTED (Phase 2) | The "Earnings" page shows calculated pay amounts, but there is NO withdrawal or bank transfer function. Trainers can see how much they earned but cannot request payment through the system. | Stripe Connect or bank transfer integration (Phase 2) |
+| **Cron Reminders** | PARTIALLY WORKING | The cron job runs on schedule, but because email is not connected, reminder emails are silently skipped. | Resend API key needed |
+| **Meister Integration** | NOT IMPLEMENTED (Phase 2) | SPOT and Meister are completely separate systems. Career data from Meister does not flow to SPOT. | Phase 2 development |
+
+**Everything else works:** Shift creation, shift approval, trainer applications, QR clock-in/out, attendance tracking, evaluations, pay rate calculation, blank management rules, cost ceiling, audit log, rollback, resignation flow - all fully functional within the system.
+
+---
+
+## 10. Test It Yourself
 
 ### Site URL
 
