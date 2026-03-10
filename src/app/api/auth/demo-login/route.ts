@@ -9,8 +9,11 @@ const DEMO_ACCOUNTS: Record<string, { email: string; password: string }> = {
 };
 
 export async function GET(request: Request) {
-  // SECURITY: Block demo login in production
-  if (process.env.NODE_ENV === "production") {
+  // SECURITY: Block demo login in production unless explicitly enabled
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ENABLE_DEMO_LOGIN !== "true"
+  ) {
     return NextResponse.json(
       { error: "Demo login is not available in production" },
       { status: 403 }
