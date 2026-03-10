@@ -85,22 +85,30 @@ export async function sendOffer(
     .update({ status: "offered" })
     .eq("id", input.availability_id);
 
-  // Notify trainer
-  const admin = createAdminClient();
-  const { data: trainerRecord } = await admin
-    .from("alumni_trainers")
-    .select("auth_user_id")
-    .eq("id", availability.trainer_id)
-    .single();
+  // Notify trainer (fail-safe: notification failure should not block offer creation)
+  try {
+    const admin = createAdminClient();
+    const { data: trainerRecord } = await admin
+      .from("alumni_trainers")
+      .select("auth_user_id")
+      .eq("id", availability.trainer_id)
+      .single();
 
-  if (trainerRecord) {
-    await createNotification({
-      userId: trainerRecord.auth_user_id,
-      type: "push",
-      category: "application_confirmed",
-      title: "店舗からオファーが届きました",
-      body: `${input.title}（¥${rateBreakdown.total}/h）`,
-    });
+    if (trainerRecord) {
+      await createNotification({
+        userId: trainerRecord.auth_user_id,
+        type: "push",
+        category: "application_confirmed",
+        title: "店舗からオファーが届きました",
+        body: `${input.title}（¥${rateBreakdown.total}/h）`,
+      });
+    }
+
+    // B2: Send LINE notification if trainer has linked account
+    const { sendLineOfferNotification } = await import("@/actions/line");
+    await sendLineOfferNotification(offer.id);
+  } catch (err) {
+    console.error("[sendOffer] Notification failed (non-blocking):", err);
   }
 
   return { success: true, data: offer };
@@ -274,31 +282,46 @@ export async function respondToOffer(
     status: "scheduled",
   });
 
-  // 6. Notify the creator
-  if (offer.created_by) {
-    const { data: mgr } = await admin
-      .from("store_managers")
-      .select("auth_user_id")
-      .eq("id", offer.created_by)
-      .single();
+  // 6. Notify the creator (fail-safe)
+  try {
+    if (offer.created_by) {
+      const { data: mgr } = await admin
+        .from("store_managers")
+        .select("auth_user_id")
+        .eq("id", offer.created_by)
+        .single();
 
-    if (mgr) {
+      if (mgr) {
+        await createNotification({
+          userId: mgr.auth_user_id,
+          type: "push",
+          category: "application_confirmed",
+          title: "オファーが承諾されました",
+          body: `${offer.title} — シフトが確定しました`,
+        });
+      }
+    } else if (offer.created_by_hr_id) {
       await createNotification({
-        userId: mgr.auth_user_id,
+        userId: offer.created_by_hr_id,
         type: "push",
         category: "application_confirmed",
         title: "オファーが承諾されました",
         body: `${offer.title} — シフトが確定しました`,
       });
     }
-  } else if (offer.created_by_hr_id) {
-    await createNotification({
-      userId: offer.created_by_hr_id,
-      type: "push",
-      category: "application_confirmed",
-      title: "オファーが承諾されました",
-      body: `${offer.title} — シフトが確定しました`,
+
+    // B3: Send shift confirmation LINE notification to trainer
+    const { sendLineShiftConfirmation } = await import("@/actions/line");
+    await sendLineShiftConfirmation({
+      trainerId: trainer.id,
+      storeName: "", // Will be fetched inside the function
+      storeId: offer.store_id,
+      shiftDate: offer.shift_date,
+      startTime: offer.start_time,
+      endTime: offer.end_time,
     });
+  } catch (err) {
+    console.error("[respondToOffer] Notification failed (non-blocking):", err);
   }
 
   return { success: true };

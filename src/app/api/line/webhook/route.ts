@@ -489,7 +489,7 @@ async function processOfferFromLine(
 
   if (appError) return { success: false, error: appError.message };
 
-  await admin.from("attendance_records").insert({
+  const { error: attendanceError } = await admin.from("attendance_records").insert({
     application_id: application.id,
     trainer_id: trainerId,
     store_id: offer.store_id,
@@ -499,6 +499,11 @@ async function processOfferFromLine(
     break_minutes: offer.break_minutes,
     status: "scheduled",
   });
+
+  if (attendanceError) {
+    console.error("[LINE Webhook] attendance_records.insert failed:", attendanceError);
+    // Don't fail the whole flow — the offer acceptance and application are already saved
+  }
 
   return { success: true };
 }

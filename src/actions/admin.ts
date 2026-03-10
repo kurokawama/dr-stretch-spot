@@ -53,8 +53,10 @@ export async function getAdminKPIs(): Promise<ActionResult<AdminKPIs>> {
       blank_distribution[status]++;
     });
 
-  // Monthly shift stats (current month)
-  const startOfMonth = new Date();
+  // Monthly shift stats (current month in JST)
+  const now = new Date();
+  const jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const startOfMonth = new Date(jstNow);
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
   const monthStart = startOfMonth.toISOString().split("T")[0];
@@ -82,7 +84,7 @@ export async function getAdminKPIs(): Promise<ActionResult<AdminKPIs>> {
     const appIds = attendance.map((a) => a.application_id);
     const { data: apps } = await admin
       .from("shift_applications")
-      .select("confirmed_rate, shift_request_id")
+      .select("id, confirmed_rate")
       .in("id", appIds);
 
     if (apps) {
@@ -94,7 +96,7 @@ export async function getAdminKPIs(): Promise<ActionResult<AdminKPIs>> {
         .in("status", ["clocked_out", "verified"]);
 
       records?.forEach((rec) => {
-        const app = apps.find((a) => a.shift_request_id === rec.application_id);
+        const app = apps.find((a) => a.id === rec.application_id);
         if (app && rec.actual_work_minutes) {
           monthly_cost += (app.confirmed_rate / 60) * rec.actual_work_minutes;
         }
@@ -175,9 +177,13 @@ export async function getAllTrainers(filters?: {
     query = query.contains("preferred_areas", [filters.area]);
   }
   if (filters?.search) {
-    query = query.or(
-      `full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`
-    );
+    // Sanitize search input to prevent PostgREST filter injection
+    const sanitized = filters.search.replace(/[%_\\'"(),]/g, "");
+    if (sanitized.length > 0) {
+      query = query.or(
+        `full_name.ilike.%${sanitized}%,email.ilike.%${sanitized}%`
+      );
+    }
   }
 
   const { data, error } = await query;
@@ -280,52 +286,68 @@ export async function getMonthlyBudgetReport(): Promise<
 
   if (!stores) return { success: true, data: [] };
 
-  const startOfMonth = new Date();
+  // Use JST for month start
+  const now = new Date();
+  const jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const startOfMonth = new Date(jstNow);
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
   const monthStart = startOfMonth.toISOString().split("T")[0];
 
-  const reports: BudgetReport[] = [];
+  // Batch query: get all attendance records for all stores at once (fixes N+1)
+  const storeIds = stores.map((s) => s.id);
+  const { data: allRecords } = await admin
+    .from("attendance_records")
+    .select("id, trainer_id, actual_work_minutes, application_id, store_id")
+    .in("store_id", storeIds)
+    .gte("shift_date", monthStart)
+    .in("status", ["clocked_out", "verified"]);
 
-  for (const store of stores) {
-    const { data: records } = await admin
-      .from("attendance_records")
-      .select("id, trainer_id, actual_work_minutes, application_id")
-      .eq("store_id", store.id)
-      .gte("shift_date", monthStart)
-      .in("status", ["clocked_out", "verified"]);
+  // Batch query: get all related applications at once
+  const allAppIds = [...new Set((allRecords ?? []).map((r) => r.application_id))];
+  let appsMap = new Map<string, { id: string; confirmed_rate: number }>();
+  if (allAppIds.length > 0) {
+    const { data: allApps } = await admin
+      .from("shift_applications")
+      .select("id, confirmed_rate")
+      .in("id", allAppIds);
+    if (allApps) {
+      appsMap = new Map(allApps.map((a) => [a.id, a]));
+    }
+  }
 
+  // Group records by store_id
+  const recordsByStore = new Map<string, typeof allRecords>();
+  for (const rec of allRecords ?? []) {
+    const storeRecords = recordsByStore.get(rec.store_id) ?? [];
+    storeRecords.push(rec);
+    recordsByStore.set(rec.store_id, storeRecords);
+  }
+
+  const reports: BudgetReport[] = stores.map((store) => {
+    const records = recordsByStore.get(store.id) ?? [];
     let total_shift_cost = 0;
     const trainerIds = new Set<string>();
 
-    if (records && records.length > 0) {
-      const appIds = records.map((r) => r.application_id);
-      const { data: apps } = await admin
-        .from("shift_applications")
-        .select("id, confirmed_rate")
-        .in("id", appIds);
+    records.forEach((rec) => {
+      trainerIds.add(rec.trainer_id);
+      const app = appsMap.get(rec.application_id);
+      if (app && rec.actual_work_minutes) {
+        total_shift_cost += (app.confirmed_rate / 60) * rec.actual_work_minutes;
+      }
+    });
 
-      records.forEach((rec) => {
-        trainerIds.add(rec.trainer_id);
-        const app = apps?.find((a) => a.id === rec.application_id);
-        if (app && rec.actual_work_minutes) {
-          total_shift_cost +=
-            (app.confirmed_rate / 60) * rec.actual_work_minutes;
-        }
-      });
-    }
-
-    reports.push({
+    return {
       store_id: store.id,
       store_name: store.name,
       area: store.area,
       emergency_budget: store.emergency_budget_monthly,
       emergency_used: store.emergency_budget_used,
       total_shift_cost: Math.round(total_shift_cost),
-      shift_count: records?.length ?? 0,
+      shift_count: records.length,
       trainer_count: trainerIds.size,
-    });
-  }
+    };
+  });
 
   return { success: true, data: reports };
 }

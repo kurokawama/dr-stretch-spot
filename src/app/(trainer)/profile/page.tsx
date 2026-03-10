@@ -3,15 +3,17 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageCircle, Link2Off, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { getLineStatus, generateLinkToken, unlinkLineAccount } from "@/actions/line";
 
 const AREAS = [
   "北海道", "東北", "関東", "中部", "関西", "中国", "四国", "九州・沖縄",
@@ -27,6 +29,11 @@ export default function ProfilePage() {
     bank_name: "", bank_branch: "", bank_account_number: "", bank_account_holder: "",
     tenure_years: 0,
   });
+  const [trainerId, setTrainerId] = useState<string | null>(null);
+  const [lineLinked, setLineLinked] = useState(false);
+  const [lineLinkedAt, setLineLinkedAt] = useState<string | null>(null);
+  const [linkingLine, setLinkingLine] = useState(false);
+  const [unlinkingLine, setUnlinkingLine] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -38,6 +45,7 @@ export default function ProfilePage() {
         .eq("auth_user_id", user.id)
         .single();
       if (data) {
+        setTrainerId(data.id);
         setForm({
           full_name: data.full_name || "",
           full_name_kana: data.full_name_kana || "",
@@ -51,6 +59,12 @@ export default function ProfilePage() {
           bank_account_holder: data.bank_account_holder || "",
           tenure_years: data.tenure_years,
         });
+      }
+      // Load LINE status
+      const lineResult = await getLineStatus();
+      if (lineResult.success && lineResult.data) {
+        setLineLinked(lineResult.data.linked);
+        setLineLinkedAt(lineResult.data.linked_at);
       }
       setLoading(false);
     }
@@ -83,6 +97,34 @@ export default function ProfilePage() {
       toast.error("保存に失敗しました");
     } else {
       toast.success("プロフィールを更新しました");
+    }
+  };
+
+  const handleLinkLine = async () => {
+    if (!trainerId) return;
+    setLinkingLine(true);
+    const result = await generateLinkToken(trainerId);
+    setLinkingLine(false);
+    if (!result.success || !result.data) {
+      toast.error(result.error ?? "トークン生成に失敗しました");
+      return;
+    }
+    // Open LINE friend add with pre-filled message containing the token
+    const lineUrl = `https://line.me/R/oaMessage/@269knmbd/?${encodeURIComponent(result.data.token)}`;
+    window.open(lineUrl, "_blank");
+    toast.success("LINEアプリが開きます。表示されたメッセージを送信してください。");
+  };
+
+  const handleUnlinkLine = async () => {
+    setUnlinkingLine(true);
+    const result = await unlinkLineAccount();
+    setUnlinkingLine(false);
+    if (result.success) {
+      setLineLinked(false);
+      setLineLinkedAt(null);
+      toast.success("LINE連携を解除しました");
+    } else {
+      toast.error(result.error ?? "解除に失敗しました");
     }
   };
 
@@ -149,6 +191,65 @@ export default function ProfilePage() {
               <Input className="rounded-xl" value={form.bank_account_holder} onChange={(e) => setForm({ ...form, bank_account_holder: e.target.value })} />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-xl border bg-card shadow-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="font-heading font-semibold text-base flex items-center gap-2">
+              <MessageCircle className="h-4 w-4 text-[#06C755]" />
+              LINE連携
+            </CardTitle>
+            {lineLinked ? (
+              <Badge variant="outline" className="text-[#06C755] border-[#06C755]">連携済み</Badge>
+            ) : (
+              <Badge variant="outline" className="text-muted-foreground">未連携</Badge>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {lineLinked ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                LINEアカウントが連携されています。シフト確定やオファーの通知をLINEで受け取れます。
+              </p>
+              {lineLinkedAt && (
+                <p className="text-xs text-muted-foreground">
+                  連携日: {new Date(lineLinkedAt).toLocaleDateString("ja-JP")}
+                </p>
+              )}
+              <Button
+                variant="outline"
+                className="w-full rounded-xl text-destructive border-destructive hover:bg-destructive/10"
+                onClick={handleUnlinkLine}
+                disabled={unlinkingLine}
+              >
+                {unlinkingLine ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />解除中...</>
+                ) : (
+                  <><Link2Off className="mr-2 h-4 w-4" />連携を解除</>
+                )}
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                LINEを連携すると、シフト確定やオファーの通知をLINEで受け取れます。
+              </p>
+              <Button
+                className="w-full rounded-xl bg-[#06C755] hover:bg-[#06C755]/90 text-white"
+                onClick={handleLinkLine}
+                disabled={linkingLine}
+              >
+                {linkingLine ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />準備中...</>
+                ) : (
+                  <><ExternalLink className="mr-2 h-4 w-4" />LINEで連携する</>
+                )}
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
 

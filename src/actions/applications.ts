@@ -105,11 +105,21 @@ export async function applyToShift(
 
   if (error) return { success: false, error: error.message };
 
-  // If auto-confirmed, increment filled_count and create attendance record
+  // If auto-confirmed, atomically increment filled_count and create attendance record
   if (autoConfirm && data) {
-    await supabase.rpc("increment_filled_count", {
+    const { data: fillSuccess } = await supabase.rpc("try_increment_filled_count", {
       shift_id: shiftRequestId,
     });
+
+    if (!fillSuccess) {
+      // Race condition: shift became full between check and insert
+      // Cancel the application we just created
+      await supabase
+        .from("shift_applications")
+        .update({ status: "cancelled", cancel_reason: "定員に達しました" })
+        .eq("id", data.id);
+      return { success: false, error: "このシフトは定員に達しています" };
+    }
 
     if (shift) {
       await supabase.from("attendance_records").insert({

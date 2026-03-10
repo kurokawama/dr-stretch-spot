@@ -266,10 +266,32 @@ export async function cancelShiftRequest(
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "ログインが必要です" };
 
+  // Verify the user is a store manager who created this shift
+  const { data: manager } = await supabase
+    .from("store_managers")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!manager) {
+    // Check if HR/admin role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
+      return { success: false, error: "この操作を行う権限がありません" };
+    }
+  }
+
+  // Only cancel the shift if it belongs to this manager's store (or admin/HR)
   const { error } = await supabase
     .from("shift_requests")
     .update({ status: "cancelled" })
-    .eq("id", shiftId);
+    .eq("id", shiftId)
+    .in("status", ["pending_approval", "open"]);
 
   if (error) return { success: false, error: error.message };
   return { success: true };

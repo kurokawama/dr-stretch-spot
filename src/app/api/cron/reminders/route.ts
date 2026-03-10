@@ -20,12 +20,18 @@ import { reminderMessage } from "@/lib/line/templates";
  * Note: 22:00 UTC = 07:00 JST (next day)
  */
 export async function GET(request: Request) {
-  // Verify cron secret
+  // Verify cron secret (required — reject if not configured)
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    console.error("[Cron] CRON_SECRET environment variable is not set");
+    return NextResponse.json(
+      { error: "Server misconfiguration" },
+      { status: 500 }
+    );
+  }
+
   const authHeader = request.headers.get("authorization");
-  if (
-    process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

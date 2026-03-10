@@ -183,6 +183,29 @@ export async function verifyAttendance(
 ): Promise<ActionResult> {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "ログインが必要です" };
+
+  // Verify the user is a store manager for the relevant store
+  const { data: record } = await supabase
+    .from("attendance_records")
+    .select("store_id")
+    .eq("id", attendanceId)
+    .single();
+
+  if (!record) return { success: false, error: "出勤記録が見つかりません" };
+
+  const { data: manager } = await supabase
+    .from("store_managers")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .eq("store_id", record.store_id)
+    .single();
+
+  if (!manager) return { success: false, error: "この店舗の管理権限がありません" };
+
   const { error } = await supabase
     .from("attendance_records")
     .update({

@@ -194,6 +194,85 @@ export async function getLineStatus(): Promise<
 }
 
 // =============================================
+// Send LINE Shift Confirmation
+// =============================================
+
+/**
+ * Send a shift confirmation notification via LINE push message.
+ * Called when a trainer accepts an offer and the shift is confirmed.
+ */
+export async function sendLineShiftConfirmation(input: {
+  trainerId: string;
+  storeName: string;
+  storeId: string;
+  shiftDate: string;
+  startTime: string;
+  endTime: string;
+}): Promise<ActionResult> {
+  const admin = createAdminClient();
+
+  // Get trainer's LINE userId
+  const { data: trainer } = await admin
+    .from("alumni_trainers")
+    .select("id, line_user_id")
+    .eq("id", input.trainerId)
+    .single();
+
+  if (!trainer?.line_user_id) {
+    return { success: true }; // No LINE linked — skip silently
+  }
+
+  // Get store name if not provided
+  let storeName = input.storeName;
+  if (!storeName) {
+    const { data: store } = await admin
+      .from("stores")
+      .select("name")
+      .eq("id", input.storeId)
+      .single();
+    storeName = store?.name ?? "店舗";
+  }
+
+  const { shiftConfirmation } = await import("@/lib/line/templates");
+  const message = shiftConfirmation({
+    title: `${storeName} シフト確定`,
+    store_name: storeName,
+    shift_date: input.shiftDate,
+    start_time: input.startTime.slice(0, 5),
+    end_time: input.endTime.slice(0, 5),
+    rate: 0, // Rate will be shown in the web app
+  });
+
+  try {
+    await pushMessage(trainer.line_user_id, [message]);
+
+    await admin.from("line_notifications").insert({
+      trainer_id: trainer.id,
+      line_user_id: trainer.line_user_id,
+      message_type: "shift_confirmation",
+      reference_id: null,
+      status: "sent",
+    });
+
+    return { success: true };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "LINE送信に失敗しました";
+    console.error("[LINE] Shift confirmation push failed:", err);
+
+    await admin.from("line_notifications").insert({
+      trainer_id: trainer.id,
+      line_user_id: trainer.line_user_id,
+      message_type: "shift_confirmation",
+      reference_id: null,
+      status: "failed",
+      error_message: errorMessage,
+    });
+
+    return { success: false, error: errorMessage };
+  }
+}
+
+// =============================================
 // Send LINE Offer Notification
 // =============================================
 

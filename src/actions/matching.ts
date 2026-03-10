@@ -223,7 +223,32 @@ export async function getAllShiftRequests(filters?: {
 export async function confirmPreDayAttendance(
   applicationId: string
 ): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "ログインが必要です" };
+
+  // Verify the trainer owns this application
+  const { data: trainer } = await supabase
+    .from("alumni_trainers")
+    .select("id")
+    .eq("auth_user_id", user.id)
+    .single();
+
+  if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
+
   const admin = createAdminClient();
+
+  const { data: application } = await admin
+    .from("shift_applications")
+    .select("id, trainer_id")
+    .eq("id", applicationId)
+    .eq("trainer_id", trainer.id)
+    .single();
+
+  if (!application) return { success: false, error: "応募情報が見つかりません" };
 
   const { error } = await admin
     .from("shift_applications")
