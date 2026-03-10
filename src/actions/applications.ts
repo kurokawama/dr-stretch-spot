@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { calculateHourlyRate } from "./pricing";
 import { createNotification } from "@/actions/notifications";
-import type { ActionResult, ShiftApplication } from "@/types/database";
+import type { ActionResult, ShiftApplication, RateBreakdown } from "@/types/database";
 
 export async function applyToShift(
   shiftRequestId: string
@@ -77,7 +77,12 @@ export async function applyToShift(
   }
 
   // Calculate rate (FIXED at application time)
-  const rateBreakdown = await calculateHourlyRate(trainer.id, shiftRequestId);
+  let rateBreakdown: RateBreakdown;
+  try {
+    rateBreakdown = await calculateHourlyRate(trainer.id, shiftRequestId);
+  } catch (err) {
+    return { success: false, error: "時給計算に失敗しました" };
+  }
 
   // Check if store has auto_confirm enabled
   const { data: store } = await supabase

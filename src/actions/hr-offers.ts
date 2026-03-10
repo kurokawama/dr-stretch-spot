@@ -180,10 +180,15 @@ export async function hrCreateOffer(
   if (!store) return { success: false, error: "店舗が見つかりません" };
 
   // Calculate rate
-  const rateBreakdown: RateBreakdown = await calculateOfferRate(
-    input.trainer_id,
-    input.store_id
-  );
+  let rateBreakdown: RateBreakdown;
+  try {
+    rateBreakdown = await calculateOfferRate(
+      input.trainer_id,
+      input.store_id
+    );
+  } catch (err) {
+    return { success: false, error: "時給計算に失敗しました" };
+  }
 
   // Create offer (admin client to bypass RLS and FK constraints)
   const { data: offer, error } = await admin

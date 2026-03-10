@@ -53,10 +53,15 @@ export async function sendOffer(
   }
 
   // Calculate rate for the trainer (no shift_request yet, so no emergency bonus)
-  const rateBreakdown = await calculateOfferRate(
-    availability.trainer_id,
-    manager.store_id
-  );
+  let rateBreakdown: RateBreakdown;
+  try {
+    rateBreakdown = await calculateOfferRate(
+      availability.trainer_id,
+      manager.store_id
+    );
+  } catch (err) {
+    return { success: false, error: "時給計算に失敗しました" };
+  }
 
   // Create offer
   const { data: offer, error } = await supabase
