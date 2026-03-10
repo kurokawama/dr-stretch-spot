@@ -93,9 +93,20 @@ export default async function HRDashboardPage() {
     );
   }
 
-  const unconfirmedCount = filteredTomorrow.filter(
-    (a) => !a.application?.pre_day_confirmed
-  ).length;
+  // All matchings (shift_applications)
+  const { data: allMatchings } = await admin
+    .from("shift_applications")
+    .select(
+      "*, shift_request:shift_requests(title, shift_date, start_time, end_time, store:stores(name, area, prefecture)), trainer:alumni_trainers(full_name)"
+    )
+    .order("created_at", { ascending: false });
+
+  let filteredMatchings = allMatchings ?? [];
+  if (managedAreas.length > 0) {
+    filteredMatchings = filteredMatchings.filter((m) =>
+      managedAreas.includes(m.shift_request?.store?.area ?? "")
+    );
+  }
 
   // Shift availabilities (all stores)
   const { data: allAvailabilities } = await admin
@@ -113,7 +124,22 @@ export default async function HRDashboardPage() {
     );
   }
 
-  // Stats
+  // Stats from matchings
+  const totalMatchingCount = filteredMatchings.length;
+  const approvedMatchings = filteredMatchings.filter((m) => m.status === "approved").length;
+  const completedMatchings = filteredMatchings.filter((m) => m.status === "completed").length;
+  const cancelledMatchings = filteredMatchings.filter(
+    (m) => m.status === "cancelled" || m.status === "no_show"
+  ).length;
+  const pendingSummaryCount = filteredPending.length;
+  const fillRate =
+    totalMatchingCount > 0
+      ? Math.round(((approvedMatchings + completedMatchings) / totalMatchingCount) * 100)
+      : 0;
+  const cancelRate =
+    totalMatchingCount > 0 ? Math.round((cancelledMatchings / totalMatchingCount) * 100) : 0;
+
+  // Attendance stats for sub-label
   const clockedInCount = filteredAttendance.filter(
     (a) => a.status === "clocked_in"
   ).length;
@@ -124,12 +150,11 @@ export default async function HRDashboardPage() {
     (a) => a.status === "clocked_out" || a.status === "verified"
   ).length;
 
-  const attendanceStatusToSummary = (status: string): "approved" | "completed" | "cancelled" => {
-    if (status === "clocked_out" || status === "verified") return "completed";
-    if (status === "no_show") return "cancelled";
-    return "approved";
-  };
+  const unconfirmedCount = filteredTomorrow.filter(
+    (a) => !a.application?.pre_day_confirmed
+  ).length;
 
+  // Build overview rows: pending shifts + recent matchings
   const overviewRows = [
     ...filteredPending.map((shift) => ({
       id: `pending-${shift.id}`,
@@ -143,29 +168,19 @@ export default async function HRDashboardPage() {
       shiftId: shift.id,
       area: shift.store?.area ?? "",
     })),
-    ...filteredAttendance.map((record) => ({
-      id: `attendance-${record.id}`,
-      trainerName: record.trainer?.full_name ?? "—",
-      storeName: record.store?.name ?? "—",
-      shiftDate: record.shift_date,
-      time: `${record.scheduled_start?.slice(0, 5)}〜${record.scheduled_end?.slice(0, 5)}`,
-      rate: "—",
-      status: attendanceStatusToSummary(record.status),
+    ...filteredMatchings.slice(0, 20).map((m) => ({
+      id: `matching-${m.id}`,
+      trainerName: m.trainer?.full_name ?? "—",
+      storeName: m.shift_request?.store?.name ?? "—",
+      shiftDate: m.shift_request?.shift_date ?? "—",
+      time: `${m.shift_request?.start_time?.slice(0, 5)}〜${m.shift_request?.end_time?.slice(0, 5)}`,
+      rate: m.confirmed_rate ? `¥${m.confirmed_rate.toLocaleString()}` : "—",
+      status: (m.status === "approved" ? "approved" : m.status === "completed" ? "completed" : m.status === "cancelled" || m.status === "no_show" ? "cancelled" : "approved") as "approved" | "completed" | "cancelled" | "pending",
       canApprove: false,
       shiftId: "",
-      area: record.store?.area ?? "",
+      area: m.shift_request?.store?.area ?? "",
     })),
   ].sort((a, b) => (a.shiftDate < b.shiftDate ? 1 : -1));
-
-  const totalMatchingCount = overviewRows.length;
-  const pendingSummaryCount = overviewRows.filter((row) => row.status === "pending").length;
-  const cancelCount = overviewRows.filter((row) => row.status === "cancelled").length;
-  const fillRate =
-    filteredAttendance.length > 0
-      ? Math.round(((clockedInCount + completedCount) / filteredAttendance.length) * 100)
-      : 0;
-  const cancelRate =
-    totalMatchingCount > 0 ? Math.round((cancelCount / totalMatchingCount) * 100) : 0;
 
   const paginatedRows = overviewRows.slice(0, 10);
   const areaOptions = Array.from(new Set(overviewRows.map((row) => row.area).filter(Boolean)));
@@ -205,12 +220,9 @@ export default async function HRDashboardPage() {
           <CardContent className="space-y-1 p-5">
             <p className="text-sm text-muted-foreground">全マッチング数</p>
             <p className="font-heading text-3xl font-bold tabular-nums">{totalMatchingCount}</p>
-            <div className="flex items-end gap-1">
-              <span className="h-2 w-2 rounded-full bg-primary/60" />
-              <span className="h-3 w-2 rounded-full bg-primary/70" />
-              <span className="h-4 w-2 rounded-full bg-primary/80" />
-              <span className="h-5 w-2 rounded-full bg-primary" />
-            </div>
+            <p className="text-xs text-muted-foreground">
+              確定 {approvedMatchings} / 完了 {completedMatchings}
+            </p>
           </CardContent>
         </Card>
 
@@ -230,7 +242,7 @@ export default async function HRDashboardPage() {
             <p className="text-sm text-muted-foreground">今月の充足率</p>
             <p className="font-heading text-3xl font-bold tabular-nums">{fillRate}%</p>
             <p className="text-xs text-muted-foreground">
-              出勤中 {clockedInCount} / 完了 {completedCount} / 待機 {scheduledCount}
+              本日: 出勤中 {clockedInCount} / 完了 {completedCount} / 待機 {scheduledCount}
             </p>
           </CardContent>
         </Card>
