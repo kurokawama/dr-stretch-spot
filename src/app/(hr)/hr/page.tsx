@@ -124,20 +124,17 @@ export default async function HRDashboardPage() {
     );
   }
 
-  // Stats from matchings
+  // Today's matchings (shift_date = today)
+  const todayMatchings = filteredMatchings.filter(
+    (m) => m.shift_request?.shift_date === today
+  );
+  const todayMatchingCount = todayMatchings.length;
+  const todayApproved = todayMatchings.filter((m) => m.status === "approved").length;
+  const todayCompleted = todayMatchings.filter((m) => m.status === "completed").length;
+
+  // All matchings stats
   const totalMatchingCount = filteredMatchings.length;
-  const approvedMatchings = filteredMatchings.filter((m) => m.status === "approved").length;
-  const completedMatchings = filteredMatchings.filter((m) => m.status === "completed").length;
-  const cancelledMatchings = filteredMatchings.filter(
-    (m) => m.status === "cancelled" || m.status === "no_show"
-  ).length;
   const pendingSummaryCount = filteredPending.length;
-  const fillRate =
-    totalMatchingCount > 0
-      ? Math.round(((approvedMatchings + completedMatchings) / totalMatchingCount) * 100)
-      : 0;
-  const cancelRate =
-    totalMatchingCount > 0 ? Math.round((cancelledMatchings / totalMatchingCount) * 100) : 0;
 
   // Attendance stats for sub-label
   const clockedInCount = filteredAttendance.filter(
@@ -150,11 +147,15 @@ export default async function HRDashboardPage() {
     (a) => a.status === "clocked_out" || a.status === "verified"
   ).length;
 
+  // Tomorrow stats
+  const tomorrowMatchings = filteredMatchings.filter(
+    (m) => m.shift_request?.shift_date === tomorrowStr
+  );
   const unconfirmedCount = filteredTomorrow.filter(
     (a) => !a.application?.pre_day_confirmed
   ).length;
 
-  // Build overview rows: pending shifts + recent matchings
+  // Build overview rows: pending shifts + today's/upcoming matchings
   const overviewRows = [
     ...filteredPending.map((shift) => ({
       id: `pending-${shift.id}`,
@@ -168,19 +169,21 @@ export default async function HRDashboardPage() {
       shiftId: shift.id,
       area: shift.store?.area ?? "",
     })),
-    ...filteredMatchings.slice(0, 20).map((m) => ({
-      id: `matching-${m.id}`,
-      trainerName: m.trainer?.full_name ?? "—",
-      storeName: m.shift_request?.store?.name ?? "—",
-      shiftDate: m.shift_request?.shift_date ?? "—",
-      time: `${m.shift_request?.start_time?.slice(0, 5)}〜${m.shift_request?.end_time?.slice(0, 5)}`,
-      rate: m.confirmed_rate ? `¥${m.confirmed_rate.toLocaleString()}` : "—",
-      status: (m.status === "approved" ? "approved" : m.status === "completed" ? "completed" : m.status === "cancelled" || m.status === "no_show" ? "cancelled" : "approved") as "approved" | "completed" | "cancelled" | "pending",
-      canApprove: false,
-      shiftId: "",
-      area: m.shift_request?.store?.area ?? "",
-    })),
-  ].sort((a, b) => (a.shiftDate < b.shiftDate ? 1 : -1));
+    ...filteredMatchings
+      .filter((m) => m.shift_request?.shift_date && m.shift_request.shift_date >= today)
+      .map((m) => ({
+        id: `matching-${m.id}`,
+        trainerName: m.trainer?.full_name ?? "—",
+        storeName: m.shift_request?.store?.name ?? "—",
+        shiftDate: m.shift_request?.shift_date ?? "—",
+        time: `${m.shift_request?.start_time?.slice(0, 5)}〜${m.shift_request?.end_time?.slice(0, 5)}`,
+        rate: m.confirmed_rate ? `¥${m.confirmed_rate.toLocaleString()}` : "—",
+        status: (m.status === "approved" ? "approved" : m.status === "completed" ? "completed" : m.status === "cancelled" || m.status === "no_show" ? "cancelled" : "approved") as "approved" | "completed" | "cancelled" | "pending",
+        canApprove: false,
+        shiftId: "",
+        area: m.shift_request?.store?.area ?? "",
+      })),
+  ].sort((a, b) => (a.shiftDate < b.shiftDate ? -1 : 1));
 
   const paginatedRows = overviewRows.slice(0, 10);
   const areaOptions = Array.from(new Set(overviewRows.map((row) => row.area).filter(Boolean)));
@@ -218,10 +221,10 @@ export default async function HRDashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
         <Card className="rounded-lg border border-t-4 border-t-primary bg-card shadow-sm">
           <CardContent className="space-y-1 p-5">
-            <p className="text-sm text-muted-foreground">全マッチング数</p>
-            <p className="font-heading text-3xl font-bold tabular-nums">{totalMatchingCount}</p>
+            <p className="text-sm text-muted-foreground">本日のマッチング</p>
+            <p className="font-heading text-3xl font-bold tabular-nums">{todayMatchingCount}</p>
             <p className="text-xs text-muted-foreground">
-              確定 {approvedMatchings} / 完了 {completedMatchings}
+              確定 {todayApproved} / 完了 {todayCompleted}（全{totalMatchingCount}件）
             </p>
           </CardContent>
         </Card>
@@ -229,28 +232,30 @@ export default async function HRDashboardPage() {
         <Card className="rounded-lg border border-t-4 border-t-yellow-500 bg-card shadow-sm">
           <CardContent className="space-y-1 p-5">
             <div className="flex items-center gap-2">
-              <p className="text-sm text-muted-foreground">承認待ち</p>
-              <span className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+              <p className="text-sm text-muted-foreground">承認待ちシフト</p>
+              {pendingSummaryCount > 0 && (
+                <span className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+              )}
             </div>
             <p className="font-heading text-3xl font-bold tabular-nums">{pendingSummaryCount}</p>
-            <p className="text-xs text-muted-foreground">シフト申請</p>
+            <p className="text-xs text-muted-foreground">店舗からの申請</p>
           </CardContent>
         </Card>
 
         <Card className="rounded-lg border border-t-4 border-t-green-500 bg-card shadow-sm">
           <CardContent className="space-y-1 p-5">
-            <p className="text-sm text-muted-foreground">今月の充足率</p>
-            <p className="font-heading text-3xl font-bold tabular-nums">{fillRate}%</p>
+            <p className="text-sm text-muted-foreground">本日の出勤状況</p>
+            <p className="font-heading text-3xl font-bold tabular-nums">{filteredAttendance.length}</p>
             <p className="text-xs text-muted-foreground">
-              本日: 出勤中 {clockedInCount} / 完了 {completedCount} / 待機 {scheduledCount}
+              出勤中 {clockedInCount} / 完了 {completedCount} / 待機 {scheduledCount}
             </p>
           </CardContent>
         </Card>
 
         <Card className="rounded-lg border border-t-4 border-t-blue-500 bg-card shadow-sm">
           <CardContent className="space-y-1 p-5">
-            <p className="text-sm text-muted-foreground">キャンセル率</p>
-            <p className="font-heading text-3xl font-bold tabular-nums">{cancelRate}%</p>
+            <p className="text-sm text-muted-foreground">明日の予定</p>
+            <p className="font-heading text-3xl font-bold tabular-nums">{tomorrowMatchings.length}</p>
             <p className="text-xs text-muted-foreground">
               前日未確認 {unconfirmedCount} / シフト希望 {filteredAvailabilities.length}
             </p>
@@ -296,7 +301,7 @@ export default async function HRDashboardPage() {
       {/* Data Table */}
       <Card className="rounded-lg border bg-card shadow-sm">
         <CardHeader>
-          <CardTitle className="font-heading text-base font-semibold">マッチング一覧</CardTitle>
+          <CardTitle className="font-heading text-base font-semibold">本日のマッチング・シフト一覧</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="overflow-x-auto rounded-lg border">
@@ -384,9 +389,9 @@ export default async function HRDashboardPage() {
 
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <p>
-              {totalMatchingCount === 0
-                ? `0 / ${totalMatchingCount}件`
-                : `1-${Math.min(10, totalMatchingCount)} / ${totalMatchingCount}件`}
+              {overviewRows.length === 0
+                ? "0件"
+                : `1-${Math.min(10, overviewRows.length)} / ${overviewRows.length}件`}
             </p>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="h-8 rounded-xl px-2" disabled>
