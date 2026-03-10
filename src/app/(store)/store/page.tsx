@@ -4,15 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  CalendarPlus,
-  Users,
-  ClipboardCheck,
-  MapPin,
-  Calendar,
-  TrendingUp,
-  HandHeart,
-} from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
 
 export default async function StoreDashboardPage() {
   const supabase = await createClient();
@@ -101,10 +93,87 @@ export default async function StoreDashboardPage() {
     .order("start_time", { ascending: true })
     .limit(10);
 
+  const totalRequiredToday = (todayShifts ?? []).reduce(
+    (sum, shift) => sum + (shift.required_count ?? 0),
+    0
+  );
+  const totalFilledToday = (todayShifts ?? []).reduce(
+    (sum, shift) => sum + (shift.filled_count ?? 0),
+    0
+  );
+  const coverageRate =
+    totalRequiredToday > 0
+      ? Math.round((totalFilledToday / totalRequiredToday) * 100)
+      : 0;
+
+  const ringRadius = 34;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset =
+    ringCircumference - (Math.min(100, Math.max(0, coverageRate)) / 100) * ringCircumference;
+  const isCoverageHigh = coverageRate >= 80;
+
+  const pendingTrendHeights = Array.from({ length: 7 }, (_, index) => {
+    const normalized = (pendingCount ?? 0) + index;
+    return ["h-2", "h-3", "h-5", "h-7"][Math.min(normalized % 4, 3)];
+  });
+
+  const monthlyTrendHeights = Array.from({ length: 8 }, (_, index) => {
+    const normalized = (monthlyAttendance ?? 0) + index;
+    return ["h-2", "h-3", "h-4", "h-6"][Math.min(normalized % 4, 3)];
+  });
+
+  const recentActivities = [
+    ...(todayCount && todayCount > 0
+      ? [{ time: "現在", detail: `本日のシフト ${todayCount}件` }]
+      : []),
+    ...(attendanceCount && attendanceCount > 0
+      ? [{ time: "現在", detail: `本日の出勤者 ${attendanceCount}名` }]
+      : []),
+    ...(pendingCount && pendingCount > 0
+      ? [{ time: "現在", detail: `${pendingCount}件の応募が審査待ちです` }]
+      : []),
+    ...(upcomingShifts ?? []).slice(0, 3).map((shift) => ({
+      time: `${shift.shift_date} ${shift.start_time?.slice(0, 5)}`,
+      detail: shift.title,
+    })),
+    ...(availabilityCount && availabilityCount > 0
+      ? [{ time: "現在", detail: `シフト希望 ${availabilityCount}件` }]
+      : []),
+  ];
+
+  const resolveShiftStatus = (shift: {
+    status: string;
+    required_count: number;
+    filled_count: number;
+  }) => {
+    if (shift.status === "cancelled") {
+      return {
+        label: "キャンセル",
+        className: "bg-red-100 text-red-800",
+      };
+    }
+    if (shift.status === "closed") {
+      return {
+        label: "完了",
+        className: "bg-gray-100 text-gray-800",
+      };
+    }
+    if (shift.filled_count >= shift.required_count) {
+      return {
+        label: "充足",
+        className: "bg-green-100 text-green-800",
+      };
+    }
+    return {
+      label: "募集中",
+      className: "bg-yellow-100 text-yellow-800",
+    };
+  };
+
   return (
-    <div className="animate-fade-in-up p-4 md:p-6 space-y-6">
+    <div className="animate-fade-in-up space-y-6 bg-[#FCFCFC] p-4 md:p-6">
       {/* Store Info Header */}
-      <div>
+      <div className="space-y-1">
         <h1 className="font-heading text-2xl font-bold">ダッシュボード</h1>
         {store && (
           <div className="mt-1 space-y-0.5">
@@ -116,7 +185,7 @@ export default async function StoreDashboardPage() {
               </p>
             )}
             {store.area && (
-              <Badge variant="outline" className="text-xs mt-1">
+              <Badge className="mt-1 rounded-full border border-input bg-white text-xs font-medium text-foreground">
                 {store.area}エリア
               </Badge>
             )}
@@ -124,94 +193,96 @@ export default async function StoreDashboardPage() {
         )}
       </div>
 
-      {/* Today's KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
-        <Card className="card-interactive rounded-xl border bg-card shadow-sm">
-          <CardContent className="flex items-center gap-3 p-4">
-            <CalendarPlus className="h-8 w-8 text-primary shrink-0" />
-            <div>
-              <p className="font-heading text-2xl font-bold tabular-nums">{todayCount ?? 0}</p>
-              <p className="text-xs text-muted-foreground">本日のシフト</p>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="rounded-lg border border-t-4 border-t-primary bg-card shadow-sm">
+          <CardContent className="flex items-center justify-between p-5">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">本日のカバー率</p>
+              <p className="font-heading text-3xl font-bold tabular-nums">{coverageRate}%</p>
+              <p className="text-xs text-muted-foreground">
+                {totalFilledToday}/{totalRequiredToday || 0}名
+              </p>
+            </div>
+            <div className="relative h-20 w-20">
+              <svg className="h-20 w-20 -rotate-90">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r={ringRadius}
+                  fill="none"
+                  strokeWidth="8"
+                  className="stroke-muted"
+                  strokeDasharray={ringCircumference}
+                  strokeDashoffset={0}
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r={ringRadius}
+                  fill="none"
+                  strokeWidth="8"
+                  strokeDasharray={ringCircumference}
+                  strokeDashoffset={ringOffset}
+                  className={isCoverageHigh ? "stroke-green-500" : "stroke-primary"}
+                />
+              </svg>
             </div>
           </CardContent>
         </Card>
-        <Card className="card-interactive rounded-xl border bg-card shadow-sm">
-          <CardContent className="flex items-center gap-3 p-4">
-            <Users className="h-8 w-8 text-accent-foreground shrink-0" />
+
+        <Card className="rounded-lg border border-t-4 border-t-primary bg-card shadow-sm">
+          <CardContent className="space-y-3 p-5">
             <div>
-              <p className="font-heading text-2xl font-bold tabular-nums">{pendingCount ?? 0}</p>
-              <p className="text-xs text-muted-foreground">未審査の応募</p>
+              <p className="text-sm text-muted-foreground">未対応の応募</p>
+              <p className="font-heading text-3xl font-bold tabular-nums">{pendingCount ?? 0}</p>
+            </div>
+            <div className="flex items-end gap-1">
+              {pendingTrendHeights.map((heightClass, index) => (
+                <div
+                  key={`${heightClass}-${index}`}
+                  className={`w-2 rounded-full bg-primary/70 ${heightClass}`}
+                />
+              ))}
             </div>
           </CardContent>
         </Card>
-        <Card className="card-interactive rounded-xl border bg-card shadow-sm">
-          <CardContent className="flex items-center gap-3 p-4">
-            <ClipboardCheck className="h-8 w-8 text-green-600 shrink-0" />
+
+        <Card className="rounded-lg border border-t-4 border-t-primary bg-card shadow-sm">
+          <CardContent className="space-y-3 p-5">
             <div>
-              <p className="font-heading text-2xl font-bold tabular-nums">{attendanceCount ?? 0}</p>
-              <p className="text-xs text-muted-foreground">本日の出勤者</p>
+              <p className="text-sm text-muted-foreground">今月の利用回数</p>
+              <p className="font-heading text-3xl font-bold tabular-nums">{monthlyAttendance ?? 0}</p>
+              <p className="text-xs text-muted-foreground">シフト数 {monthlyShiftCount ?? 0}</p>
+            </div>
+            <div className="flex items-end gap-1">
+              {monthlyTrendHeights.map((heightClass, index) => (
+                <div
+                  key={`${heightClass}-${index}`}
+                  className={`w-2 rounded-full bg-[#DADF00]/80 ${heightClass}`}
+                />
+              ))}
             </div>
           </CardContent>
         </Card>
-        <Link href="/store/availability">
-          <Card className="card-interactive rounded-xl border bg-card shadow-sm h-full">
-            <CardContent className="flex items-center gap-3 p-4">
-              <HandHeart className="h-8 w-8 text-primary shrink-0" />
-              <div>
-                <p className="font-heading text-2xl font-bold tabular-nums">{availabilityCount ?? 0}</p>
-                <p className="text-xs text-muted-foreground">シフト希望</p>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
       </div>
 
-      {/* Pending Applications Alert */}
-      {pendingCount && pendingCount > 0 ? (
-        <Card className="border-amber-200 bg-amber-50">
-          <CardContent className="flex items-center justify-between p-4">
-            <p className="text-sm font-medium">
-              {pendingCount}件の応募が審査待ちです
-            </p>
-            <Button size="sm" asChild>
-              <Link href="/store/applications">確認する</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {/* Monthly Stats */}
-      <Card className="rounded-xl border bg-card shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="font-heading text-base font-semibold flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            今月のサマリー
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-xl border bg-muted/40 p-4 text-center shadow-sm">
-              <p className="text-xs text-muted-foreground">シフト数</p>
-              <p className="font-heading text-xl font-bold tabular-nums">{monthlyShiftCount ?? 0}</p>
-            </div>
-            <div className="rounded-xl border bg-muted/40 p-4 text-center shadow-sm">
-              <p className="text-xs text-muted-foreground">出勤回数</p>
-              <p className="font-heading text-xl font-bold tabular-nums">{monthlyAttendance ?? 0}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Upcoming Shifts (Next 7 days) */}
-      <Card className="rounded-xl border bg-card shadow-sm">
+      {/* Upcoming Shifts Table */}
+      <Card className="rounded-lg border bg-card shadow-sm">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="font-heading text-base font-semibold flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              今週のシフト予定
+            <CardTitle className="font-heading text-base font-semibold">
+              今週のシフト
             </CardTitle>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/store/shifts">全て見る</Link>
+            <Button
+              asChild
+              size="sm"
+              className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Link href="/store/shifts/new">
+                <Plus className="mr-1 h-4 w-4" />
+                新規作成
+              </Link>
             </Button>
           </div>
         </CardHeader>
@@ -221,27 +292,43 @@ export default async function StoreDashboardPage() {
               今後7日間の予定はありません
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border">
+            <div className="overflow-x-auto rounded-lg border">
               <table className="w-full text-sm">
+                <thead className="bg-muted/60 text-left">
+                  <tr className="border-b">
+                    <th className="px-3 py-2 font-medium">日付</th>
+                    <th className="px-3 py-2 font-medium">時間</th>
+                    <th className="px-3 py-2 font-medium text-right">必要人数</th>
+                    <th className="px-3 py-2 font-medium text-right">応募数</th>
+                    <th className="px-3 py-2 font-medium">ステータス</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  {upcomingShifts.map((shift) => (
-                    <tr key={shift.id} className="border-b last:border-b-0 hover:bg-muted/40">
-                      <td className="px-3 py-3 align-middle">
-                        <p className="font-medium">{shift.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {shift.shift_date} {shift.start_time}〜{shift.end_time}
-                        </p>
-                      </td>
-                      <td className="px-3 py-3 text-right align-middle">
-                        <Badge
-                          variant={shift.filled_count >= shift.required_count ? "default" : "secondary"}
-                          className="tabular-nums"
-                        >
-                          {shift.filled_count}/{shift.required_count}名
-                        </Badge>
-                      </td>
-                    </tr>
-                  ))}
+                  {upcomingShifts.map((shift, index) => {
+                    const status = resolveShiftStatus(shift);
+                    return (
+                      <tr
+                        key={shift.id}
+                        className={`border-b last:border-b-0 hover:bg-muted/50 ${
+                          index % 2 === 0 ? "bg-white" : "bg-muted/20"
+                        }`}
+                      >
+                        <td className="px-3 py-3 align-middle">{shift.shift_date}</td>
+                        <td className="px-3 py-3 align-middle">
+                          {shift.start_time?.slice(0, 5)}〜{shift.end_time?.slice(0, 5)}
+                        </td>
+                        <td className="px-3 py-3 text-right align-middle">{shift.required_count}名</td>
+                        <td className="px-3 py-3 text-right align-middle">{shift.filled_count}名</td>
+                        <td className="px-3 py-3 align-middle">
+                          <Badge
+                            className={`rounded-full px-2 py-0.5 text-xs font-medium ${status.className}`}
+                          >
+                            {status.label}
+                          </Badge>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -249,38 +336,29 @@ export default async function StoreDashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Today's Shifts Detail */}
-      {todayShifts && todayShifts.length > 0 && (
-        <Card className="rounded-xl border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="font-heading text-base font-semibold">本日のシフト</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {todayShifts.map((shift) => (
-              <div
-                key={shift.id}
-                className="flex items-center justify-between rounded-xl border p-3 hover:bg-muted/40"
-              >
-                <div>
-                  <p className="text-sm font-medium">{shift.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {shift.start_time}〜{shift.end_time}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <Badge
-                    variant={
-                      shift.status === "open" ? "default" : "secondary"
-                    }
-                  >
-                    {shift.filled_count}/{shift.required_count}名
-                  </Badge>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
+      {/* Recent Activity */}
+      <Card className="rounded-lg border bg-card shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-heading text-base font-semibold">最近のアクティビティ</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {recentActivities.length === 0 ? (
+            <p className="text-sm text-muted-foreground">今後7日間の予定はありません</p>
+          ) : (
+            <ul className="space-y-3">
+              {recentActivities.map((activity, index) => (
+                <li
+                  key={`${activity.time}-${activity.detail}-${index}`}
+                  className="flex items-start gap-3 border-b pb-3 last:border-b-0 last:pb-0"
+                >
+                  <span className="min-w-28 text-xs text-muted-foreground">{activity.time}</span>
+                  <p className="text-sm">{activity.detail}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
