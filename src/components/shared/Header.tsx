@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { LogOut, UserCircle, ArrowLeftRight } from "lucide-react";
+import { LogOut, UserCircle, ArrowLeftRight, Bell } from "lucide-react";
 
 interface HeaderProps {
   displayName: string;
@@ -47,7 +47,7 @@ export function Header({ displayName, role }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-sm">
-      <div className="flex h-14 items-center justify-between px-4 md:px-6">
+      <div className="mx-auto flex h-16 max-w-lg items-center justify-between px-4 md:max-w-none md:px-6">
         <Link href="/" className="flex items-center gap-2 group">
           <Image
             src="/images/icon.svg"
@@ -65,6 +65,16 @@ export function Header({ displayName, role }: HeaderProps) {
         </Link>
 
         <div className="flex items-center gap-3">
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="relative h-9 w-9 rounded-xl border border-transparent bg-muted/40 text-foreground hover:bg-muted"
+          >
+            <Link href="/notifications" aria-label="notifications">
+              <Bell className="h-4 w-4" />
+            </Link>
+          </Button>
           <span className="hidden text-xs text-muted-foreground md:inline rounded-full bg-muted px-2.5 py-0.5">
             {roleLabels[role] || role}
           </span>
