@@ -5,6 +5,8 @@ import {
   preDayReminderEmail,
   dayReminderEmail,
 } from "@/lib/notifications";
+import { pushMessage } from "@/lib/line/client";
+import { reminderMessage } from "@/lib/line/templates";
 
 /**
  * Cron endpoint for sending reminders (runs once daily at 07:00 JST / 22:00 UTC)
@@ -93,7 +95,7 @@ export async function GET(request: Request) {
   const { data: tomorrowRecords } = await admin
     .from("attendance_records")
     .select(
-      "*, trainer:alumni_trainers(full_name, email, auth_user_id), store:stores(name, address), application:shift_applications(id, pre_day_reminder_sent)"
+      "*, trainer:alumni_trainers(full_name, email, auth_user_id, line_user_id), store:stores(name, address), application:shift_applications(id, pre_day_reminder_sent)"
     )
     .eq("shift_date", tomorrowStr)
     .eq("status", "scheduled");
@@ -102,6 +104,7 @@ export async function GET(request: Request) {
     if (record.application?.pre_day_reminder_sent) continue;
     if (!record.trainer?.email) continue;
 
+    // Send email reminder
     const email = preDayReminderEmail({
       trainerName: record.trainer.full_name,
       storeName: record.store?.name ?? "",
@@ -137,6 +140,46 @@ export async function GET(request: Request) {
       errors.push(
         `Failed to send pre-day reminder to ${record.trainer.email}: ${result.error}`
       );
+    }
+
+    // Send LINE reminder if trainer has linked LINE account
+    if (record.trainer?.line_user_id) {
+      try {
+        const lineMessage = reminderMessage({
+          application_id: record.application?.id ?? "",
+          store_name: record.store?.name ?? "",
+          shift_date: tomorrowStr,
+          start_time: record.scheduled_start?.slice(0, 5) ?? "",
+          end_time: record.scheduled_end?.slice(0, 5) ?? "",
+        });
+
+        await pushMessage(record.trainer.line_user_id, [lineMessage]);
+
+        await admin.from("line_notifications").insert({
+          trainer_id: record.trainer_id,
+          line_user_id: record.trainer.line_user_id,
+          message_type: "pre_day_reminder",
+          reference_id: record.application?.id ?? null,
+          status: "sent",
+        });
+
+        sentCount++;
+      } catch (err) {
+        const errMsg =
+          err instanceof Error ? err.message : "LINE送信失敗";
+        errors.push(
+          `Failed to send LINE reminder to ${record.trainer.full_name}: ${errMsg}`
+        );
+
+        await admin.from("line_notifications").insert({
+          trainer_id: record.trainer_id,
+          line_user_id: record.trainer.line_user_id,
+          message_type: "pre_day_reminder",
+          reference_id: record.application?.id ?? null,
+          status: "failed",
+          error_message: errMsg,
+        });
+      }
     }
   }
 

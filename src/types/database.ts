@@ -18,7 +18,7 @@ export type BlankRuleType = "alert_60" | "skill_check_required" | "training_requ
 export type ChangeLogType = "rate_update" | "rate_create" | "rate_delete" | "blank_rule_update" | "simulation" | "cost_ceiling_update" | "config_rollback" | "store_budget_update";
 export type AvailabilityStatus = "open" | "offered" | "matched" | "expired" | "cancelled";
 export type OfferStatus = "pending" | "accepted" | "declined" | "expired" | "cancelled";
-export type ShiftSource = "store_created" | "direct_offer";
+export type ShiftSource = "store_created" | "direct_offer" | "hr_offer";
 export type QrTokenType = "clock_in" | "clock_out";
 export type NotificationType = "email" | "push" | "line";
 export type NotificationCategory =
@@ -84,6 +84,8 @@ export interface AlumniTrainer {
   training_completed_at: string | null;
   rank: TrainerRank;
   badges: string[];
+  line_user_id: string | null;
+  line_linked_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -125,7 +127,8 @@ export interface StoreManager {
 export interface ShiftRequest {
   id: string;
   store_id: string;
-  created_by: string;
+  created_by: string | null;
+  created_by_hr_id: string | null;
   title: string;
   description: string | null;
   shift_date: string;
@@ -465,10 +468,11 @@ export interface ShiftAvailability {
 
 export interface ShiftOffer {
   id: string;
-  availability_id: string;
+  availability_id: string | null;
   trainer_id: string;
   store_id: string;
-  created_by: string;
+  created_by: string | null;
+  created_by_hr_id: string | null;
   title: string;
   shift_date: string;
   start_time: string;
@@ -485,6 +489,33 @@ export interface ShiftOffer {
   trainer?: AlumniTrainer;
   store?: Store;
   created_by_manager?: StoreManager;
+}
+
+// =============================================
+// LINE Integration Types
+// =============================================
+
+export type LineNotificationStatus = "sent" | "failed";
+
+export interface LineLinkToken {
+  id: string;
+  token: string;
+  trainer_id: string;
+  expires_at: string;
+  used: boolean;
+  created_at: string;
+}
+
+export interface LineNotification {
+  id: string;
+  trainer_id: string;
+  line_user_id: string;
+  message_type: string;
+  reference_id: string | null;
+  status: LineNotificationStatus;
+  error_message: string | null;
+  sent_at: string;
+  created_at: string;
 }
 
 // =============================================

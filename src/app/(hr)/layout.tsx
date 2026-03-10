@@ -13,6 +13,7 @@ import {
   Shield,
   TrendingUp,
   RotateCcw,
+  Send,
 } from "lucide-react";
 
 export default async function HRLayout({
@@ -44,6 +45,7 @@ export default async function HRLayout({
 
   const navItems = [
     { href: "/hr", icon: LayoutDashboard, label: "ダッシュボード" },
+    { href: "/hr/shift-offers", icon: Send, label: "シフトオファー" },
     { href: "/hr/matchings", icon: Users, label: "マッチング管理" },
     { href: "/hr/attendance", icon: ClipboardCheck, label: "出勤管理" },
     { href: "/hr/resignations", icon: UserMinus, label: "退職意向管理" },

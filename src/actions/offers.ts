@@ -149,22 +149,37 @@ export async function respondToOffer(
       })
       .eq("id", offerId);
 
-    await supabase
-      .from("shift_availabilities")
-      .update({ status: "open" })
-      .eq("id", offer.availability_id);
+    // Only update availability if it exists (store offers have availability, HR offers don't)
+    if (offer.availability_id) {
+      await supabase
+        .from("shift_availabilities")
+        .update({ status: "open" })
+        .eq("id", offer.availability_id);
+    }
 
-    // Notify store manager
+    // Notify the creator (store manager or HR user)
     const admin = createAdminClient();
-    const { data: mgr } = await admin
-      .from("store_managers")
-      .select("auth_user_id")
-      .eq("id", offer.created_by)
-      .single();
+    if (offer.created_by) {
+      // Store manager offer
+      const { data: mgr } = await admin
+        .from("store_managers")
+        .select("auth_user_id")
+        .eq("id", offer.created_by)
+        .single();
 
-    if (mgr) {
+      if (mgr) {
+        await createNotification({
+          userId: mgr.auth_user_id,
+          type: "push",
+          category: "application_cancelled",
+          title: "オファーが辞退されました",
+          body: offer.title,
+        });
+      }
+    } else if (offer.created_by_hr_id) {
+      // HR offer
       await createNotification({
-        userId: mgr.auth_user_id,
+        userId: offer.created_by_hr_id,
         type: "push",
         category: "application_cancelled",
         title: "オファーが辞退されました",
@@ -187,31 +202,44 @@ export async function respondToOffer(
     })
     .eq("id", offerId);
 
-  // 2. Update availability
-  await supabase
-    .from("shift_availabilities")
-    .update({ status: "matched" })
-    .eq("id", offer.availability_id);
+  // 2. Update availability (only for store offers)
+  if (offer.availability_id) {
+    await supabase
+      .from("shift_availabilities")
+      .update({ status: "matched" })
+      .eq("id", offer.availability_id);
+  }
 
-  // 3. Create shift_request (direct offer, no HR approval needed)
+  // Determine source type
+  const isHrOffer = !offer.created_by && offer.created_by_hr_id;
+  const source = isHrOffer ? "hr_offer" : "direct_offer";
+
+  // 3. Create shift_request
+  const shiftRequestData: Record<string, unknown> = {
+    store_id: offer.store_id,
+    title: offer.title,
+    shift_date: offer.shift_date,
+    start_time: offer.start_time,
+    end_time: offer.end_time,
+    break_minutes: offer.break_minutes,
+    required_count: 1,
+    filled_count: 1,
+    status: "closed",
+    source,
+    offer_id: offer.id,
+    target_areas: [],
+    published_at: new Date().toISOString(),
+  };
+
+  if (isHrOffer) {
+    shiftRequestData.created_by_hr_id = offer.created_by_hr_id;
+  } else {
+    shiftRequestData.created_by = offer.created_by;
+  }
+
   const { data: shiftRequest, error: srError } = await admin
     .from("shift_requests")
-    .insert({
-      store_id: offer.store_id,
-      created_by: offer.created_by,
-      title: offer.title,
-      shift_date: offer.shift_date,
-      start_time: offer.start_time,
-      end_time: offer.end_time,
-      break_minutes: offer.break_minutes,
-      required_count: 1,
-      filled_count: 1,
-      status: "closed",
-      source: "direct_offer",
-      offer_id: offer.id,
-      target_areas: [],
-      published_at: new Date().toISOString(),
-    })
+    .insert(shiftRequestData)
     .select()
     .single();
 
@@ -227,7 +255,7 @@ export async function respondToOffer(
       rate_breakdown: offer.rate_breakdown,
       status: "approved",
       reviewed_at: new Date().toISOString(),
-      reviewed_by: offer.created_by,
+      reviewed_by: offer.created_by ?? null,
     })
     .select()
     .single();
@@ -246,16 +274,26 @@ export async function respondToOffer(
     status: "scheduled",
   });
 
-  // 6. Notify store manager
-  const { data: mgr } = await admin
-    .from("store_managers")
-    .select("auth_user_id")
-    .eq("id", offer.created_by)
-    .single();
+  // 6. Notify the creator
+  if (offer.created_by) {
+    const { data: mgr } = await admin
+      .from("store_managers")
+      .select("auth_user_id")
+      .eq("id", offer.created_by)
+      .single();
 
-  if (mgr) {
+    if (mgr) {
+      await createNotification({
+        userId: mgr.auth_user_id,
+        type: "push",
+        category: "application_confirmed",
+        title: "オファーが承諾されました",
+        body: `${offer.title} — シフトが確定しました`,
+      });
+    }
+  } else if (offer.created_by_hr_id) {
     await createNotification({
-      userId: mgr.auth_user_id,
+      userId: offer.created_by_hr_id,
       type: "push",
       category: "application_confirmed",
       title: "オファーが承諾されました",
@@ -319,7 +357,7 @@ export async function getStoreOffers(
  * Calculate hourly rate for a direct offer (no shift_request).
  * Emergency bonus is always 0 for direct offers.
  */
-async function calculateOfferRate(
+export async function calculateOfferRate(
   trainerId: string,
   storeId: string
 ): Promise<RateBreakdown> {
