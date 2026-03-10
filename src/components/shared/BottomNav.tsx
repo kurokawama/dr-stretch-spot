@@ -7,7 +7,6 @@ import {
   Search,
   CalendarDays,
   Clock,
-  Wallet,
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,10 +33,9 @@ const navConfigs: Record<BottomNavProps["mode"], NavItem[]> = {
   ],
   active: [
     { href: "/home", icon: Home, label: "ホーム" },
-    { href: "/shifts", icon: Search, label: "シフト検索" },
+    { href: "/shifts", icon: Search, label: "シフト" },
     { href: "/my-shifts", icon: CalendarDays, label: "マイシフト" },
     { href: "/clock", icon: Clock, label: "打刻" },
-    { href: "/earnings", icon: Wallet, label: "収入" },
     { href: "/profile", icon: User, label: "設定" },
   ],
 };
@@ -52,8 +50,8 @@ export function BottomNav({ mode }: BottomNavProps) {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur-sm md:hidden">
-      <div className="flex items-center justify-around py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur-sm md:hidden safe-area-bottom">
+      <div className="flex items-center justify-around py-1.5">
         {items.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -62,7 +60,7 @@ export function BottomNav({ mode }: BottomNavProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "relative flex flex-col items-center gap-0.5 px-3 py-1 transition-colors",
+                "relative flex flex-col items-center gap-0.5 min-w-[48px] min-h-[44px] justify-center px-2 py-1 transition-colors",
                 active
                   ? "nav-item-active text-primary"
                   : "text-muted-foreground hover:text-primary"
@@ -76,8 +74,8 @@ export function BottomNav({ mode }: BottomNavProps) {
               />
               <span
                 className={cn(
-                  "text-[10px]",
-                  active && "font-semibold"
+                  "text-xs leading-tight",
+                  active ? "font-semibold" : "font-normal"
                 )}
               >
                 {item.label}

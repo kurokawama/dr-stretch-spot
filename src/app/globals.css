@@ -274,3 +274,8 @@ button, a {
 button:active, a:active {
   transform: scale(0.97);
 }
+
+/* Safe area support for notched devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
