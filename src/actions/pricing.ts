@@ -5,21 +5,22 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionResult, RateBreakdown, HourlyRateConfig } from "@/types/database";
 
 /**
- * Calculate the confirmed hourly rate for a trainer applying to a shift.
- * Rate = base_rate(tenure) + attendance_bonus(30d) + emergency_bonus
- * Rate is FIXED at application time.
+ * Core rate calculation shared by shift applications and direct offers.
+ * Calculates: base_rate(tenure) + attendance_bonus(30d) + emergency_bonus - cost ceiling
  */
-export async function calculateHourlyRate(
-  trainerId: string,
-  shiftRequestId: string
-): Promise<RateBreakdown> {
+export async function calculateRate(params: {
+  trainerId: string;
+  storeId: string;
+  emergencyBonus?: number;
+}): Promise<RateBreakdown> {
   const supabase = await createClient();
+  const admin = createAdminClient();
 
   // 1. Get trainer info
   const { data: trainer, error: trainerError } = await supabase
     .from("alumni_trainers")
     .select("tenure_years")
-    .eq("id", trainerId)
+    .eq("id", params.trainerId)
     .single();
 
   if (trainerError || !trainer) {
@@ -51,7 +52,7 @@ export async function calculateHourlyRate(
   const { count: attendanceCount } = await supabase
     .from("attendance_records")
     .select("*", { count: "exact", head: true })
-    .eq("trainer_id", trainerId)
+    .eq("trainer_id", params.trainerId)
     .in("status", ["clocked_out", "verified"])
     .gte("shift_date", thirtyDaysAgo.toISOString().split("T")[0]);
 
@@ -61,21 +62,11 @@ export async function calculateHourlyRate(
       ? rateConfig.attendance_bonus_amount
       : 0;
 
-  // 4. Check emergency bonus
-  const { data: shiftRequest } = await supabase
-    .from("shift_requests")
-    .select("is_emergency, emergency_bonus_amount")
-    .eq("id", shiftRequestId)
-    .single();
+  const emergencyBonus = params.emergencyBonus ?? 0;
 
-  const emergencyBonus =
-    shiftRequest?.is_emergency ? (shiftRequest.emergency_bonus_amount ?? 0) : 0;
-
-  // 5. Calculate total
+  // 4. Calculate total with cost ceiling
   let total = rateConfig.base_rate + attendanceBonus + emergencyBonus;
 
-  // 6. Apply cost ceiling check (Phase 2)
-  const admin = createAdminClient();
   const { data: ceilingConfig } = await admin
     .from("cost_ceiling_config")
     .select("max_hourly_rate")
@@ -83,28 +74,15 @@ export async function calculateHourlyRate(
     .limit(1)
     .single();
 
-  // Check store-specific ceiling override
-  if (shiftRequest) {
-    const { data: shift } = await supabase
-      .from("shift_requests")
-      .select("store_id")
-      .eq("id", shiftRequestId)
-      .single();
+  const { data: store } = await admin
+    .from("stores")
+    .select("cost_ceiling_override")
+    .eq("id", params.storeId)
+    .single();
 
-    if (shift) {
-      const { data: store } = await admin
-        .from("stores")
-        .select("cost_ceiling_override")
-        .eq("id", shift.store_id)
-        .single();
-
-      const maxRate = store?.cost_ceiling_override ?? ceilingConfig?.max_hourly_rate;
-      if (maxRate && total > maxRate) {
-        total = maxRate;
-      }
-    }
-  } else if (ceilingConfig?.max_hourly_rate && total > ceilingConfig.max_hourly_rate) {
-    total = ceilingConfig.max_hourly_rate;
+  const maxRate = store?.cost_ceiling_override ?? ceilingConfig?.max_hourly_rate;
+  if (maxRate && total > maxRate) {
+    total = maxRate;
   }
 
   return {
@@ -115,6 +93,37 @@ export async function calculateHourlyRate(
     emergency_bonus: emergencyBonus,
     total,
   };
+}
+
+/**
+ * Calculate the confirmed hourly rate for a trainer applying to a shift.
+ * Wraps calculateRate with shift-specific emergency bonus lookup.
+ */
+export async function calculateHourlyRate(
+  trainerId: string,
+  shiftRequestId: string
+): Promise<RateBreakdown> {
+  const supabase = await createClient();
+
+  // Look up emergency bonus from the shift request
+  const { data: shiftRequest } = await supabase
+    .from("shift_requests")
+    .select("is_emergency, emergency_bonus_amount, store_id")
+    .eq("id", shiftRequestId)
+    .single();
+
+  const emergencyBonus =
+    shiftRequest?.is_emergency ? (shiftRequest.emergency_bonus_amount ?? 0) : 0;
+
+  if (!shiftRequest) {
+    throw new Error("Shift request not found");
+  }
+
+  return calculateRate({
+    trainerId,
+    storeId: shiftRequest.store_id,
+    emergencyBonus,
+  });
 }
 
 /**

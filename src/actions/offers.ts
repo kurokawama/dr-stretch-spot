@@ -3,7 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotification } from "@/actions/notifications";
-import type { ActionResult, ShiftOffer, RateBreakdown, HourlyRateConfig } from "@/types/database";
+import { calculateRate } from "@/actions/pricing";
+import type { ActionResult, ShiftOffer, RateBreakdown } from "@/types/database";
 
 interface SendOfferInput {
   availability_id: string;
@@ -379,80 +380,11 @@ export async function getStoreOffers(
 /**
  * Calculate hourly rate for a direct offer (no shift_request).
  * Emergency bonus is always 0 for direct offers.
+ * Delegates to shared calculateRate in pricing.ts.
  */
 export async function calculateOfferRate(
   trainerId: string,
   storeId: string
 ): Promise<RateBreakdown> {
-  const supabase = await createClient();
-  const admin = createAdminClient();
-
-  const { data: trainer } = await supabase
-    .from("alumni_trainers")
-    .select("tenure_years")
-    .eq("id", trainerId)
-    .single();
-
-  if (!trainer) throw new Error("Trainer not found");
-
-  const { data: rateConfigs } = await supabase
-    .from("hourly_rate_config")
-    .select("*")
-    .eq("is_active", true)
-    .lte("tenure_min_years", trainer.tenure_years)
-    .order("tenure_min_years", { ascending: false });
-
-  const rateConfig = rateConfigs?.find(
-    (rc: HourlyRateConfig) =>
-      rc.tenure_max_years === null ||
-      trainer.tenure_years < rc.tenure_max_years
-  );
-
-  if (!rateConfig) throw new Error("No rate configuration found");
-
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-  const { count: attendanceCount } = await supabase
-    .from("attendance_records")
-    .select("*", { count: "exact", head: true })
-    .eq("trainer_id", trainerId)
-    .in("status", ["clocked_out", "verified"])
-    .gte("shift_date", thirtyDaysAgo.toISOString().split("T")[0]);
-
-  const count30d = attendanceCount ?? 0;
-  const attendanceBonus =
-    count30d >= rateConfig.attendance_bonus_threshold
-      ? rateConfig.attendance_bonus_amount
-      : 0;
-
-  let total = rateConfig.base_rate + attendanceBonus;
-
-  // Apply cost ceiling
-  const { data: ceilingConfig } = await admin
-    .from("cost_ceiling_config")
-    .select("max_hourly_rate")
-    .eq("is_active", true)
-    .limit(1)
-    .single();
-
-  const { data: store } = await admin
-    .from("stores")
-    .select("cost_ceiling_override")
-    .eq("id", storeId)
-    .single();
-
-  const maxRate = store?.cost_ceiling_override ?? ceilingConfig?.max_hourly_rate;
-  if (maxRate && total > maxRate) {
-    total = maxRate;
-  }
-
-  return {
-    base_rate: rateConfig.base_rate,
-    tenure_years: trainer.tenure_years,
-    attendance_bonus: attendanceBonus,
-    attendance_count_30d: count30d,
-    emergency_bonus: 0,
-    total,
-  };
+  return calculateRate({ trainerId, storeId, emergencyBonus: 0 });
 }

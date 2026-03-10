@@ -124,6 +124,21 @@ export async function getAllResignations(filters?: {
 }
 
 export async function receiveResignation(resignationId: string) {
+  // Auth check: only HR/admin can receive resignations
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "認証が必要です" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
+    return { success: false, error: "HR/管理者権限が必要です" };
+  }
+
   const admin = createAdminClient();
 
   const { error } = await admin
@@ -141,6 +156,21 @@ export async function receiveResignation(resignationId: string) {
 }
 
 export async function completeResignation(resignationId: string) {
+  // Auth check: only HR/admin can complete resignations
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "認証が必要です" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["hr", "admin"].includes(profile.role)) {
+    return { success: false, error: "HR/管理者権限が必要です" };
+  }
+
   const admin = createAdminClient();
 
   // 1. Get resignation data

@@ -9,6 +9,14 @@ const DEMO_ACCOUNTS: Record<string, { email: string; password: string }> = {
 };
 
 export async function GET(request: Request) {
+  // SECURITY: Block demo login in production
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { error: "Demo login is not available in production" },
+      { status: 403 }
+    );
+  }
+
   const { searchParams, origin } = new URL(request.url);
   const role = searchParams.get("role");
 

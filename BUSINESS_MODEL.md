@@ -1,24 +1,25 @@
 # Dr.stretch SPOT - Business Model Book
 
-> **Last Updated:** 2026-03-08
+> **Last Updated:** 2026-03-11
 > **Status:** MVP Phase 1 (Production)
 
 ---
 
 ## 1. What is this?
 
-**Dr.stretch SPOT** is a gig-work matching platform for retired Dr.stretch trainers.
+**Dr.stretch SPOT** is a part-time employment (アルバイト) matching platform for retired Dr.stretch trainers.
 
-When trainers leave Dr.stretch, their skills don't disappear. SPOT connects these alumni trainers with Dr.stretch stores that need temporary staff, creating a win-win:
+When trainers leave Dr.stretch, their skills don't disappear. SPOT connects these alumni trainers with Dr.stretch stores that need temporary staff as part-time employees (アルバイト — NOT freelance/業務委託), creating a win-win:
 - Stores get experienced, pre-trained staff on demand
 - Alumni trainers earn extra income with flexible schedules
+- Salary is paid by HR via bank transfer (not through the platform)
 
 ```
 Alumni trainer registers on SPOT
   -> Declares availability ("I can work Tuesdays at Shibuya store")
   -> Store posts a shift ("Need 2 trainers this Saturday")
   -> Trainer applies (or receives direct offer)
-  -> Match confirmed -> QR clock-in/out -> Get paid
+  -> Match confirmed -> QR clock-in/out -> HR pays salary via bank transfer
 ```
 
 ---
@@ -312,11 +313,12 @@ SPOT creates a marketplace where:
 
 ### Revenue model
 
-Platform charges are managed through the rate system:
-- Company sets pay rates (base + bonuses)
+SPOT is an internal HR tool — not a marketplace that charges fees:
+- Company sets pay rates (base + bonuses) for part-time employees
 - Cost ceiling prevents overspending
 - Emergency bonus budget is capped per store per month
-- Potential future: take a platform fee from each transaction
+- Salary is paid via standard payroll (bank transfer by HR department)
+- No platform fee or in-app payment processing
 
 ### Cost structure
 
@@ -348,10 +350,10 @@ Platform charges are managed through the rate system:
 ```
 Dr.stretch Meister (Career Credentials)
   -> Trainer career data flows to SPOT
-  -> VCs provide pre-verification for gig work
+  -> VCs provide pre-verification for part-time work
 
-Dr.stretch SPOT (Gig Matching)
-  -> Alumni trainers matched with stores
+Dr.stretch SPOT (Part-time Employment Matching)
+  -> Alumni trainers matched with stores as part-time employees
   -> Performance data feeds back to Meister
 
 Dr.stretch SELECT (Member EC)
@@ -369,8 +371,8 @@ Below is a list of features that exist in the UI but are NOT yet fully working. 
 |---------|---------------|-----------------|--------------------------|
 | **Email Notifications** | NOT CONNECTED | Shift reminders, application confirmations, and blank alerts are NOT sent by email. Notification logs appear in the system but emails don't actually deliver. | Resend API key needs to be configured |
 | **Push Notifications** | NOT IMPLEMENTED | The "Notifications" page shows notification records, but no push notifications are sent to phones. | Firebase Cloud Messaging or LINE Messaging API integration needed |
-| **LINE Notifications** | NOT IMPLEMENTED | No LINE messages are sent to trainers. | LINE Messaging API channel access token needed |
-| **Payment / Payout** | NOT IMPLEMENTED (Phase 2) | The "Earnings" page shows calculated pay amounts, but there is NO withdrawal or bank transfer function. Trainers can see how much they earned but cannot request payment through the system. | Stripe Connect or bank transfer integration (Phase 2) |
+| **LINE Notifications** | ✅ CONNECTED | LINE messages are sent for shift offers, confirmations, and system notifications via LINE Messaging API (@476pimjy). | Fully operational |
+| **Payment / Payout** | HANDLED EXTERNALLY | The "Earnings" page shows calculated pay amounts for reference. Actual salary payment is handled by HR via bank transfer (standard アルバイト payroll). No in-app payment processing is needed. | N/A — HR handles payroll externally |
 | **Cron Reminders** | PARTIALLY WORKING | The cron job runs on schedule, but because email is not connected, reminder emails are silently skipped. | Resend API key needed |
 | **Meister Integration** | NOT IMPLEMENTED (Phase 2) | SPOT and Meister are completely separate systems. Career data from Meister does not flow to SPOT. | Phase 2 development |
 
