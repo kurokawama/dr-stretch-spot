@@ -420,7 +420,7 @@ export default async function TrainerHomePage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-sm font-bold text-primary">
-                        +¥{shift.emergency_bonus_amount.toLocaleString("ja-JP")}
+                        +¥{(shift.emergency_bonus_amount ?? 0).toLocaleString("ja-JP")}
                       </p>
                       <Button asChild size="sm" className="h-8 rounded-xl bg-primary px-4 text-xs text-primary-foreground hover:bg-primary/90">
                         <Link href={`/shifts/${shift.id}`}>応募</Link>

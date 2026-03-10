@@ -311,15 +311,10 @@ export default function ShiftSearchPage() {
                       </p>
                     </div>
                     <div className="text-right space-y-1">
-                      <p className="text-sm font-bold text-primary">+¥{shift.emergency_bonus_amount.toLocaleString("ja-JP")}</p>
+                      <p className="text-sm font-bold text-primary">+¥{(shift.emergency_bonus_amount ?? 0).toLocaleString("ja-JP")}</p>
                       <Badge variant="outline" className="text-xs">
                         {shift.filled_count}/{shift.required_count}名
                       </Badge>
-                      {shift.is_emergency && shift.emergency_bonus_amount > 0 && (
-                        <p className="text-xs font-semibold text-accent-foreground">
-                          +¥{shift.emergency_bonus_amount}
-                        </p>
-                      )}
                       <span className="inline-flex h-8 items-center rounded-xl bg-primary px-3 text-xs font-medium text-primary-foreground">
                         応募する
                       </span>

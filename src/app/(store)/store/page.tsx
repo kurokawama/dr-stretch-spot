@@ -171,7 +171,7 @@ export default async function StoreDashboardPage() {
   };
 
   return (
-    <div className="animate-fade-in-up space-y-6 bg-[#FCFCFC] p-4 md:p-6">
+    <div className="animate-fade-in-up space-y-6 bg-background p-4 md:p-6">
       {/* Store Info Header */}
       <div className="space-y-1">
         <h1 className="font-heading text-2xl font-bold">ダッシュボード</h1>

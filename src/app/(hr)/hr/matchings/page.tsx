@@ -183,7 +183,7 @@ export default function MatchingsPage() {
   };
 
   return (
-    <div className="animate-fade-in-up space-y-6 bg-[#FCFCFC] p-6">
+    <div className="animate-fade-in-up space-y-6 bg-background p-6">
       <div>
         <h1 className="font-heading text-2xl font-bold">マッチング管理</h1>
         <p className="text-muted-foreground">
@@ -239,7 +239,7 @@ export default function MatchingsPage() {
       {/* Matchings table */}
       <Card className="rounded-lg border bg-card shadow-sm">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="font-heading text-base font-semibold">
             マッチング一覧（{totalCount}件）
           </CardTitle>
         </CardHeader>

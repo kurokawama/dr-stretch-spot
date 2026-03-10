@@ -185,7 +185,7 @@ export default async function HRDashboardPage() {
   };
 
   return (
-    <div className="animate-fade-in-up space-y-6 bg-[#FCFCFC] p-6">
+    <div className="animate-fade-in-up space-y-6 bg-background p-6">
       <div>
         <h1 className="font-heading text-2xl font-bold">
           {profile?.role === "area_manager"
