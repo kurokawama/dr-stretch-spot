@@ -1,13 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Search,
   CalendarDays,
-  Clock,
   AlertTriangle,
   FileText,
   Sparkles,
@@ -16,8 +14,6 @@ import {
   ArrowRight,
   TrendingUp,
   Trophy,
-  Bell,
-  CalendarPlus,
 } from "lucide-react";
 
 export default async function TrainerHomePage() {
@@ -270,6 +266,14 @@ export default async function TrainerHomePage() {
     .order("applied_at", { ascending: false })
     .limit(5);
 
+  const { data: availableShifts } = await supabase
+    .from("shift_requests")
+    .select("id, title, shift_date, start_time, end_time, emergency_bonus_amount, is_emergency, store:stores(name, area)")
+    .eq("status", "open")
+    .gte("shift_date", today)
+    .order("shift_date")
+    .limit(4);
+
   const statusLabels: Record<string, string> = {
     pending: "審査中", approved: "承認済", rejected: "不承認",
     cancelled: "キャンセル", completed: "完了", no_show: "欠勤",
@@ -283,184 +287,180 @@ export default async function TrainerHomePage() {
     no_show: "bg-red-100 text-red-800 border-red-200",
   };
 
-  return (
-    <div className="animate-fade-in-up p-4 md:p-6 space-y-5 max-w-lg mx-auto">
-      {/* Greeting section */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <p className="text-sm text-muted-foreground">おかえりなさい</p>
-          <h1 className="font-heading text-2xl font-bold">
-            {trainer?.full_name ?? "トレーナー"}<span className="font-normal text-lg">さん</span>
-          </h1>
-        </div>
-        <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5">
-          <TrendingUp className="h-3.5 w-3.5 text-primary" />
-          <span className="text-sm font-semibold text-primary">{trainer?.tenure_years ?? 0}年</span>
-        </div>
-      </div>
+  const todayShift = todayShifts?.[0] ?? null;
+  const nextShift = (availableShifts?.[0] ??
+    todayShift) as
+    | {
+      shift_date?: string;
+      start_time?: string;
+      end_time?: string;
+      scheduled_start?: string;
+      scheduled_end?: string;
+      store?: { name?: string } | null;
+    }
+    | null;
+  const monthlyIncome = (recentApps ?? []).reduce((sum, app) => sum + (app.confirmed_rate ?? 0), 0);
+  const rankLabel = (trainer?.tenure_years ?? 0) >= 5
+    ? "ゴールド"
+    : (trainer?.tenure_years ?? 0) >= 3
+      ? "シルバー"
+      : "ブロンズ";
 
-      {/* Blank alert */}
+  return (
+    <div className="animate-fade-in-up mx-auto max-w-lg space-y-6 bg-background p-4 pb-24 md:p-6">
+      <section className="rounded-2xl bg-gradient-to-b from-white to-red-50/30 p-4">
+        <div className="space-y-4">
+          <h1 className="font-heading text-xl font-bold text-foreground">
+            おかえりなさい、{trainer?.full_name ?? "トレーナー"}さん 👋
+          </h1>
+
+          <div className="rounded-xl bg-primary p-5 text-primary-foreground shadow-sm">
+            <p className="text-xs font-medium text-white/90">本日のシフト</p>
+            <p className="mt-1 text-base font-semibold">
+              {(todayShift?.store as unknown as { name: string } | null)?.name ?? "本日のシフト"}
+            </p>
+            <p className="mt-1 text-sm text-white/90">
+              {todayShift ? `${todayShift.scheduled_start} - ${todayShift.scheduled_end}` : "--:-- - --:--"}
+            </p>
+            <Button asChild className="mt-4 h-9 rounded-xl bg-white px-4 text-sm font-semibold text-primary hover:bg-white/90">
+              <Link href="/clock">打刻する</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {trainer?.blank_status && trainer.blank_status !== "ok" && (
-        <Card className="border-0 shadow-md overflow-hidden">
+        <Card className="overflow-hidden rounded-lg border bg-card shadow-sm">
           <div className="h-1 bg-destructive" />
           <CardContent className="flex items-center gap-3 p-4">
             <div className="rounded-full bg-destructive/10 p-2">
               <AlertTriangle className="h-4 w-4 text-destructive" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-sm text-destructive">ブランクアラート</p>
+              <p className="text-sm font-medium text-destructive">ブランクアラート</p>
               <p className="text-xs text-muted-foreground">
                 {trainer.blank_status === "alert_60" && "60日以上シフトに入っていません"}
                 {trainer.blank_status === "skill_check_required" && "スキルチェックが必要です"}
                 {trainer.blank_status === "training_required" && "再研修が必要です"}
               </p>
             </div>
-            <Button variant="outline" size="sm" asChild className="shrink-0">
+            <Button variant="outline" size="sm" asChild className="shrink-0 rounded-xl">
               <Link href="/alerts">詳細</Link>
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Quick actions */}
-      <div className="grid gap-3 grid-cols-3 stagger-children">
-        <Link href="/shifts" className="card-interactive">
-          <Card className="h-full rounded-xl border bg-card shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <Search className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-medium">シフト検索</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/my-shifts" className="card-interactive">
-          <Card className="h-full rounded-xl border bg-card shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-muted p-2">
-                <CalendarDays className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-medium">マイシフト</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/clock" className="card-interactive">
-          <Card className="h-full rounded-xl border bg-card shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-muted p-2">
-                <Clock className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-medium">打刻</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/availability" className="card-interactive">
-          <Card className="h-full rounded-xl border bg-card shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-muted p-2">
-                <CalendarPlus className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-medium">シフト希望</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/rank" className="card-interactive">
-          <Card className="h-full rounded-xl border bg-card shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-muted p-2">
-                <Trophy className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-medium">ランク</span>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/notifications" className="card-interactive">
-          <Card className="h-full rounded-xl border bg-card shadow-sm">
-            <CardContent className="p-4 flex flex-col items-center justify-center gap-2 h-20">
-              <div className="rounded-lg bg-muted p-2">
-                <Bell className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-xs font-medium">通知</span>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Today's shifts */}
-      <Card className="rounded-xl border bg-card shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="font-heading text-base font-semibold flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary" />
-            本日のシフト
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {todayShifts && todayShifts.length > 0 ? (
-            <div className="space-y-2 stagger-children">
-              {todayShifts.map((shift) => (
-                <div key={shift.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
-                  <div>
-                    <p className="font-medium text-sm">{(shift.store as unknown as { name: string })?.name}</p>
-                    <p className="text-xs text-muted-foreground">{shift.scheduled_start} - {shift.scheduled_end}</p>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={
-                      shift.status === "clocked_in"
-                        ? "bg-green-100 text-green-800 border-green-200"
-                        : shift.status === "clocked_out"
-                          ? "bg-primary/10 text-primary border-primary/30"
-                          : "bg-accent/30 text-accent-foreground border-accent/60"
-                    }
-                  >
-                    {shift.status === "scheduled" ? "予定" : shift.status === "clocked_in" ? "出勤中" : "退勤済"}
-                  </Badge>
-                </div>
-              ))}
+      <section className="grid grid-cols-3 gap-3">
+        <Card className="rounded-lg border border-l-4 border-l-primary bg-card shadow-sm">
+          <CardContent className="space-y-1 p-3">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <CalendarDays className="h-3.5 w-3.5" />
+              <p className="text-xs font-medium">次のシフト</p>
             </div>
-          ) : (
-            <div className="rounded-xl border border-dashed bg-muted/40 p-5 text-center space-y-2">
-              <CalendarDays className="mx-auto h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">本日のシフト</p>
+            <p className="line-clamp-1 text-xs font-semibold text-foreground">
+              {nextShift?.shift_date ?? "未定"}
+            </p>
+            <p className="line-clamp-1 text-[11px] text-muted-foreground">
+              {(nextShift?.store as { name?: string } | null)?.name ?? ""}
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-lg border border-l-4 border-l-[oklch(0.87_0.18_110)] bg-card shadow-sm">
+          <CardContent className="space-y-1 p-3">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <TrendingUp className="h-3.5 w-3.5" />
+              <p className="text-xs font-medium">今月の収入</p>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <p className="line-clamp-1 text-xs font-semibold text-foreground">
+              ¥{monthlyIncome.toLocaleString("ja-JP")}
+            </p>
+            <p className="text-[11px] text-muted-foreground">直近5件</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-lg border border-l-4 border-l-yellow-500 bg-card shadow-sm">
+          <CardContent className="space-y-1 p-3">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Trophy className="h-3.5 w-3.5" />
+              <p className="text-xs font-medium">ランク</p>
+            </div>
+            <p className="line-clamp-1 text-xs font-semibold text-foreground">{rankLabel}</p>
+            <p className="text-[11px] text-muted-foreground">{trainer?.tenure_years ?? 0}年</p>
+          </CardContent>
+        </Card>
+      </section>
 
-      {/* Recent applications */}
-      <Card className="rounded-xl border bg-card shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="font-heading text-base font-semibold">最近の応募</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentApps && recentApps.length > 0 ? (
-            <div className="space-y-2 stagger-children">
-              {recentApps.map((app) => {
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-base font-semibold">募集中のシフト</h2>
+          <Link href="/shifts" className="text-xs font-medium text-primary">
+            すべて見る &gt;
+          </Link>
+        </div>
+
+        {availableShifts && availableShifts.length > 0 ? (
+          <div className="space-y-3 stagger-children">
+            {availableShifts.map((shift) => {
+              const store = shift.store as unknown as { name?: string; area?: string } | null;
+              return (
+                <Card key={shift.id} className="rounded-lg border bg-card shadow-sm">
+                  <CardContent className="space-y-3 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">
+                          {store?.name ?? shift.title}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {shift.shift_date} {shift.start_time}〜{shift.end_time}
+                        </p>
+                      </div>
+                      <Badge className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:bg-muted">
+                        {store?.area ?? "エリア"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold text-primary">
+                        +¥{shift.emergency_bonus_amount.toLocaleString("ja-JP")}
+                      </p>
+                      <Button asChild size="sm" className="h-8 rounded-xl bg-primary px-4 text-xs text-primary-foreground hover:bg-primary/90">
+                        <Link href={`/shifts/${shift.id}`}>応募</Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <Card className="rounded-lg border bg-card shadow-sm">
+            <CardContent className="flex items-center justify-center p-6 text-sm text-muted-foreground">
+              募集中のシフト
+            </CardContent>
+          </Card>
+        )}
+
+        {recentApps && recentApps.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="font-heading text-sm font-semibold">最近の応募</h3>
+            <div className="space-y-2">
+              {recentApps.slice(0, 3).map((app) => {
                 const sr = app.shift_request as unknown as { title: string; shift_date: string; store: { name: string } } | null;
                 return (
-                  <div key={app.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
+                  <div key={app.id} className="flex items-center justify-between rounded-lg border bg-card p-3 shadow-sm">
                     <div>
-                      <p className="font-medium text-sm">{sr?.title ?? "シフト"}</p>
+                      <p className="text-sm font-medium">{sr?.title ?? "シフト"}</p>
                       <p className="text-xs text-muted-foreground">{sr?.store?.name} / {sr?.shift_date}</p>
                     </div>
-                    <div className="text-right space-y-1">
-                      <Badge variant="outline" className={statusColors[app.status] ?? ""}>
-                        {statusLabels[app.status] ?? app.status}
-                      </Badge>
-                      <p className="text-xs font-mono text-muted-foreground">¥{app.confirmed_rate}/h</p>
-                    </div>
+                    <Badge variant="outline" className={statusColors[app.status] ?? ""}>
+                      {statusLabels[app.status] ?? app.status}
+                    </Badge>
                   </div>
                 );
               })}
             </div>
-          ) : (
-            <div className="rounded-xl border border-dashed bg-muted/40 p-5 text-center space-y-2">
-              <FileText className="mx-auto h-6 w-6 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">最近の応募</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
