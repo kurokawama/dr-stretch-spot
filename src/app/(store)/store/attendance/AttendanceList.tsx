@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,7 @@ import { verifyAttendance } from "@/actions/attendance";
 import { requestClockOut } from "@/actions/matching";
 import { toast } from "sonner";
 import type { AttendanceRecord } from "@/types/database";
-import { CheckCircle, Clock, QrCode, LogOut, Loader2 } from "lucide-react";
+import { CheckCircle, Clock, QrCode, LogOut, Loader2, Camera, Keyboard } from "lucide-react";
 
 const statusLabels: Record<string, string> = {
   scheduled: "予定",
@@ -52,6 +52,120 @@ export function AttendanceList({
   const [scanDialog, setScanDialog] = useState(false);
   const [scanToken, setScanToken] = useState("");
   const [scanning, setScanning] = useState(false);
+  const [cameraMode, setCameraMode] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopCamera = useCallback(() => {
+    if (scanIntervalRef.current) {
+      clearInterval(scanIntervalRef.current);
+      scanIntervalRef.current = null;
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    setCameraMode(false);
+  }, []);
+
+  const processQrResult = useCallback(async (rawValue: string) => {
+    stopCamera();
+    // Extract token from URL or use raw value
+    let token = rawValue.trim();
+    const urlMatch = token.match(/[?&]token=([^&]+)/);
+    if (urlMatch) {
+      token = urlMatch[1];
+    }
+
+    setScanning(true);
+    try {
+      const res = await fetch("/api/attendance/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        const action = result.data.type === "clock_in" ? "出勤" : "退勤";
+        toast.success(`${action}打刻が完了しました`);
+        setScanDialog(false);
+        setScanToken("");
+        router.refresh();
+      } else {
+        toast.error(result.error ?? "QRコードの検証に失敗しました");
+      }
+    } catch {
+      toast.error("通信エラーが発生しました");
+    }
+    setScanning(false);
+  }, [stopCamera, router]);
+
+  const startCamera = useCallback(async () => {
+    setCameraError("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } },
+      });
+      streamRef.current = stream;
+      setCameraMode(true);
+
+      // Wait for video element to be available
+      await new Promise<void>((resolve) => {
+        const check = () => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+            videoRef.current.play();
+            resolve();
+          } else {
+            requestAnimationFrame(check);
+          }
+        };
+        check();
+      });
+
+      // Check if BarcodeDetector is available
+      if ("BarcodeDetector" in window) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const detector = new (window as any).BarcodeDetector({
+          formats: ["qr_code"],
+        });
+
+        scanIntervalRef.current = setInterval(async () => {
+          if (!videoRef.current || videoRef.current.readyState !== 4) return;
+          try {
+            const barcodes = await detector.detect(videoRef.current);
+            if (barcodes.length > 0) {
+              const value = barcodes[0].rawValue;
+              if (value) {
+                processQrResult(value);
+              }
+            }
+          } catch {
+            // Detection failed, keep trying
+          }
+        }, 300);
+      } else {
+        // BarcodeDetector not available - use canvas + manual approach
+        setCameraError(
+          "このブラウザはQR自動読み取りに対応していません。QRコードが画面に映ったら、下のテキスト入力欄にトークンを入力してください。"
+        );
+      }
+    } catch {
+      setCameraError(
+        "カメラへのアクセスが拒否されました。ブラウザの設定でカメラの許可を確認してください。"
+      );
+    }
+  }, [processQrResult]);
+
+  // Cleanup camera on dialog close
+  useEffect(() => {
+    if (!scanDialog) {
+      stopCamera();
+    }
+  }, [scanDialog, stopCamera]);
 
   const handleVerify = async (attendanceId: string) => {
     setProcessing(attendanceId);
@@ -259,36 +373,88 @@ export function AttendanceList({
 
       {/* QR Scan dialog */}
       <Dialog open={scanDialog} onOpenChange={setScanDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>QRコードスキャン</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              トレーナーのQRコードに表示されているURLまたはトークンを入力してください。
-            </p>
-            <Input
-              placeholder="トークンまたはURLを入力..."
-              value={scanToken}
-              onChange={(e) => setScanToken(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleScanQR()}
-            />
-            <p className="text-xs text-muted-foreground">
-              カメラスキャナーアプリをお使いの場合は、QRコードを読み取るとURLが自動で開き打刻が完了します。
-            </p>
+            {/* Camera / Manual toggle */}
+            <div className="flex gap-2">
+              <Button
+                variant={cameraMode ? "default" : "outline"}
+                size="sm"
+                onClick={startCamera}
+                className="flex-1"
+              >
+                <Camera className="h-4 w-4 mr-1" />
+                カメラ
+              </Button>
+              <Button
+                variant={!cameraMode ? "default" : "outline"}
+                size="sm"
+                onClick={stopCamera}
+                className="flex-1"
+              >
+                <Keyboard className="h-4 w-4 mr-1" />
+                手動入力
+              </Button>
+            </div>
+
+            {/* Camera view */}
+            {cameraMode && (
+              <div className="space-y-2">
+                <div className="relative rounded-lg overflow-hidden bg-black aspect-[4/3]">
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                    playsInline
+                    muted
+                  />
+                  {/* Scan overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-48 h-48 border-2 border-white/70 rounded-lg" />
+                  </div>
+                </div>
+                {cameraError && (
+                  <p className="text-xs text-amber-600 bg-amber-50 p-2 rounded">
+                    {cameraError}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground text-center">
+                  QRコードをカメラに映してください。自動で読み取ります。
+                </p>
+              </div>
+            )}
+
+            {/* Manual input */}
+            {!cameraMode && (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  トレーナーのQRコードに表示されているURLまたはトークンを入力してください。
+                </p>
+                <Input
+                  placeholder="トークンまたはURLを入力..."
+                  value={scanToken}
+                  onChange={(e) => setScanToken(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleScanQR()}
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setScanDialog(false)}>
               閉じる
             </Button>
-            <Button onClick={handleScanQR} disabled={scanning}>
-              {scanning ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <QrCode className="mr-2 h-4 w-4" />
-              )}
-              {scanning ? "処理中..." : "打刻実行"}
-            </Button>
+            {!cameraMode && (
+              <Button onClick={handleScanQR} disabled={scanning}>
+                {scanning ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <QrCode className="mr-2 h-4 w-4" />
+                )}
+                {scanning ? "処理中..." : "打刻実行"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

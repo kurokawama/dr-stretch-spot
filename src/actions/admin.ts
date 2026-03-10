@@ -192,6 +192,67 @@ export async function getAllTrainers(filters?: {
 }
 
 // =============================================
+// A-2b: Update Trainer (HR/Admin only)
+// =============================================
+
+export async function updateTrainer(
+  trainerId: string,
+  updates: {
+    rank?: string;
+    status?: string;
+    spot_status?: string;
+    certifications?: string[];
+    preferred_areas?: string[];
+    full_name?: string;
+    phone?: string;
+    bio?: string;
+    tenure_years?: number;
+  }
+): Promise<ActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "ログインが必要です" };
+
+  // Verify HR or Admin role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
+    return { success: false, error: "権限がありません" };
+  }
+
+  const admin = createAdminClient();
+
+  // Validate rank if provided
+  if (updates.rank && !["bronze", "silver", "gold", "platinum"].includes(updates.rank)) {
+    return { success: false, error: "無効なランクです" };
+  }
+
+  // Validate status if provided
+  if (updates.status && !["pending", "active", "suspended", "inactive"].includes(updates.status)) {
+    return { success: false, error: "無効なステータスです" };
+  }
+
+  // Validate spot_status if provided
+  if (updates.spot_status && !["registered", "active", "inactive", "paused"].includes(updates.spot_status)) {
+    return { success: false, error: "無効なSPOTステータスです" };
+  }
+
+  const { error } = await admin
+    .from("alumni_trainers")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", trainerId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+// =============================================
 // A-3: Store Management
 // =============================================
 

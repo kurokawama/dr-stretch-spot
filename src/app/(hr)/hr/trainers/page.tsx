@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,10 +27,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Label } from "@/components/ui/label";
-import { Users, Search, RefreshCw, Pencil, Save, X } from "lucide-react";
+import {
+  Users,
+  Search,
+  Pencil,
+  Save,
+  X,
+  MessageCircle,
+} from "lucide-react";
 import { getAllTrainers, updateTrainer } from "@/actions/admin";
-import { runBlankStatusBatch } from "@/actions/config";
 import type { AlumniTrainer } from "@/types/database";
 import { toast } from "sonner";
 
@@ -43,18 +49,25 @@ const areaLabels: Record<string, string> = {
   kansai: "関西", chugoku: "中国", shikoku: "四国", kyushu: "九州",
 };
 
-const blankStatusConfig: Record<string, { label: string; color: string }> = {
-  ok: { label: "正常", color: "bg-green-100 text-green-800" },
-  alert_60: { label: "60日アラート", color: "bg-amber-100 text-amber-800" },
-  skill_check_required: { label: "スキルチェック要", color: "bg-orange-100 text-orange-800" },
-  training_required: { label: "研修要", color: "bg-red-100 text-red-800" },
-};
-
 const rankConfig: Record<string, { label: string; color: string }> = {
   bronze: { label: "ブロンズ", color: "bg-amber-700 text-white" },
   silver: { label: "シルバー", color: "bg-gray-400 text-white" },
   gold: { label: "ゴールド", color: "bg-yellow-500 text-white" },
   platinum: { label: "プラチナ", color: "bg-purple-600 text-white" },
+};
+
+const statusConfig: Record<string, { label: string; color: string }> = {
+  active: { label: "アクティブ", color: "bg-green-100 text-green-800" },
+  pending: { label: "保留中", color: "bg-yellow-100 text-yellow-800" },
+  suspended: { label: "停止中", color: "bg-red-100 text-red-800" },
+  inactive: { label: "非アクティブ", color: "bg-gray-100 text-gray-800" },
+};
+
+const spotStatusConfig: Record<string, string> = {
+  registered: "登録済み",
+  active: "アクティブ",
+  inactive: "非アクティブ",
+  paused: "一時停止",
 };
 
 interface EditForm {
@@ -68,7 +81,7 @@ interface EditForm {
   preferred_areas: string[];
 }
 
-export default function AdminTrainersPage() {
+export default function HRTrainersPage() {
   const [trainers, setTrainers] = useState<AlumniTrainer[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTrainer, setSelectedTrainer] = useState<AlumniTrainer | null>(null);
@@ -86,7 +99,6 @@ export default function AdminTrainersPage() {
   });
   const [filters, setFilters] = useState({
     status: "",
-    blank_status: "",
     area: "",
     search: "",
   });
@@ -95,7 +107,6 @@ export default function AdminTrainersPage() {
     setLoading(true);
     const result = await getAllTrainers({
       status: filters.status || undefined,
-      blank_status: filters.blank_status || undefined,
       area: filters.area || undefined,
       search: filters.search || undefined,
     });
@@ -109,16 +120,6 @@ export default function AdminTrainersPage() {
     loadTrainers();
   }, [loadTrainers]);
 
-  const handleBatchUpdate = async () => {
-    const result = await runBlankStatusBatch();
-    if (result.success && result.data) {
-      toast.success(`${result.data.updated}名のステータスを更新しました`);
-      loadTrainers();
-    } else {
-      toast.error(result.error || "バッチ更新に失敗しました");
-    }
-  };
-
   const startEdit = (trainer: AlumniTrainer) => {
     setEditForm({
       full_name: trainer.full_name,
@@ -131,6 +132,10 @@ export default function AdminTrainersPage() {
       preferred_areas: [...trainer.preferred_areas],
     });
     setEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setEditing(false);
   };
 
   const handleSave = async () => {
@@ -169,23 +174,17 @@ export default function AdminTrainersPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">トレーナー管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            全トレーナーの状況を一覧で管理
-          </p>
-        </div>
-        <Button variant="outline" onClick={handleBatchUpdate}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          ブランク一括更新
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold">トレーナー管理</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          トレーナー情報の閲覧・編集
+        </p>
       </div>
 
       {/* Filters */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -212,28 +211,6 @@ export default function AdminTrainersPage() {
                 <SelectItem value="pending">保留中</SelectItem>
                 <SelectItem value="inactive">非アクティブ</SelectItem>
                 <SelectItem value="suspended">停止中</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={filters.blank_status}
-              onValueChange={(v) =>
-                setFilters((f) => ({
-                  ...f,
-                  blank_status: v === "all" ? "" : v,
-                }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="ブランクステータス" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全ブランク</SelectItem>
-                <SelectItem value="ok">正常</SelectItem>
-                <SelectItem value="alert_60">60日アラート</SelectItem>
-                <SelectItem value="skill_check_required">
-                  スキルチェック要
-                </SelectItem>
-                <SelectItem value="training_required">研修要</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -271,23 +248,24 @@ export default function AdminTrainersPage() {
             <TableRow>
               <TableHead>名前</TableHead>
               <TableHead>メール</TableHead>
-              <TableHead>在籍年数</TableHead>
               <TableHead>ランク</TableHead>
-              <TableHead>ブランク</TableHead>
-              <TableHead>最終勤務</TableHead>
+              <TableHead>エリア</TableHead>
+              <TableHead>LINE</TableHead>
               <TableHead>ステータス</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {trainers.map((trainer) => {
-              const blankCfg =
-                blankStatusConfig[trainer.blank_status] || blankStatusConfig.ok;
               const rnk = rankConfig[trainer.rank] || rankConfig.bronze;
+              const sts = statusConfig[trainer.status] || statusConfig.pending;
               return (
                 <TableRow
                   key={trainer.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setSelectedTrainer(trainer)}
+                  onClick={() => {
+                    setSelectedTrainer(trainer);
+                    setEditing(false);
+                  }}
                 >
                   <TableCell className="font-medium">
                     {trainer.full_name}
@@ -295,31 +273,35 @@ export default function AdminTrainersPage() {
                   <TableCell className="text-sm text-muted-foreground">
                     {trainer.email}
                   </TableCell>
-                  <TableCell>{trainer.tenure_years}年</TableCell>
                   <TableCell>
                     <Badge className={rnk.color}>{rnk.label}</Badge>
                   </TableCell>
-                  <TableCell>
-                    <Badge className={blankCfg.color}>{blankCfg.label}</Badge>
-                  </TableCell>
                   <TableCell className="text-sm">
-                    {trainer.last_shift_date || "-"}
+                    {trainer.preferred_areas
+                      .map((a) => areaLabels[a] || a)
+                      .join(", ") || "-"}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        trainer.status === "active" ? "default" : "secondary"
-                      }
-                    >
-                      {trainer.status}
-                    </Badge>
+                    {trainer.line_user_id ? (
+                      <Badge className="bg-green-500 text-white">
+                        <MessageCircle className="h-3 w-3 mr-1" />
+                        連携済
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-muted-foreground">
+                        未連携
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={sts.color}>{sts.label}</Badge>
                   </TableCell>
                 </TableRow>
               );
             })}
             {!loading && trainers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   <p className="text-muted-foreground">
                     条件に一致するトレーナーがいません
                   </p>
@@ -330,7 +312,7 @@ export default function AdminTrainersPage() {
         </Table>
       </Card>
 
-      {/* Detail Sheet */}
+      {/* Detail / Edit Sheet */}
       <Sheet
         open={!!selectedTrainer}
         onOpenChange={() => {
@@ -370,70 +352,48 @@ export default function AdminTrainersPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">ランク</p>
-                    <Badge
-                      className={
-                        (rankConfig[selectedTrainer.rank] || rankConfig.bronze)
-                          .color
-                      }
-                    >
-                      {
-                        (rankConfig[selectedTrainer.rank] || rankConfig.bronze)
-                          .label
-                      }
+                    <Badge className={(rankConfig[selectedTrainer.rank] || rankConfig.bronze).color}>
+                      {(rankConfig[selectedTrainer.rank] || rankConfig.bronze).label}
                     </Badge>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">
-                      ブランクステータス
-                    </p>
-                    <Badge
-                      className={
-                        (
-                          blankStatusConfig[selectedTrainer.blank_status] ||
-                          blankStatusConfig.ok
-                        ).color
-                      }
-                    >
-                      {
-                        (
-                          blankStatusConfig[selectedTrainer.blank_status] ||
-                          blankStatusConfig.ok
-                        ).label
-                      }
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">最終勤務日</p>
-                    <p className="text-sm">
-                      {selectedTrainer.last_shift_date || "未勤務"}
-                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">SPOT状態</p>
                     <Badge variant="outline">
-                      {selectedTrainer.spot_status}
+                      {spotStatusConfig[selectedTrainer.spot_status] || selectedTrainer.spot_status}
                     </Badge>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">
-                      ステータス
-                    </p>
-                    <Badge
-                      variant={
-                        selectedTrainer.status === "active"
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
-                      {selectedTrainer.status}
+                    <p className="text-xs text-muted-foreground">ステータス</p>
+                    <Badge className={(statusConfig[selectedTrainer.status] || statusConfig.pending).color}>
+                      {(statusConfig[selectedTrainer.status] || statusConfig.pending).label}
                     </Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">LINE連携</p>
+                    {selectedTrainer.line_user_id ? (
+                      <div>
+                        <Badge className="bg-green-500 text-white">
+                          <MessageCircle className="h-3 w-3 mr-1" />
+                          連携済
+                        </Badge>
+                        {selectedTrainer.line_linked_at && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(selectedTrainer.line_linked_at).toLocaleDateString("ja-JP")}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="text-muted-foreground">未連携</Badge>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">最終勤務日</p>
+                    <p className="text-sm">{selectedTrainer.last_shift_date || "未勤務"}</p>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    希望エリア
-                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">希望エリア</p>
                   <div className="flex flex-wrap gap-1">
                     {selectedTrainer.preferred_areas.map((area) => (
                       <Badge key={area} variant="outline" className="text-xs">
@@ -441,12 +401,21 @@ export default function AdminTrainersPage() {
                       </Badge>
                     ))}
                     {selectedTrainer.preferred_areas.length === 0 && (
-                      <span className="text-sm text-muted-foreground">
-                        未設定
-                      </span>
+                      <span className="text-sm text-muted-foreground">未設定</span>
                     )}
                   </div>
                 </div>
+
+                {selectedTrainer.certifications.length > 0 && (
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">資格</p>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedTrainer.certifications.map((cert) => (
+                        <Badge key={cert} className="text-xs">{cert}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {selectedTrainer.bio && (
                   <div>
@@ -456,22 +425,6 @@ export default function AdminTrainersPage() {
                     </p>
                   </div>
                 )}
-
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">バッジ</p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedTrainer.badges.map((badge) => (
-                      <Badge key={badge} className="text-xs">
-                        {badge}
-                      </Badge>
-                    ))}
-                    {selectedTrainer.badges.length === 0 && (
-                      <span className="text-sm text-muted-foreground">
-                        バッジなし
-                      </span>
-                    )}
-                  </div>
-                </div>
               </div>
             </>
           )}
@@ -483,27 +436,27 @@ export default function AdminTrainersPage() {
               </SheetHeader>
               <div className="space-y-4 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="admin-edit-name">氏名</Label>
+                  <Label htmlFor="edit-name">氏名</Label>
                   <Input
-                    id="admin-edit-name"
+                    id="edit-name"
                     value={editForm.full_name}
                     onChange={(e) => setEditForm((f) => ({ ...f, full_name: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="admin-edit-phone">電話番号</Label>
+                  <Label htmlFor="edit-phone">電話番号</Label>
                   <Input
-                    id="admin-edit-phone"
+                    id="edit-phone"
                     value={editForm.phone}
                     onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="admin-edit-tenure">在籍年数</Label>
+                  <Label htmlFor="edit-tenure">在籍年数</Label>
                   <Input
-                    id="admin-edit-tenure"
+                    id="edit-tenure"
                     type="number"
                     min={0}
                     value={editForm.tenure_years}
@@ -582,9 +535,9 @@ export default function AdminTrainersPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="admin-edit-bio">自己紹介</Label>
+                  <Label htmlFor="edit-bio">自己紹介</Label>
                   <textarea
-                    id="admin-edit-bio"
+                    id="edit-bio"
                     className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     value={editForm.bio}
                     onChange={(e) => setEditForm((f) => ({ ...f, bio: e.target.value }))}
@@ -596,7 +549,7 @@ export default function AdminTrainersPage() {
                     <Save className="h-4 w-4 mr-1" />
                     {saving ? "保存中..." : "保存"}
                   </Button>
-                  <Button variant="outline" onClick={() => setEditing(false)} className="flex-1">
+                  <Button variant="outline" onClick={cancelEdit} className="flex-1">
                     <X className="h-4 w-4 mr-1" />
                     キャンセル
                   </Button>
