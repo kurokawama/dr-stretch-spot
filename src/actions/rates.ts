@@ -50,18 +50,18 @@ export async function updateRateConfig(
     .eq("id", user.id)
     .single();
 
-  if (!profile || (profile.role !== "hr" && profile.role !== "admin")) {
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
     return { success: false, error: "この操作を行う権限がありません" };
   }
 
-  // Get manager record for logging
+  // Get manager record for logging (optional for HR users)
   const { data: manager } = await supabase
     .from("store_managers")
     .select("id")
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
+  const changedBy = manager?.id ?? user.id;
 
   // Get old values for audit log
   const { data: oldConfig } = await supabase
@@ -95,7 +95,7 @@ export async function updateRateConfig(
 
   // Create audit log
   await supabase.from("rate_change_logs").insert({
-    changed_by: manager.id,
+    changed_by: changedBy,
     change_type: "rate_update",
     table_name: "hourly_rate_config",
     record_id: configId,
@@ -133,14 +133,14 @@ export async function createRateConfig(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
+  const changedBy = manager?.id ?? user.id;
 
   const { data, error } = await supabase
     .from("hourly_rate_config")
     .insert({
       ...config,
       is_active: true,
-      created_by: manager.id,
+      created_by: changedBy,
     })
     .select()
     .single();
@@ -149,7 +149,7 @@ export async function createRateConfig(
 
   // Audit log
   await supabase.from("rate_change_logs").insert({
-    changed_by: manager.id,
+    changed_by: changedBy,
     change_type: "rate_create",
     table_name: "hourly_rate_config",
     record_id: data.id,
@@ -179,7 +179,7 @@ export async function deleteRateConfig(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
+  const changedBy = manager?.id ?? user.id;
 
   // Get old values
   const { data: oldConfig } = await supabase
@@ -198,7 +198,7 @@ export async function deleteRateConfig(
 
   // Audit log
   await supabase.from("rate_change_logs").insert({
-    changed_by: manager.id,
+    changed_by: changedBy,
     change_type: "rate_delete",
     table_name: "hourly_rate_config",
     record_id: configId,
@@ -251,7 +251,7 @@ export async function updateBlankRule(
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) return { success: false, error: "マネージャー情報が見つかりません" };
+  const changedBy = manager?.id ?? user.id;
 
   const { data: oldRule } = await supabase
     .from("blank_rule_config")
@@ -270,7 +270,7 @@ export async function updateBlankRule(
 
   // Audit log
   await supabase.from("rate_change_logs").insert({
-    changed_by: manager.id,
+    changed_by: changedBy,
     change_type: "blank_rule_update",
     table_name: "blank_rule_config",
     record_id: ruleId,

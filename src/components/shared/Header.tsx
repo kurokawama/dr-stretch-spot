@@ -28,9 +28,19 @@ const roleLabels: Record<string, string> = {
   admin: "管理者",
 };
 
+const notificationPaths: Record<string, string> = {
+  store_manager: "/store/notifications",
+  hr: "/notifications",
+  area_manager: "/notifications",
+  admin: "/notifications",
+  trainer: "/notifications",
+  employee: "/notifications",
+};
+
 export function Header({ displayName, role }: HeaderProps) {
   const router = useRouter();
   const supabase = createClient();
+  const notifHref = notificationPaths[role] ?? "/notifications";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -71,7 +81,7 @@ export function Header({ displayName, role }: HeaderProps) {
             size="icon"
             className="relative h-9 w-9 rounded-xl border border-transparent bg-muted/40 text-foreground hover:bg-muted"
           >
-            <Link href="/notifications" aria-label="notifications">
+            <Link href={notifHref} aria-label="notifications">
               <Bell className="h-4 w-4" />
             </Link>
           </Button>

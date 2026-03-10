@@ -122,6 +122,17 @@ export async function updateStoreEmergencyBudget(
   } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "ログインが必要です" };
 
+  // Role check: only HR, admin, store_manager allowed
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["hr", "admin", "store_manager", "area_manager"].includes(profile.role)) {
+    return { success: false, error: "この操作を行う権限がありません" };
+  }
+
   const admin = createAdminClient();
 
   const { error } = await admin

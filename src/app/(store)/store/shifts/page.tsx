@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ShiftCreateForm } from "./ShiftCreateForm";
+import { getTodayJST } from "@/lib/date";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -18,7 +19,7 @@ export default async function StoreShiftsPage() {
   if (!manager) redirect("/login");
 
   // Get upcoming shifts for this store
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayJST();
   const { data: shifts } = await supabase
     .from("shift_requests")
     .select("*")

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { AttendanceList } from "./AttendanceList";
+import { getTodayJST, getDaysAgoJST } from "@/lib/date";
 
 export default async function StoreAttendancePage() {
   const supabase = await createClient();
@@ -15,7 +16,7 @@ export default async function StoreAttendancePage() {
 
   if (!manager) redirect("/login");
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayJST();
 
   // Today's attendance records
   const { data: todayRecords } = await supabase

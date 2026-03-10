@@ -56,7 +56,7 @@ export async function hrSearchTrainers(filters?: {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["hr", "admin"].includes(profile.role)) {
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
     return { success: false, error: "人事部権限が必要です" };
   }
 
@@ -152,7 +152,7 @@ export async function hrCreateOffer(
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["hr", "admin"].includes(profile.role)) {
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
     return { success: false, error: "人事部権限が必要です" };
   }
 
@@ -246,7 +246,7 @@ export async function getHrOffers(): Promise<ActionResult<ShiftOffer[]>> {
     .eq("id", user.id)
     .single();
 
-  if (!profile || !["hr", "admin"].includes(profile.role)) {
+  if (!profile || !["hr", "admin", "area_manager"].includes(profile.role)) {
     return { success: false, error: "人事部権限が必要です" };
   }
 

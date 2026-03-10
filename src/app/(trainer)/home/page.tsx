@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getTodayJST } from "@/lib/date";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -249,7 +250,7 @@ export default async function TrainerHomePage() {
   // =============================================
   // Trainer: SPOT Active — Full dashboard
   // =============================================
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayJST();
   const trainerId = trainer?.id ?? "";
 
   const { data: todayShifts } = await supabase

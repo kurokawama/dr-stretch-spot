@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Plus } from "lucide-react";
+import { getTodayJST } from "@/lib/date";
 
 export default async function StoreDashboardPage() {
   const supabase = await createClient();
@@ -26,7 +27,7 @@ export default async function StoreDashboardPage() {
     address: string;
     area: string;
   } | null;
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayJST();
 
   // Today's shifts
   const { data: todayShifts, count: todayCount } = await supabase
@@ -279,7 +280,7 @@ export default async function StoreDashboardPage() {
               size="sm"
               className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <Link href="/store/shifts/new">
+              <Link href="/store/shifts">
                 <Plus className="mr-1 h-4 w-4" />
                 新規作成
               </Link>

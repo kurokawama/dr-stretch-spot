@@ -39,14 +39,26 @@ export default async function EvaluationHistoryPage() {
 
   const { data: trainer } = await supabase
     .from("alumni_trainers")
-    .select("id, average_rating, total_shifts")
+    .select("id")
     .eq("auth_user_id", user.id)
     .single();
 
   if (!trainer) redirect("/home");
 
+  // Calculate total_shifts and average_rating from related tables
+  const { count: shiftCount } = await supabase
+    .from("attendance_records")
+    .select("*", { count: "exact", head: true })
+    .eq("trainer_id", trainer.id)
+    .in("status", ["verified", "clocked_out"]);
+
   const result = await getTrainerEvaluations(trainer.id);
   const evaluations = result.success ? (result.data ?? []) : [];
+
+  const totalShifts = shiftCount ?? 0;
+  const averageRating = evaluations.length > 0
+    ? evaluations.reduce((sum, e) => sum + (e.rating ?? 0), 0) / evaluations.length
+    : 0;
 
   // Calculate category averages
   const categoryTotals: Record<string, { sum: number; count: number }> = {};
@@ -74,8 +86,8 @@ export default async function EvaluationHistoryPage() {
               <div className="flex items-center justify-center gap-1 mt-1">
                 <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                 <span className="text-2xl font-bold">
-                  {trainer.average_rating
-                    ? trainer.average_rating.toFixed(1)
+                  {averageRating > 0
+                    ? averageRating.toFixed(1)
                     : "-"}
                 </span>
               </div>
@@ -87,7 +99,7 @@ export default async function EvaluationHistoryPage() {
             <div>
               <p className="text-xs text-muted-foreground">勤務回数</p>
               <p className="text-2xl font-bold mt-1">
-                {trainer.total_shifts ?? 0}
+                {totalShifts}
               </p>
             </div>
           </div>

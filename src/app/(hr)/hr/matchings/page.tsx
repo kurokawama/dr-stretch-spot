@@ -331,10 +331,10 @@ export default function MatchingsPage() {
                           {m.shift_request?.shift_date ?? "—"}
                         </TableCell>
                         <TableCell>
-                          {m.shift_request?.start_time?.slice(0, 5)}〜
-                          {m.shift_request?.end_time?.slice(0, 5)}
+                          {m.shift_request?.start_time?.slice(0, 5) ?? "—"}〜
+                          {m.shift_request?.end_time?.slice(0, 5) ?? "—"}
                         </TableCell>
-                        <TableCell>¥{m.confirmed_rate?.toLocaleString()}</TableCell>
+                        <TableCell>{m.confirmed_rate != null ? `¥${m.confirmed_rate.toLocaleString()}` : "—"}</TableCell>
                         <TableCell>
                           <Badge
                             className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusClass(m.status)}`}

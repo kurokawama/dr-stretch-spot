@@ -16,6 +16,7 @@ import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
 import { approveShiftRequest, rejectShiftRequest } from "@/actions/shifts";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { getTodayJST, getTomorrowJST } from "@/lib/date";
 
 export default async function HRDashboardPage() {
   const supabase = await createClient();
@@ -59,8 +60,8 @@ export default async function HRDashboardPage() {
     );
   }
 
-  // Today's attendance
-  const today = new Date().toISOString().split("T")[0];
+  // Today's attendance (JST)
+  const today = getTodayJST();
   const { data: todayAttendance } = await admin
     .from("attendance_records")
     .select("*, trainer:alumni_trainers(full_name), store:stores(name, area)")
@@ -74,10 +75,8 @@ export default async function HRDashboardPage() {
     );
   }
 
-  // Tomorrow's attendance with pre-day confirmation
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split("T")[0];
+  // Tomorrow's attendance with pre-day confirmation (JST)
+  const tomorrowStr = getTomorrowJST();
   const { data: tomorrowAttendance } = await admin
     .from("attendance_records")
     .select(

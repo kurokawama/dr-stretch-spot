@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { redirect } from "next/navigation";
+import { getTodayJST, getDaysAgoJST } from "@/lib/date";
 
 export default async function HRAttendancePage() {
   const supabase = await createClient();
@@ -40,18 +41,16 @@ export default async function HRAttendancePage() {
     managedAreas = manager?.managed_areas ?? [];
   }
 
-  // Today's records
-  const today = new Date().toISOString().split("T")[0];
+  // Today's records (JST)
+  const today = getTodayJST();
   const { data: todayRecords } = await admin
     .from("attendance_records")
     .select("*, trainer:alumni_trainers(full_name, email), store:stores(name, area)")
     .eq("shift_date", today)
     .order("scheduled_start");
 
-  // Past 7 days
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const weekAgoStr = weekAgo.toISOString().split("T")[0];
+  // Past 7 days (JST)
+  const weekAgoStr = getDaysAgoJST(7);
   const { data: recentRecords } = await admin
     .from("attendance_records")
     .select("*, trainer:alumni_trainers(full_name), store:stores(name, area)")

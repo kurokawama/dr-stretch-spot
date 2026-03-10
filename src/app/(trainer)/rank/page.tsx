@@ -59,25 +59,40 @@ export default async function RankPage() {
 
   const { data: trainer } = await supabase
     .from("alumni_trainers")
-    .select("id, rank, badges, total_shifts, average_rating")
+    .select("id, rank, badges")
     .eq("auth_user_id", user.id)
     .single();
 
   if (!trainer) redirect("/home");
+
+  // Calculate total_shifts and average_rating from related tables
+  const { count: shiftCount } = await supabase
+    .from("attendance_records")
+    .select("*", { count: "exact", head: true })
+    .eq("trainer_id", trainer.id)
+    .in("status", ["verified", "clocked_out"]);
+
+  const { data: evalData } = await supabase
+    .from("evaluations")
+    .select("rating")
+    .eq("trainer_id", trainer.id);
+
+  const totalShifts = shiftCount ?? 0;
+  const avgRating = evalData && evalData.length > 0
+    ? evalData.reduce((sum, e) => sum + (e.rating ?? 0), 0) / evalData.length
+    : 0;
 
   const rank = (trainer.rank as string) ?? "bronze";
   const badges = (trainer.badges as string[]) ?? [];
   const config = rankConfig[rank] ?? rankConfig.bronze;
   const RankIcon = config.icon;
 
-  // Calculate progress to next rank
-  const totalShifts = trainer.total_shifts ?? 0;
-  const avgRating = trainer.average_rating ?? 0;
+  // Rank thresholds (match DB cron job)
   const rankThresholds: Record<string, { shifts: number; rating: number }> = {
     bronze: { shifts: 0, rating: 0 },
-    silver: { shifts: 5, rating: 3.0 },
-    gold: { shifts: 15, rating: 3.5 },
-    platinum: { shifts: 30, rating: 4.0 },
+    silver: { shifts: 10, rating: 3.5 },
+    gold: { shifts: 30, rating: 4.0 },
+    platinum: { shifts: 50, rating: 4.5 },
   };
   const nextRankKey = config.next;
   const nextThreshold = nextRankKey ? rankThresholds[nextRankKey] : null;

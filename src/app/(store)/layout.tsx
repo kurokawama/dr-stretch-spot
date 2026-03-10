@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   LayoutDashboard,
   CalendarPlus,
+  CalendarRange,
   Users,
   ClipboardCheck,
   Star,
@@ -45,6 +46,7 @@ export default async function StoreLayout({
     { href: "/store/shifts", icon: CalendarPlus, label: "シフト募集" },
     { href: "/store/applications", icon: Users, label: "応募者" },
     { href: "/store/attendance", icon: ClipboardCheck, label: "出勤管理" },
+    { href: "/store/availability", icon: CalendarRange, label: "シフト希望" },
     { href: "/store/evaluations", icon: Star, label: "評価" },
     { href: "/store/templates", icon: Copy, label: "テンプレート" },
     { href: "/store/usage", icon: BarChart3, label: "利用実績" },
