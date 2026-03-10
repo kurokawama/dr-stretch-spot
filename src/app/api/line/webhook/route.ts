@@ -98,6 +98,47 @@ async function handleEvent(event: WebhookEvent): Promise<void> {
   const lineUserId = event.source?.userId;
   if (!lineUserId) return;
 
+  console.log(`[LINE Webhook] event=${event.type} lineUserId=${lineUserId}`);
+
+  // Auto-link: if unlinked user sends message, try to link with 黒川's trainer account
+  if (event.type === "message") {
+    const admin = createAdminClient();
+    const { data: existing } = await admin
+      .from("alumni_trainers")
+      .select("id")
+      .eq("line_user_id", lineUserId)
+      .single();
+
+    if (!existing) {
+      // Link to 黒川's account if not already linked
+      const { data: kurokawa } = await admin
+        .from("alumni_trainers")
+        .select("id, line_user_id")
+        .eq("email", "m-kurokawa@fubic.com")
+        .single();
+
+      if (kurokawa && !kurokawa.line_user_id) {
+        await admin
+          .from("alumni_trainers")
+          .update({
+            line_user_id: lineUserId,
+            line_linked_at: new Date().toISOString(),
+          })
+          .eq("id", kurokawa.id);
+        console.log(`[LINE Webhook] Auto-linked lineUserId=${lineUserId} to 黒川`);
+
+        if (event.replyToken) {
+          await replyMessage(event.replyToken, [
+            textMessage(
+              "LINE連携が完了しました！\n黒川さんのアカウントと紐付けました。\n\nシフトオファーがあるとこちらに通知が届きます。"
+            ),
+          ]);
+          return;
+        }
+      }
+    }
+  }
+
   switch (event.type) {
     case "follow":
       await handleFollow(event, lineUserId);
