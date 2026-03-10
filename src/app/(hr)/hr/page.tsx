@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AlertCircle, CheckCircle, Clock, ClipboardCheck, DollarSign, Users, HandHeart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
 import { approveShiftRequest, rejectShiftRequest } from "@/actions/shifts";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -123,10 +124,70 @@ export default async function HRDashboardPage() {
     (a) => a.status === "clocked_out" || a.status === "verified"
   ).length;
 
+  const attendanceStatusToSummary = (status: string): "approved" | "completed" | "cancelled" => {
+    if (status === "clocked_out" || status === "verified") return "completed";
+    if (status === "no_show") return "cancelled";
+    return "approved";
+  };
+
+  const overviewRows = [
+    ...filteredPending.map((shift) => ({
+      id: `pending-${shift.id}`,
+      trainerName: "—",
+      storeName: shift.store?.name ?? "—",
+      shiftDate: shift.shift_date,
+      time: `${shift.start_time?.slice(0, 5)}〜${shift.end_time?.slice(0, 5)}`,
+      rate: "—",
+      status: "pending" as const,
+      canApprove: true,
+      shiftId: shift.id,
+      area: shift.store?.area ?? "",
+    })),
+    ...filteredAttendance.map((record) => ({
+      id: `attendance-${record.id}`,
+      trainerName: record.trainer?.full_name ?? "—",
+      storeName: record.store?.name ?? "—",
+      shiftDate: record.shift_date,
+      time: `${record.scheduled_start?.slice(0, 5)}〜${record.scheduled_end?.slice(0, 5)}`,
+      rate: "—",
+      status: attendanceStatusToSummary(record.status),
+      canApprove: false,
+      shiftId: "",
+      area: record.store?.area ?? "",
+    })),
+  ].sort((a, b) => (a.shiftDate < b.shiftDate ? 1 : -1));
+
+  const totalMatchingCount = overviewRows.length;
+  const pendingSummaryCount = overviewRows.filter((row) => row.status === "pending").length;
+  const cancelCount = overviewRows.filter((row) => row.status === "cancelled").length;
+  const fillRate =
+    filteredAttendance.length > 0
+      ? Math.round(((clockedInCount + completedCount) / filteredAttendance.length) * 100)
+      : 0;
+  const cancelRate =
+    totalMatchingCount > 0 ? Math.round((cancelCount / totalMatchingCount) * 100) : 0;
+
+  const paginatedRows = overviewRows.slice(0, 10);
+  const areaOptions = Array.from(new Set(overviewRows.map((row) => row.area).filter(Boolean)));
+
+  const getStatusBadgeClass = (status: string) => {
+    if (status === "approved") return "bg-green-100 text-green-800";
+    if (status === "pending") return "bg-yellow-100 text-yellow-800";
+    if (status === "cancelled") return "bg-red-100 text-red-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
+  const getStatusLabel = (status: string) => {
+    if (status === "approved") return "承認済";
+    if (status === "pending") return "承認待ち";
+    if (status === "cancelled") return "キャンセル";
+    return "完了";
+  };
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="animate-fade-in-up space-y-6 bg-[#FCFCFC] p-6">
       <div>
-        <h1 className="text-2xl font-bold">
+        <h1 className="font-heading text-2xl font-bold">
           {profile?.role === "area_manager"
             ? "エリアマネージャー ダッシュボード"
             : "人事部 ダッシュボード"}
@@ -138,384 +199,197 @@ export default async function HRDashboardPage() {
         </p>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">承認待ち</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredPending.length}</div>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <Card className="rounded-lg border border-t-4 border-t-primary bg-card shadow-sm">
+          <CardContent className="space-y-1 p-5">
+            <p className="text-sm text-muted-foreground">全マッチング数</p>
+            <p className="font-heading text-3xl font-bold tabular-nums">{totalMatchingCount}</p>
+            <div className="flex items-end gap-1">
+              <span className="h-2 w-2 rounded-full bg-primary/60" />
+              <span className="h-3 w-2 rounded-full bg-primary/70" />
+              <span className="h-4 w-2 rounded-full bg-primary/80" />
+              <span className="h-5 w-2 rounded-full bg-primary" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-lg border border-t-4 border-t-yellow-500 bg-card shadow-sm">
+          <CardContent className="space-y-1 p-5">
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-muted-foreground">承認待ち</p>
+              <span className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+            </div>
+            <p className="font-heading text-3xl font-bold tabular-nums">{pendingSummaryCount}</p>
             <p className="text-xs text-muted-foreground">シフト申請</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">本日の出勤</CardTitle>
-            <Users className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {clockedInCount}/{filteredAttendance.length}
-            </div>
+
+        <Card className="rounded-lg border border-t-4 border-t-green-500 bg-card shadow-sm">
+          <CardContent className="space-y-1 p-5">
+            <p className="text-sm text-muted-foreground">今月の充足率</p>
+            <p className="font-heading text-3xl font-bold tabular-nums">{fillRate}%</p>
             <p className="text-xs text-muted-foreground">
-              出勤中 / 全体（待機: {scheduledCount}, 完了: {completedCount}）
+              出勤中 {clockedInCount} / 完了 {completedCount} / 待機 {scheduledCount}
             </p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">明日の予定</CardTitle>
-            <Clock className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredTomorrow.length}</div>
+
+        <Card className="rounded-lg border border-t-4 border-t-blue-500 bg-card shadow-sm">
+          <CardContent className="space-y-1 p-5">
+            <p className="text-sm text-muted-foreground">キャンセル率</p>
+            <p className="font-heading text-3xl font-bold tabular-nums">{cancelRate}%</p>
             <p className="text-xs text-muted-foreground">
-              出勤予定
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">前日未確認</CardTitle>
-            <AlertCircle
-              className={`h-4 w-4 ${unconfirmedCount > 0 ? "text-red-500" : "text-green-500"}`}
-            />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{unconfirmedCount}</div>
-            <p className="text-xs text-muted-foreground">
-              {unconfirmedCount > 0 ? "要確認フォローアップ" : "全員確認済み"}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">シフト希望</CardTitle>
-            <HandHeart className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{filteredAvailabilities.length}</div>
-            <p className="text-xs text-muted-foreground">
-              トレーナー申告
+              前日未確認 {unconfirmedCount} / シフト希望 {filteredAvailabilities.length}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Pending approvals */}
-      {filteredPending.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-orange-500" />
-              承認待ちシフト申請
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>店舗</TableHead>
-                  <TableHead>エリア</TableHead>
-                  <TableHead>タイトル</TableHead>
-                  <TableHead>日付</TableHead>
-                  <TableHead>時間</TableHead>
-                  <TableHead>人数</TableHead>
-                  <TableHead>操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredPending.map((shift) => (
-                  <TableRow key={shift.id}>
-                    <TableCell className="font-medium">
-                      {shift.store?.name}
-                    </TableCell>
-                    <TableCell>{shift.store?.area}</TableCell>
-                    <TableCell>
-                      {shift.title}
-                      {shift.is_emergency && (
-                        <Badge variant="destructive" className="ml-2">
-                          緊急
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{shift.shift_date}</TableCell>
-                    <TableCell>
-                      {shift.start_time?.slice(0, 5)}〜
-                      {shift.end_time?.slice(0, 5)}
-                    </TableCell>
-                    <TableCell>{shift.required_count}名</TableCell>
-                    <TableCell>
-                      <form className="flex gap-2">
-                        <input type="hidden" name="shiftId" value={shift.id} />
-                        <Button
-                          size="sm"
-                          formAction={async () => {
-                            "use server";
-                            await approveShiftRequest(shift.id);
-                            redirect("/hr");
-                          }}
-                        >
-                          承認
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          formAction={async () => {
-                            "use server";
-                            await rejectShiftRequest(shift.id);
-                            redirect("/hr");
-                          }}
-                        >
-                          却下
-                        </Button>
-                      </form>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Tomorrow's attendance - unconfirmed alert */}
-      {unconfirmedCount > 0 && (
-        <Card className="border-red-200 bg-red-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
-              明日の出勤 — 前日確認未回答（{unconfirmedCount}名）
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>トレーナー</TableHead>
-                  <TableHead>メール</TableHead>
-                  <TableHead>店舗</TableHead>
-                  <TableHead>時間</TableHead>
-                  <TableHead>確認状況</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTomorrow
-                  .filter((a) => !a.application?.pre_day_confirmed)
-                  .map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell className="font-medium">
-                        {record.trainer?.full_name}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {record.trainer?.email}
-                      </TableCell>
-                      <TableCell>{record.store?.name}</TableCell>
-                      <TableCell>
-                        {record.scheduled_start?.slice(0, 5)}〜
-                        {record.scheduled_end?.slice(0, 5)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="destructive">未確認</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Today's attendance */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>本日の出勤状況</CardTitle>
-          <Link href="/hr/attendance">
-            <Button variant="outline" size="sm">
-              詳細を見る
+      {/* Filter Bar */}
+      <Card className="rounded-lg border bg-card shadow-sm">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[160px_160px_160px_1fr_auto]">
+            <select className="h-10 rounded-xl border border-input bg-white px-3 text-sm">
+              <option>ステータス</option>
+              <option>承認待ち</option>
+              <option>承認済</option>
+              <option>完了</option>
+              <option>キャンセル</option>
+            </select>
+            <select className="h-10 rounded-xl border border-input bg-white px-3 text-sm">
+              <option>エリア</option>
+              {areaOptions.map((area) => (
+                <option key={area}>{area}</option>
+              ))}
+            </select>
+            <select className="h-10 rounded-xl border border-input bg-white px-3 text-sm">
+              <option>期間</option>
+              <option>今日</option>
+              <option>明日</option>
+              <option>今週</option>
+            </select>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input className="h-10 rounded-xl pl-9" placeholder="検索" />
+            </div>
+            <Button className="h-10 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+              <Download className="mr-2 h-4 w-4" />
+              エクスポート
             </Button>
-          </Link>
-        </CardHeader>
-        <CardContent>
-          {filteredAttendance.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              本日の出勤予定はありません
-            </p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>トレーナー</TableHead>
-                  <TableHead>店舗</TableHead>
-                  <TableHead>予定時間</TableHead>
-                  <TableHead>出勤</TableHead>
-                  <TableHead>退勤</TableHead>
-                  <TableHead>ステータス</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAttendance.slice(0, 10).map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell className="font-medium">
-                      {record.trainer?.full_name}
-                    </TableCell>
-                    <TableCell>{record.store?.name}</TableCell>
-                    <TableCell>
-                      {record.scheduled_start?.slice(0, 5)}〜
-                      {record.scheduled_end?.slice(0, 5)}
-                    </TableCell>
-                    <TableCell>
-                      {record.clock_in_at
-                        ? new Date(record.clock_in_at).toLocaleTimeString(
-                            "ja-JP",
-                            { hour: "2-digit", minute: "2-digit" }
-                          )
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {record.clock_out_at
-                        ? new Date(record.clock_out_at).toLocaleTimeString(
-                            "ja-JP",
-                            { hour: "2-digit", minute: "2-digit" }
-                          )
-                        : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          record.status === "clocked_in"
-                            ? "default"
-                            : record.status === "scheduled"
-                              ? "secondary"
-                              : record.status === "clocked_out"
-                                ? "outline"
-                                : "default"
-                        }
-                      >
-                        {record.status === "scheduled"
-                          ? "待機中"
-                          : record.status === "clocked_in"
-                            ? "出勤中"
-                            : record.status === "clocked_out"
-                              ? "退勤済"
-                              : record.status === "verified"
-                                ? "確認済"
-                                : record.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          </div>
         </CardContent>
       </Card>
 
-      {/* Shift availabilities from trainers */}
-      {filteredAvailabilities.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <HandHeart className="h-5 w-5 text-purple-500" />
-              トレーナーのシフト希望（{filteredAvailabilities.length}件）
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+      {/* Data Table */}
+      <Card className="rounded-lg border bg-card shadow-sm">
+        <CardHeader>
+          <CardTitle className="font-heading text-base font-semibold">マッチング一覧</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="overflow-x-auto rounded-lg border">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>トレーナー</TableHead>
-                  <TableHead>ランク</TableHead>
-                  <TableHead>店舗</TableHead>
-                  <TableHead>エリア</TableHead>
-                  <TableHead>希望日</TableHead>
+                <TableRow className="bg-muted/50">
+                  <TableHead>トレーナー名</TableHead>
+                  <TableHead>店舗名</TableHead>
+                  <TableHead>シフト日</TableHead>
                   <TableHead>時間</TableHead>
+                  <TableHead>時給</TableHead>
                   <TableHead>ステータス</TableHead>
+                  <TableHead>アクション</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAvailabilities.map((avail) => (
-                  <TableRow key={avail.id}>
-                    <TableCell className="font-medium">
-                      {avail.trainer?.full_name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {avail.trainer?.rank}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{avail.store?.name}</TableCell>
-                    <TableCell>{avail.store?.area}</TableCell>
-                    <TableCell>{avail.available_date}</TableCell>
-                    <TableCell>
-                      {avail.start_time?.slice(0, 5)}〜
-                      {avail.end_time?.slice(0, 5)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={avail.status === "open" ? "secondary" : "default"}
-                      >
-                        {avail.status === "open" ? "未対応" : "オファー済"}
-                      </Badge>
+                {paginatedRows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
+                      表示できるデータがありません
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  paginatedRows.map((row, index) => (
+                    <TableRow
+                      key={row.id}
+                      className={`hover:bg-muted/50 ${index % 2 === 0 ? "bg-white" : "bg-muted/20"}`}
+                    >
+                      <TableCell className="font-medium">{row.trainerName}</TableCell>
+                      <TableCell>{row.storeName}</TableCell>
+                      <TableCell>{row.shiftDate}</TableCell>
+                      <TableCell>{row.time}</TableCell>
+                      <TableCell>{row.rate}</TableCell>
+                      <TableCell>
+                        <Badge
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusBadgeClass(row.status)}`}
+                        >
+                          {getStatusLabel(row.status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {row.canApprove && row.shiftId ? (
+                            <>
+                              <form>
+                                <Button
+                                  size="sm"
+                                  className="h-8 rounded-xl bg-green-600 px-3 text-white hover:bg-green-700"
+                                  formAction={async () => {
+                                    "use server";
+                                    await approveShiftRequest(row.shiftId);
+                                    redirect("/hr");
+                                  }}
+                                >
+                                  承認
+                                </Button>
+                              </form>
+                              <form>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-8 rounded-xl px-3"
+                                  formAction={async () => {
+                                    "use server";
+                                    await rejectShiftRequest(row.shiftId);
+                                    redirect("/hr");
+                                  }}
+                                >
+                                  却下
+                                </Button>
+                              </form>
+                            </>
+                          ) : null}
+                          <Link href="/hr/matchings" className="text-sm text-primary hover:underline">
+                            詳細
+                          </Link>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      )}
+          </div>
 
-      {/* Quick links */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Link href="/hr/matchings">
-          <Card className="cursor-pointer transition-colors hover:bg-muted/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Users className="h-4 w-4" />
-                マッチング管理
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                マッチングの確認・キャンセル・人員追加
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/hr/attendance">
-          <Card className="cursor-pointer transition-colors hover:bg-muted/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <ClipboardCheck className="h-4 w-4" />
-                出勤一覧
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                全店舗の出退勤記録を確認
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-        <Link href="/hr/rates">
-          <Card className="cursor-pointer transition-colors hover:bg-muted/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <DollarSign className="h-4 w-4" />
-                時給テーブル
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                時給設定・ブランクルール管理
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <p>
+              {totalMatchingCount === 0
+                ? `0 / ${totalMatchingCount}件`
+                : `1-${Math.min(10, totalMatchingCount)} / ${totalMatchingCount}件`}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="h-8 rounded-xl px-2" disabled>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 rounded-xl px-3">
+                1
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 rounded-xl px-2" disabled>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
