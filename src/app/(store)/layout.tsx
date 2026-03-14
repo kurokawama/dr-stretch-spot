@@ -41,7 +41,8 @@ export default async function StoreLayout({
     redirect("/login");
   }
 
-  const navItems = [
+  // All nav items for sidebar (desktop)
+  const allNavItems = [
     { href: "/store", icon: LayoutDashboard, label: "ダッシュボード" },
     { href: "/store/shifts", icon: CalendarPlus, label: "シフト募集" },
     { href: "/store/applications", icon: Users, label: "応募者" },
@@ -50,6 +51,15 @@ export default async function StoreLayout({
     { href: "/store/evaluations", icon: Star, label: "評価" },
     { href: "/store/templates", icon: Copy, label: "テンプレート" },
     { href: "/store/usage", icon: BarChart3, label: "利用実績" },
+    { href: "/store/notifications", icon: Bell, label: "通知" },
+  ];
+
+  // Mobile bottom nav: top 5 most-used items only
+  const mobileNavItems = [
+    { href: "/store", icon: LayoutDashboard, label: "ホーム" },
+    { href: "/store/shifts", icon: CalendarPlus, label: "シフト" },
+    { href: "/store/applications", icon: Users, label: "応募者" },
+    { href: "/store/attendance", icon: ClipboardCheck, label: "出勤" },
     { href: "/store/notifications", icon: Bell, label: "通知" },
   ];
 
@@ -63,7 +73,7 @@ export default async function StoreLayout({
         {/* Desktop sidebar */}
         <aside className="hidden w-56 shrink-0 border-r bg-sidebar md:block">
           <nav className="flex flex-col gap-1 p-3">
-            {navItems.map((item) => (
+            {allNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -84,14 +94,14 @@ export default async function StoreLayout({
       {/* Mobile bottom navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur-sm md:hidden">
         <div className="flex items-center justify-around py-2">
-          {navItems.map((item) => (
+          {mobileNavItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-0.5 px-2 py-1 text-muted-foreground hover:text-primary transition-colors"
+              className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground hover:text-primary transition-colors"
             >
               <item.icon className="h-5 w-5" />
-              <span className="text-[10px]">{item.label}</span>
+              <span className="text-[11px]">{item.label}</span>
             </Link>
           ))}
         </div>

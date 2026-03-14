@@ -352,6 +352,27 @@ export async function cancelApplication(
 
   if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
 
+  // Check current status — approved (confirmed) shifts cannot be cancelled directly
+  const { data: application } = await supabase
+    .from("shift_applications")
+    .select("status")
+    .eq("id", applicationId)
+    .eq("trainer_id", trainer.id)
+    .single();
+
+  if (!application) return { success: false, error: "応募情報が見つかりません" };
+
+  if (application.status === "approved") {
+    return {
+      success: false,
+      error: "確定済みシフトのキャンセルは人事部へお電話ください（03-6451-1171）",
+    };
+  }
+
+  if (application.status !== "pending") {
+    return { success: false, error: "この応募はキャンセルできません" };
+  }
+
   const { error } = await supabase
     .from("shift_applications")
     .update({
@@ -361,7 +382,7 @@ export async function cancelApplication(
     })
     .eq("id", applicationId)
     .eq("trainer_id", trainer.id)
-    .in("status", ["pending", "approved"]);
+    .eq("status", "pending");
 
   if (error) return { success: false, error: error.message };
   return { success: true };

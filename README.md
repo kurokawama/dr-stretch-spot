@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dr.stretch SPOT
 
-## Getting Started
+退職トレーナー向けスポットバイトマッチングプラットフォーム
 
-First, run the development server:
+## 概要
+
+Dr.ストレッチを退職した認定トレーナー（OB/OG）が、好きな時間に好きな店舗で副業できるマッチングシステムです。
+
+- **トレーナー**: シフト検索・応募・QR打刻・収入管理
+- **店舗マネージャー**: シフト作成・応募管理・勤怠管理・評価
+- **HR（人事部）**: 全体管理・時給設定・直接オファー・退職処理
+- **管理者**: システム全体管理
+
+## 技術スタック
+
+| レイヤー | 技術 |
+|---------|------|
+| フレームワーク | Next.js 16 (App Router, Turbopack) |
+| UI | shadcn/ui + Tailwind CSS v4 |
+| データベース | Supabase (PostgreSQL + Auth + RLS) |
+| ホスティング | Vercel |
+| LINE Bot | LINE Messaging API + @line/bot-sdk |
+| メール | Resend API |
+| 言語 | TypeScript (strict) |
+
+## セットアップ
 
 ```bash
+# インストール
+npm install
+
+# 環境変数を設定
+cp .env.example .env.local
+# → .env.local を編集
+
+# 開発サーバー起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 環境変数
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`.env.local` に以下を設定：
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+LINE_CHANNEL_SECRET=
+LINE_CHANNEL_ACCESS_TOKEN=
+RESEND_API_KEY=
+NEXT_PUBLIC_APP_URL=
+```
 
-## Learn More
+## ドキュメント
 
-To learn more about Next.js, take a look at the following resources:
+| ドキュメント | 内容 |
+|------------|------|
+| [docs/specification.md](docs/specification.md) | プロジェクト企画書・全仕様書 |
+| [docs/handoff-notes.md](docs/handoff-notes.md) | エンジニア引き継ぎノート（ローンチ前改善内容・セットアップ・チェックリスト） |
+| [docs/test-guide.md](docs/test-guide.md) | テスト手順書 |
+| [flow-diagram.json](flow-diagram.json) | 画面遷移図（JSON） |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ディレクトリ構造
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── (auth)/       # ログイン・登録
+│   ├── (trainer)/    # トレーナー向け画面（モバイルファースト）
+│   ├── (store)/      # 店舗マネージャー向け画面
+│   ├── (hr)/         # HR向け画面
+│   ├── (admin)/      # 管理者向け画面
+│   └── api/          # APIエンドポイント
+├── actions/          # Server Actions
+├── components/ui/    # shadcn/uiコンポーネント
+├── lib/              # ユーティリティ
+└── types/            # TypeScript型定義
+```
 
-## Deploy on Vercel
+## コマンド
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev      # 開発サーバー
+npm run build    # ビルド
+npm run lint     # Lint
+npm run start    # 本番サーバー
+```

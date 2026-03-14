@@ -246,7 +246,12 @@ export default function ShiftSearchPage() {
         </Card>
       )}
 
-      <p className="mb-6 text-sm text-muted-foreground">{displayedShifts.length}件の募集</p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{displayedShifts.length}件の募集</p>
+        {activeChips.includes("高時給") && (
+          <p className="text-xs text-muted-foreground">緊急手当付きシフト</p>
+        )}
+      </div>
 
       {loading ? (
         <div className="space-y-3">

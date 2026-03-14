@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Shield, Award, TrendingUp, ChevronRight, History } from "lucide-react";
+import { Trophy, Star, Shield, Award, TrendingUp, ChevronRight, History, Banknote } from "lucide-react";
 
 const rankConfig: Record<
   string,
@@ -59,7 +59,7 @@ export default async function RankPage() {
 
   const { data: trainer } = await supabase
     .from("alumni_trainers")
-    .select("id, rank, badges")
+    .select("id, rank, badges, tenure_years")
     .eq("auth_user_id", user.id)
     .single();
 
@@ -210,6 +210,100 @@ export default async function RankPage() {
               })}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Hourly Rate Table — "長く勤めるほど得" */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Banknote className="h-4 w-4" />
+            在籍年数と時給テーブル
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Dr.stretchに長く在籍するほど、SPOTの基本時給が上がります
+          </p>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const tenureYears = trainer.tenure_years ?? 0;
+            const rateTable = [
+              { range: "2〜3年", rate: 1400, min: 2, max: 3 },
+              { range: "3〜5年", rate: 1600, min: 3, max: 5 },
+              { range: "5〜7年", rate: 1800, min: 5, max: 7 },
+              { range: "7年以上", rate: 2000, min: 7, max: 99 },
+            ];
+            const currentTier = rateTable.find(
+              (t) => tenureYears >= t.min && tenureYears < t.max
+            );
+            const currentIndex = currentTier ? rateTable.indexOf(currentTier) : -1;
+            const nextTier = currentIndex >= 0 && currentIndex < rateTable.length - 1
+              ? rateTable[currentIndex + 1]
+              : null;
+
+            return (
+              <div className="space-y-4">
+                <div className="overflow-hidden rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-muted/50">
+                        <th className="px-3 py-2 text-left font-medium">在籍年数</th>
+                        <th className="px-3 py-2 text-right font-medium">基本時給</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rateTable.map((tier) => {
+                        const isCurrent = tier === currentTier;
+                        return (
+                          <tr
+                            key={tier.range}
+                            className={isCurrent ? "bg-primary/5 font-semibold" : ""}
+                          >
+                            <td className="px-3 py-2.5">
+                              {tier.range}
+                              {isCurrent && (
+                                <span className="ml-2 text-xs text-accent font-bold">
+                                  ← あなた
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-right font-mono">
+                              ¥{tier.rate.toLocaleString()}/h
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {nextTier && currentTier && (
+                  <div className="rounded-lg bg-accent/10 border border-accent/20 p-4 space-y-2">
+                    <p className="text-sm font-medium text-accent">
+                      あと{nextTier.min - tenureYears > 0 ? `${(nextTier.min - tenureYears).toFixed(1)}年` : "わずか"}で +¥{(nextTier.rate - currentTier.rate).toLocaleString()}/h
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      月8回勤務（8h）の場合、月間 +¥{((nextTier.rate - currentTier.rate) * 8 * 8).toLocaleString()} の収入増
+                    </p>
+                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-accent transition-all"
+                        style={{
+                          width: `${Math.min(100, ((tenureYears - currentTier.min) / (nextTier.min - currentTier.min)) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {!nextTier && currentTier && (
+                  <div className="rounded-lg bg-primary/10 border border-primary/20 p-4">
+                    <p className="text-sm font-medium">
+                      最高時給ランクです！あなたの{tenureYears}年の経験は大きな財産です。
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
 

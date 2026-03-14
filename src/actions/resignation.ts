@@ -200,6 +200,29 @@ export async function completeResignation(resignationId: string) {
     ) / 10;
   }
 
+  // 2b. Check spot_interest — skip SPOT registration if user declined
+  if (resignation.spot_interest === false) {
+    // Mark resignation as completed but don't create SPOT record
+    const { error: completeError } = await admin
+      .from("resignation_requests")
+      .update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", resignationId);
+
+    if (completeError) return { success: false, error: completeError.message };
+
+    // Update role to indicate ex-employee (not SPOT trainer)
+    await admin
+      .from("profiles")
+      .update({ role: "inactive", updated_at: new Date().toISOString() })
+      .eq("id", resignation.auth_user_id);
+
+    return { success: true, trainerId: null };
+  }
+
   // 3. Create alumni_trainers record (spot_status: 'registered' — not yet active)
   const { data: existingTrainer } = await admin
     .from("alumni_trainers")

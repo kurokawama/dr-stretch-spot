@@ -9,7 +9,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getMyApplications, cancelApplication } from "@/actions/applications";
 import type { ShiftApplication } from "@/types/database";
 import { toast } from "sonner";
-import { CalendarOff, History, XCircle, MapPin, Clock } from "lucide-react";
+import { CalendarOff, History, XCircle, MapPin, Clock, Phone } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import Link from "next/link";
 
 const statusLabels: Record<string, string> = {
@@ -109,15 +120,63 @@ export default function MyShiftsPage() {
               <p className="text-sm font-mono font-semibold">¥{app.confirmed_rate}/h</p>
             </div>
           </div>
-          {(app.status === "pending" || app.status === "approved") && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-3 w-full text-muted-foreground hover:text-destructive hover:border-destructive"
-              onClick={() => handleCancel(app.id)}
-            >
-              キャンセル
-            </Button>
+          {app.status === "pending" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full text-muted-foreground hover:text-destructive hover:border-destructive"
+                >
+                  キャンセル
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>応募をキャンセルしますか？</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    審査中の応募をキャンセルします。この操作は取り消せません。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>戻る</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => handleCancel(app.id)}>
+                    キャンセルする
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {app.status === "approved" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full text-muted-foreground"
+                >
+                  <Phone className="h-3.5 w-3.5 mr-1" />
+                  電話でキャンセル
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>確定済みシフトのキャンセル</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    確定済みのシフトは直接キャンセルできません。やむを得ない場合は人事部へお電話ください。無理をなさらず、ご相談ください。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+                  <AlertDialogCancel>閉じる</AlertDialogCancel>
+                  <AlertDialogAction asChild>
+                    <a href="tel:03-6451-1171" className="inline-flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      人事部へ電話する
+                    </a>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </CardContent>
       </Card>
@@ -161,7 +220,12 @@ export default function MyShiftsPage() {
         </TabsContent>
         <TabsContent value="past" className="space-y-3 mt-3 stagger-children">
           {past.length === 0 ? (
-            <EmptyState icon={History} title="履歴はありません" description="シフト完了後にここに表示されます" />
+            <div className="space-y-4">
+              <EmptyState icon={History} title="履歴はありません" description="シフトに参加して実績を積みましょう" />
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/shifts">シフトを探す</Link>
+              </Button>
+            </div>
           ) : past.map((a) => <AppCard key={a.id} app={a} />)}
         </TabsContent>
         <TabsContent value="cancelled" className="space-y-3 mt-3 stagger-children">

@@ -434,8 +434,12 @@ export default async function TrainerHomePage() {
           </div>
         ) : (
           <Card className="rounded-lg border bg-card shadow-sm">
-            <CardContent className="flex items-center justify-center p-6 text-sm text-muted-foreground">
-              募集中のシフト
+            <CardContent className="flex flex-col items-center justify-center p-6 space-y-3">
+              <CalendarDays className="h-6 w-6 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">現在募集中のシフトはありません</p>
+              <Button asChild variant="outline" size="sm" className="rounded-xl">
+                <Link href="/shifts">シフト検索で探す</Link>
+              </Button>
             </CardContent>
           </Card>
         )}

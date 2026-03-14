@@ -1,0 +1,164 @@
+{
+  "project": {
+    "name": "Dr.stretch SPOT",
+    "description": "退職トレーナー副業マッチングプラットフォーム — ローンチ前最終レビュー版",
+    "created_at": "2026-03-14"
+  },
+  "roles": [
+    {
+      "id": "trainer",
+      "name": "トレーナー（OB/OG）",
+      "description": "退職した元Dr.stretchトレーナー。副業シフトに応募・勤務する",
+      "auth_level": "trainer",
+      "test_account": { "email": "trainer@test.com", "note": "デモログイン可" }
+    },
+    {
+      "id": "store_manager",
+      "name": "店舗マネージャー",
+      "description": "店舗のシフト作成・応募管理・勤怠管理を行う",
+      "auth_level": "store_manager",
+      "test_account": { "email": "store@test.com", "note": "デモログイン可" }
+    },
+    {
+      "id": "hr",
+      "name": "HR/人事部",
+      "description": "全店舗横断のマッチング管理・時給設定・退職処理を行う",
+      "auth_level": "hr",
+      "test_account": { "email": "hr@test.com", "note": "デモログイン可" }
+    },
+    {
+      "id": "admin",
+      "name": "管理者",
+      "description": "システム全体の管理・トレーナー/店舗一括管理",
+      "auth_level": "admin",
+      "test_account": { "email": "admin@test.com", "note": "デモログイン可" }
+    }
+  ],
+  "pages": [
+    { "id": "login", "path": "/login", "name": "ログイン", "layout_group": "(auth)", "public": true, "requires_auth": false, "allowed_roles": [], "components": { "buttons": [{"id": "btn_login", "label": "ログイン", "action": "認証", "action_type": "server_action", "target": "supabase.auth.signIn", "expected_result": "ロール別ホームへリダイレクト"}], "links": [{"id": "link_register", "label": "新規登録", "destination": "/register", "type": "navigation"}], "forms": [{"id": "form_login", "name": "ログインフォーム", "action": "signIn", "fields": ["email", "password"], "submit_button": "btn_login", "validation": "メール形式 + パスワード必須"}], "data_displays": [] } },
+    { "id": "t_home", "path": "/home", "name": "トレーナーホーム", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_clock", "label": "打刻", "action": "打刻画面へ", "action_type": "navigation", "target": "/clock", "expected_result": "QR表示画面"}], "links": [{"id": "link_shifts", "label": "シフトを探す", "destination": "/shifts", "type": "navigation"}, {"id": "link_earnings", "label": "収入", "destination": "/earnings", "type": "navigation"}, {"id": "link_rank", "label": "ランク", "destination": "/rank", "type": "navigation"}], "forms": [], "data_displays": [{"id": "kpi_next_shift", "type": "card", "data_source": "getMyApplications", "description": "次のシフト情報"}, {"id": "kpi_monthly_income", "type": "card", "data_source": "getEarnings", "description": "今月の収入"}] } },
+    { "id": "t_shifts", "path": "/shifts", "name": "シフト検索", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [], "links": [{"id": "link_shift_detail", "label": "シフト詳細", "destination": "/shifts/[id]", "type": "table_row"}], "forms": [], "data_displays": [{"id": "shift_list", "type": "card", "data_source": "getOpenShifts", "description": "募集中シフト一覧"}] } },
+    { "id": "t_shift_detail", "path": "/shifts/[id]", "name": "シフト詳細", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_apply", "label": "応募する", "action": "応募確認画面へ", "action_type": "navigation", "target": "/shifts/[id]/apply", "expected_result": "応募確認画面"}], "links": [], "forms": [], "data_displays": [] } },
+    { "id": "t_apply", "path": "/shifts/[id]/apply", "name": "応募確認", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_confirm_apply", "label": "応募確定", "action": "シフト応募", "action_type": "server_action", "target": "applyToShift", "expected_result": "応募完了→マイシフトへ"}], "links": [], "forms": [], "data_displays": [{"id": "rate_preview", "type": "card", "data_source": "calculateHourlyRate", "description": "時給プレビュー（内訳付き）"}] } },
+    { "id": "t_my_shifts", "path": "/my-shifts", "name": "マイシフト", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_contact_hr", "label": "人事部へ連絡", "action": "人事部電話番号表示", "action_type": "modal", "target": "AlertDialog", "expected_result": "電話番号ダイアログ表示（approved状態のキャンセルは直接不可）"}, {"id": "btn_cancel_pending", "label": "キャンセル", "action": "pending応募のみキャンセル可", "action_type": "server_action", "target": "cancelApplication", "expected_result": "pendingのみキャンセル成功"}], "links": [], "forms": [], "data_displays": [{"id": "app_list", "type": "card", "data_source": "getMyApplications", "description": "応募一覧（予定/履歴/取消）"}] } },
+    { "id": "t_clock", "path": "/clock", "name": "打刻", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_show_qr", "label": "QR表示", "action": "QRコード生成", "action_type": "server_action", "target": "generateQrToken", "expected_result": "15分有効QRコード表示"}], "links": [], "forms": [], "data_displays": [] } },
+    { "id": "t_earnings", "path": "/earnings", "name": "収入明細", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [], "links": [], "forms": [], "data_displays": [{"id": "earnings_list", "type": "table", "data_source": "getEarnings", "description": "月別収入明細"}] } },
+    { "id": "t_availability", "path": "/availability", "name": "シフト希望・オファー", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_submit_avail", "label": "空き申告", "action": "空き時間登録", "action_type": "server_action", "target": "submitAvailability", "expected_result": "空き申告完了"}], "links": [], "forms": [{"id": "form_availability", "name": "空き申告フォーム", "action": "submitAvailability", "fields": ["store_id", "available_date", "start_time", "end_time", "memo"], "submit_button": "btn_submit_avail", "validation": "日付・時間必須"}], "data_displays": [{"id": "offers_list", "type": "card", "data_source": "getMyOffers", "description": "受信オファー一覧"}] } },
+    { "id": "t_profile", "path": "/profile", "name": "プロフィール", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_save_profile", "label": "保存する", "action": "プロフィール保存", "action_type": "server_action", "target": "update alumni_trainers", "expected_result": "保存完了toast"}, {"id": "btn_link_line", "label": "LINEで連携する", "action": "LINE連携開始", "action_type": "server_action", "target": "generateLinkToken", "expected_result": "LINEアプリ起動"}, {"id": "btn_toggle_spot", "label": "SPOTステータス切替", "action": "active/paused切替", "action_type": "server_action", "target": "updateSpotStatus", "expected_result": "ステータス変更完了"}], "links": [], "forms": [{"id": "form_profile", "name": "プロフィールフォーム", "action": "update", "fields": ["full_name", "phone", "bio", "bank_info"], "submit_button": "btn_save_profile", "validation": "氏名必須"}], "data_displays": [] } },
+    { "id": "t_spot_setup", "path": "/spot-setup", "name": "SPOT登録ウィザード", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_activate", "label": "SPOTを始める", "action": "SPOT有効化", "action_type": "server_action", "target": "activateSpot", "expected_result": "activeに変更→シフト検索へ"}], "links": [], "forms": [{"id": "form_spot_setup", "name": "SPOT登録フォーム", "action": "activateSpot", "fields": ["preferredAreas", "preferredTimeSlots", "bio"], "submit_button": "btn_activate", "validation": "エリア・時間帯必須"}], "data_displays": [] } },
+    { "id": "t_rank", "path": "/rank", "name": "ランク＆バッジ", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [], "links": [], "forms": [], "data_displays": [{"id": "rank_display", "type": "card", "data_source": "getRank", "description": "ランク・バッジ・時給テーブル"}] } },
+    { "id": "t_resignation", "path": "/resignation", "name": "退職意向フォーム", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [{"id": "btn_submit_resign", "label": "退職意向を提出", "action": "退職申請", "action_type": "server_action", "target": "submitResignation", "expected_result": "提出完了→ホームへ"}], "links": [], "forms": [{"id": "form_resignation", "name": "退職意向フォーム", "action": "submitResignation", "fields": ["fullName", "desiredResignationDate", "resignationReason"], "submit_button": "btn_submit_resign", "validation": "氏名・退職希望日必須"}], "data_displays": [] } },
+    { "id": "t_alerts", "path": "/alerts", "name": "ブランクアラート", "layout_group": "(trainer)", "public": false, "requires_auth": true, "allowed_roles": ["trainer"], "components": { "buttons": [], "links": [], "forms": [], "data_displays": [{"id": "blank_status", "type": "card", "data_source": "getBlankStatus", "description": "ブランク日数・チェック状態"}] } },
+    { "id": "s_dashboard", "path": "/store", "name": "店舗ダッシュボード", "layout_group": "(store)", "public": false, "requires_auth": true, "allowed_roles": ["store_manager"], "components": { "buttons": [{"id": "btn_create_shift", "label": "シフト作成", "action": "シフト作成画面へ", "action_type": "navigation", "target": "/store/shifts", "expected_result": "シフト作成画面"}], "links": [{"id": "link_apps", "label": "応募者", "destination": "/store/applications", "type": "sidebar"}], "forms": [], "data_displays": [{"id": "store_kpis", "type": "kpi", "data_source": "getStoreKPIs", "description": "カバー率・応募数・月利用回数"}] } },
+    { "id": "s_shifts", "path": "/store/shifts", "name": "シフト募集管理", "layout_group": "(store)", "public": false, "requires_auth": true, "allowed_roles": ["store_manager"], "components": { "buttons": [{"id": "btn_new_shift", "label": "新規シフト作成", "action": "シフト作成", "action_type": "server_action", "target": "createShiftRequest", "expected_result": "シフト作成→HR承認待ち"}], "links": [], "forms": [{"id": "form_shift", "name": "シフト作成フォーム", "action": "createShiftRequest", "fields": ["title", "shift_date", "start_time", "end_time", "required_count"], "submit_button": "btn_new_shift", "validation": "日付・時間・人数必須"}], "data_displays": [] } },
+    { "id": "s_applications", "path": "/store/applications", "name": "応募者管理", "layout_group": "(store)", "public": false, "requires_auth": true, "allowed_roles": ["store_manager"], "components": { "buttons": [{"id": "btn_approve", "label": "承認", "action": "応募承認", "action_type": "server_action", "target": "approveApplication", "expected_result": "承認→トレーナーに通知"}, {"id": "btn_reject", "label": "却下", "action": "応募却下", "action_type": "server_action", "target": "rejectApplication", "expected_result": "却下→トレーナーに通知"}], "links": [], "forms": [], "data_displays": [{"id": "app_table", "type": "table", "data_source": "getStoreApplications", "description": "応募一覧"}] } },
+    { "id": "s_attendance", "path": "/store/attendance", "name": "出勤管理", "layout_group": "(store)", "public": false, "requires_auth": true, "allowed_roles": ["store_manager"], "components": { "buttons": [{"id": "btn_scan_qr", "label": "QR読取", "action": "QRスキャン", "action_type": "client_state", "target": "camera", "expected_result": "QRスキャン→打刻記録"}], "links": [], "forms": [], "data_displays": [{"id": "attendance_table", "type": "table", "data_source": "getAttendance", "description": "出退勤記録"}] } },
+    { "id": "hr_dashboard", "path": "/hr", "name": "HRダッシュボード", "layout_group": "(hr)", "public": false, "requires_auth": true, "allowed_roles": ["hr", "admin", "area_manager"], "components": { "buttons": [{"id": "btn_approve_shift", "label": "シフト承認", "action": "シフト承認", "action_type": "server_action", "target": "approveShiftRequest", "expected_result": "公開→トレーナー検索可能に"}], "links": [{"id": "link_rates", "label": "時給テーブル", "destination": "/hr/rates", "type": "sidebar"}, {"id": "link_resignations", "label": "退職意向", "destination": "/hr/resignations", "type": "sidebar"}], "forms": [], "data_displays": [{"id": "hr_kpis", "type": "kpi", "data_source": "getHRKPIs", "description": "全店舗KPI"}, {"id": "matchings_table", "type": "table", "data_source": "getMatchings", "description": "マッチング一覧"}] } },
+    { "id": "hr_resignations", "path": "/hr/resignations", "name": "退職意向管理", "layout_group": "(hr)", "public": false, "requires_auth": true, "allowed_roles": ["hr", "admin"], "components": { "buttons": [{"id": "btn_receive", "label": "受理", "action": "退職受理", "action_type": "server_action", "target": "receiveResignation", "expected_result": "受理済み"}, {"id": "btn_complete", "label": "退職完了", "action": "退職完了処理", "action_type": "server_action", "target": "completeResignation", "expected_result": "alumni_trainers作成→SPOT登録"}], "links": [], "forms": [], "data_displays": [{"id": "resign_list", "type": "table", "data_source": "getAllResignations", "description": "退職意向一覧"}] } },
+    { "id": "hr_rates", "path": "/hr/rates", "name": "時給テーブル", "layout_group": "(hr)", "public": false, "requires_auth": true, "allowed_roles": ["hr", "admin"], "components": { "buttons": [{"id": "btn_save_rate", "label": "保存", "action": "時給設定保存", "action_type": "server_action", "target": "updateHourlyRateConfig", "expected_result": "保存完了+監査ログ"}], "links": [], "forms": [{"id": "form_rate", "name": "時給設定フォーム", "action": "updateHourlyRateConfig", "fields": ["tenure_range", "base_rate", "attendance_bonus", "emergency_bonus"], "submit_button": "btn_save_rate", "validation": "金額>0"}], "data_displays": [{"id": "rate_table", "type": "table", "data_source": "getHourlyRateConfigs", "description": "在籍年数別時給テーブル"}] } }
+  ],
+  "flows": [
+    {
+      "id": "flow_resign_to_spot",
+      "role": "trainer",
+      "name": "退職→SPOT登録フロー",
+      "description": "在籍社員が退職意向を出し、HR処理後にSPOTトレーナーとして登録される",
+      "priority": "critical",
+      "steps": [
+        { "step": 1, "page": "t_home", "action": "退職意向カードをクリック", "element": "link_resignation", "expected_result": "退職フォーム表示" },
+        { "step": 2, "page": "t_resignation", "action": "退職意向を入力・提出", "element": "form_resignation", "expected_result": "提出完了→ホームに戻る" },
+        { "step": 3, "page": "hr_resignations", "action": "HR が受理→退職完了処理", "element": "btn_complete", "expected_result": "alumni_trainers作成・role変更" },
+        { "step": 4, "page": "t_home", "action": "SPOT登録カードが表示", "element": "link_spot_setup", "expected_result": "spot-setupへ誘導" },
+        { "step": 5, "page": "t_spot_setup", "action": "エリア・時間帯を選択してSPOT開始", "element": "form_spot_setup", "expected_result": "active→シフト検索可能" }
+      ]
+    },
+    {
+      "id": "flow_shift_apply",
+      "role": "trainer",
+      "name": "シフト応募フロー",
+      "description": "トレーナーがシフトを検索・応募する",
+      "priority": "critical",
+      "steps": [
+        { "step": 1, "page": "t_home", "action": "シフトを探すリンクをタップ", "element": "link_shifts", "expected_result": "シフト検索画面" },
+        { "step": 2, "page": "t_shifts", "action": "シフトカードをタップ", "element": "link_shift_detail", "expected_result": "シフト詳細画面" },
+        { "step": 3, "page": "t_shift_detail", "action": "応募するボタン", "element": "btn_apply", "expected_result": "応募確認画面" },
+        { "step": 4, "page": "t_apply", "action": "応募確定", "element": "btn_confirm_apply", "expected_result": "応募完了→マイシフト" }
+      ]
+    },
+    {
+      "id": "flow_clock_in_out",
+      "role": "trainer",
+      "name": "出退勤打刻フロー",
+      "description": "QRコードによる出退勤記録",
+      "priority": "critical",
+      "steps": [
+        { "step": 1, "page": "t_home", "action": "打刻ボタンタップ", "element": "btn_clock", "expected_result": "打刻画面" },
+        { "step": 2, "page": "t_clock", "action": "QR表示→店舗スキャン", "element": "btn_show_qr", "expected_result": "出勤記録" },
+        { "step": 3, "page": "t_clock", "action": "退勤QR表示→店舗スキャン", "element": "btn_show_qr", "expected_result": "退勤記録+勤務時間計算" }
+      ]
+    },
+    {
+      "id": "flow_store_shift_create",
+      "role": "store_manager",
+      "name": "シフト作成→応募管理フロー",
+      "description": "店舗がシフトを作成し、応募を管理する",
+      "priority": "critical",
+      "steps": [
+        { "step": 1, "page": "s_dashboard", "action": "シフト作成へ遷移", "element": "btn_create_shift", "expected_result": "シフト作成画面" },
+        { "step": 2, "page": "s_shifts", "action": "シフト情報入力・作成", "element": "form_shift", "expected_result": "シフト作成→HR承認待ち" },
+        { "step": 3, "page": "s_applications", "action": "応募者を承認/却下", "element": "btn_approve", "expected_result": "承認→トレーナーに通知" }
+      ]
+    },
+    {
+      "id": "flow_hr_matching",
+      "role": "hr",
+      "name": "HRマッチング管理フロー",
+      "description": "HR がシフト承認・オファー送信・退職処理を行う",
+      "priority": "critical",
+      "steps": [
+        { "step": 1, "page": "hr_dashboard", "action": "シフト承認", "element": "btn_approve_shift", "expected_result": "公開→トレーナー検索可能" },
+        { "step": 2, "page": "hr_resignations", "action": "退職完了処理", "element": "btn_complete", "expected_result": "SPOT自動登録" }
+      ]
+    }
+  ],
+  "cross_role_interactions": [
+    {
+      "id": "xrole_resign",
+      "name": "退職→SPOT登録の連携",
+      "description": "トレーナーが退職意向提出→HRが退職完了処理→トレーナーにSPOT登録案内",
+      "initiator_role": "trainer",
+      "affected_roles": ["hr"],
+      "flow_steps": [
+        { "role": "trainer", "action": "退職意向提出", "flow_ref": "flow_resign_to_spot" },
+        { "role": "hr", "action": "受理→退職完了→alumni作成", "flow_ref": "flow_hr_matching" }
+      ]
+    },
+    {
+      "id": "xrole_shift_match",
+      "name": "シフトマッチング連携",
+      "description": "店舗がシフト作成→HR承認→トレーナー応募→店舗承認→勤務",
+      "initiator_role": "store_manager",
+      "affected_roles": ["hr", "trainer"],
+      "flow_steps": [
+        { "role": "store_manager", "action": "シフト作成", "flow_ref": "flow_store_shift_create" },
+        { "role": "hr", "action": "シフト承認", "flow_ref": "flow_hr_matching" },
+        { "role": "trainer", "action": "応募→打刻", "flow_ref": "flow_shift_apply" }
+      ]
+    }
+  ],
+  "test_matrix": {
+    "description": "ローンチ前最終レビュー用テストマトリクス",
+    "agents": [
+      { "agent_id": "agent_trainer", "role": "trainer", "assigned_flows": ["flow_resign_to_spot", "flow_shift_apply", "flow_clock_in_out"], "assigned_pages": ["t_home", "t_shifts", "t_my_shifts", "t_clock", "t_earnings", "t_profile", "t_spot_setup"], "focus": "トレーナー全導線・キャンセルフロー・LINE連携" },
+      { "agent_id": "agent_store", "role": "store_manager", "assigned_flows": ["flow_store_shift_create"], "assigned_pages": ["s_dashboard", "s_shifts", "s_applications", "s_attendance"], "focus": "店舗シフト管理・モバイルナビ" },
+      { "agent_id": "agent_hr", "role": "hr", "assigned_flows": ["flow_hr_matching"], "assigned_pages": ["hr_dashboard", "hr_resignations", "hr_rates"], "focus": "HR退職処理・マッチング管理" }
+    ],
+    "cross_role_agent": { "agent_id": "agent_cross", "focus": "退職→SPOT登録連携、シフトマッチング連携", "assigned_interactions": ["xrole_resign", "xrole_shift_match"] }
+  },
+  "playwright_config": {
+    "base_url": "http://localhost:3000",
+    "output_dir": "tests/e2e",
+    "timeouts": { "navigation": 10000, "action": 5000, "assertion": 5000 },
+    "responsive_breakpoints": [375, 768, 1280]
+  }
+}

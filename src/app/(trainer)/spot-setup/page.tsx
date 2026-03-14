@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -122,15 +123,39 @@ export default function SpotSetupPage() {
         <div className="text-center space-y-3">
           <div className="text-5xl">🎉</div>
           <h1 className="font-heading text-2xl font-bold">登録が完了しました！</h1>
+          {trainerInfo && (
+            <p className="text-sm text-accent font-medium">
+              あなたの{trainerInfo.tenureYears}年の経験は、店舗にとって大きな力です。
+            </p>
+          )}
           <p className="text-muted-foreground">
             早速シフトを探してみましょう
           </p>
         </div>
-        <Button asChild size="lg" className="w-full max-w-xs">
-          <a href="/shifts">
+
+        {/* LINE連携誘導カード */}
+        <Card className="w-full max-w-xs border-[#06C755]/30 bg-[#06C755]/5">
+          <CardContent className="p-4 space-y-3 text-center">
+            <p className="text-sm font-medium">LINEで通知を受け取りませんか？</p>
+            <p className="text-xs text-muted-foreground">
+              シフトオファーやリマインドをLINEで受け取れます。見逃しを防げます。
+            </p>
+            <Button
+              asChild
+              className="w-full bg-[#06C755] hover:bg-[#06C755]/90 text-white"
+            >
+              <Link href="/profile">
+                LINEを連携する
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Button asChild size="lg" variant="outline" className="w-full max-w-xs">
+          <Link href="/shifts">
             シフトを探す
             <ArrowRight className="h-4 w-4 ml-2" />
-          </a>
+          </Link>
         </Button>
       </div>
     );
@@ -328,8 +353,8 @@ export default function SpotSetupPage() {
               />
             </div>
 
-            <div className="bg-muted/50 rounded-lg p-4 space-y-1 text-sm">
-              <p className="font-medium">設定内容の確認</p>
+            <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4 space-y-1 text-sm">
+              <p className="font-medium text-primary">設定内容の確認</p>
               <p className="text-muted-foreground">エリア: {selectedAreas.join(", ")}</p>
               <p className="text-muted-foreground">
                 時間帯: {selectedSlots.map((s) => TIME_SLOTS.find((t) => t.value === s)?.label).join(", ")}

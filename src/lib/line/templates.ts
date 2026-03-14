@@ -1,6 +1,7 @@
 import { messagingApi } from "@line/bot-sdk";
 
 const APP_URL = "https://dr-stretch-spot.vercel.app";
+const HR_PHONE = "03-6451-1171";
 
 // =============================================
 // Design tokens for Flex Messages
@@ -16,7 +17,7 @@ const COLORS = {
 } as const;
 
 // =============================================
-// Offer Notification (accept/decline buttons + Web URL)
+// Offer Notification — 2 buttons: 承認 / 人事部へ相談
 // =============================================
 
 interface OfferParams {
@@ -27,11 +28,17 @@ interface OfferParams {
   start_time: string;
   end_time: string;
   offered_rate: number;
+  trainer_name?: string;
+  tenure_years?: number;
 }
 
 export function offerNotification(
   offer: OfferParams
 ): messagingApi.FlexMessage {
+  const tenureText = offer.tenure_years
+    ? `あなたの経験（${offer.tenure_years}年）を活かせるシフトです`
+    : `${offer.store_name}があなたの経験を必要としています`;
+
   const bubble: messagingApi.FlexBubble = {
     type: "bubble",
     size: "mega",
@@ -47,7 +54,9 @@ export function offerNotification(
         },
         {
           type: "text",
-          text: "\u30B7\u30D5\u30C8\u30AA\u30D5\u30A1\u30FC",
+          text: offer.trainer_name
+            ? `${offer.trainer_name}さんへのオファー`
+            : "あなたへのオファー",
           weight: "bold",
           size: "lg",
           color: COLORS.primary,
@@ -63,11 +72,19 @@ export function offerNotification(
       contents: [
         {
           type: "text",
+          text: tenureText,
+          size: "sm",
+          color: COLORS.accent,
+          wrap: true,
+        },
+        {
+          type: "text",
           text: offer.title,
           weight: "bold",
           size: "md",
           color: COLORS.primary,
           wrap: true,
+          margin: "md",
         },
         {
           type: "separator",
@@ -107,9 +124,9 @@ export function offerNotification(
           height: "md",
           action: {
             type: "postback",
-            label: "\u627F\u8AFE\u3059\u308B",
+            label: "\u53C2\u52A0\u3059\u308B",
             data: `action=accept_offer&offer_id=${offer.id}`,
-            displayText: "\u627F\u8AFE\u3057\u307E\u3059",
+            displayText: "\u53C2\u52A0\u3057\u307E\u3059\uFF01",
           },
           color: COLORS.primary,
         },
@@ -118,22 +135,11 @@ export function offerNotification(
           style: "secondary",
           height: "md",
           action: {
-            type: "postback",
-            label: "\u8F9E\u9000\u3059\u308B",
-            data: `action=decline_offer&offer_id=${offer.id}`,
-            displayText: "\u8F9E\u9000\u3057\u307E\u3059",
+            type: "uri",
+            label: "\u4EBA\u4E8B\u90E8\u3078\u76F8\u8AC7\u3059\u308B",
+            uri: `tel:${HR_PHONE}`,
           },
           color: COLORS.surface,
-        },
-        {
-          type: "button",
-          style: "link",
-          height: "sm",
-          action: {
-            type: "uri",
-            label: "Web\u3067\u8A73\u7D30\u3092\u78BA\u8A8D",
-            uri: `${APP_URL}/home`,
-          },
         },
       ],
       paddingAll: "20px",
@@ -143,7 +149,7 @@ export function offerNotification(
 
   return {
     type: "flex",
-    altText: `\u30B7\u30D5\u30C8\u30AA\u30D5\u30A1\u30FC: ${offer.title}\uFF08${offer.store_name}\uFF09`,
+    altText: `${offer.store_name}\u304B\u3089\u30AA\u30D5\u30A1\u30FC\u304C\u5C4A\u3044\u3066\u3044\u307E\u3059: ${offer.title}`,
     contents: bubble,
   };
 }
@@ -179,7 +185,7 @@ export function shiftConfirmation(
         },
         {
           type: "text",
-          text: "\u30B7\u30D5\u30C8\u78BA\u5B9A",
+          text: "\u30B7\u30D5\u30C8\u304C\u78BA\u5B9A\u3057\u307E\u3057\u305F\uFF01",
           weight: "bold",
           size: "lg",
           color: COLORS.primary,
@@ -195,11 +201,19 @@ export function shiftConfirmation(
       contents: [
         {
           type: "text",
+          text: `\u5F53\u65E5\u304A\u4F1A\u3044\u3067\u304D\u308B\u306E\u3092\u697D\u3057\u307F\u306B\u3057\u3066\u3044\u307E\u3059\uFF01`,
+          size: "sm",
+          color: COLORS.accent,
+          wrap: true,
+        },
+        {
+          type: "text",
           text: shift.title,
           weight: "bold",
           size: "md",
           color: COLORS.primary,
           wrap: true,
+          margin: "md",
         },
         {
           type: "separator",
@@ -226,10 +240,18 @@ export function shiftConfirmation(
         },
         {
           type: "text",
-          text: "\u5F53\u65E5\u306F\u30A2\u30D7\u30EA\u304B\u3089\u6253\u523B\u3092\u304A\u9858\u3044\u3057\u307E\u3059\u3002",
+          text: "\u5F53\u65E5\u306F\u30A2\u30D7\u30EA\u304B\u3089QR\u30B3\u30FC\u30C9\u3092\u8868\u793A\u3057\u3066\u6253\u523B\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
           size: "xs",
           color: COLORS.secondary,
           margin: "xl",
+          wrap: true,
+        },
+        {
+          type: "text",
+          text: `\u3084\u3080\u3092\u5F97\u306A\u3044\u5834\u5408\u306F\u4EBA\u4E8B\u90E8\uFF08${HR_PHONE}\uFF09\u3078\u3054\u9023\u7D61\u304F\u3060\u3055\u3044\u3002`,
+          size: "xxs",
+          color: COLORS.secondary,
+          margin: "md",
           wrap: true,
         },
       ],
@@ -259,7 +281,7 @@ export function shiftConfirmation(
 
   return {
     type: "flex",
-    altText: `\u30B7\u30D5\u30C8\u78BA\u5B9A: ${shift.title}\uFF08${shift.store_name}\uFF09`,
+    altText: `\u30B7\u30D5\u30C8\u304C\u78BA\u5B9A\u3057\u307E\u3057\u305F: ${shift.title}\uFF08${shift.store_name}\uFF09`,
     contents: bubble,
   };
 }
@@ -294,7 +316,7 @@ export function reminderMessage(
         },
         {
           type: "text",
-          text: "\u660E\u65E5\u306E\u30B7\u30D5\u30C8",
+          text: "\u660E\u65E5\u306E\u30B7\u30D5\u30C8\u306E\u3054\u6848\u5185",
           weight: "bold",
           size: "lg",
           color: COLORS.primary,
@@ -309,9 +331,17 @@ export function reminderMessage(
       layout: "vertical",
       contents: [
         {
+          type: "text",
+          text: `\u660E\u65E5\u3001${shift.store_name}\u3067\u304A\u5F85\u3061\u3057\u3066\u3044\u307E\u3059\uFF01`,
+          size: "sm",
+          color: COLORS.accent,
+          wrap: true,
+        },
+        {
           type: "box",
           layout: "vertical",
           spacing: "sm",
+          margin: "lg",
           contents: [
             infoRow("\u5E97\u8217", shift.store_name),
             infoRow("\u65E5\u4ED8", shift.shift_date),
@@ -323,8 +353,8 @@ export function reminderMessage(
         },
         {
           type: "text",
-          text: "\u660E\u65E5\u306E\u52E4\u52D9\u3092\u304A\u9858\u3044\u3057\u307E\u3059\u3002\u5F53\u65E5\u306F\u30A2\u30D7\u30EA\u306E\u6253\u523B\u753B\u9762\u304B\u3089QR\u30B3\u30FC\u30C9\u3092\u8868\u793A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
-          size: "xs",
+          text: "\u5F53\u65E5\u306F\u30A2\u30D7\u30EA\u306E\u6253\u523B\u753B\u9762\u304B\u3089QR\u30B3\u30FC\u30C9\u3092\u8868\u793A\u3057\u3066\u304F\u3060\u3055\u3044\u3002",
+          size: "xxs",
           color: COLORS.secondary,
           margin: "xl",
           wrap: true,
@@ -344,30 +374,31 @@ export function reminderMessage(
           height: "md",
           action: {
             type: "postback",
-            label: "\u78BA\u8A8D\u3057\u307E\u3057\u305F",
+            label: "\u4E86\u89E3\uFF01\u884C\u304D\u307E\u3059",
             data: `action=confirm_reminder&application_id=${shift.application_id}`,
-            displayText: "\u660E\u65E5\u306E\u30B7\u30D5\u30C8\u3001\u78BA\u8A8D\u3057\u307E\u3057\u305F",
+            displayText: "\u660E\u65E5\u306E\u30B7\u30D5\u30C8\u3001\u4E86\u89E3\u3067\u3059\uFF01",
           },
           color: COLORS.primary,
         },
         {
+          type: "button",
+          style: "secondary",
+          height: "md",
+          action: {
+            type: "uri",
+            label: "\u4EBA\u4E8B\u90E8\u3078\u76F8\u8AC7\u3059\u308B",
+            uri: `tel:${HR_PHONE}`,
+          },
+          color: COLORS.surface,
+        },
+        {
           type: "text",
-          text: "\u51FA\u52E4\u304C\u96E3\u3057\u3044\u5834\u5408\u306FWeb\u30A2\u30D7\u30EA\u304B\u3089\u3054\u9023\u7D61\u304F\u3060\u3055\u3044",
+          text: "\u7121\u7406\u3092\u306A\u3055\u3089\u305A\u3001\u51FA\u52E4\u304C\u96E3\u3057\u3044\u5834\u5408\u306F\u304A\u6C17\u8EFD\u306B\u3054\u76F8\u8AC7\u304F\u3060\u3055\u3044\u3002",
           size: "xxs",
           color: COLORS.secondary,
           align: "center",
           margin: "lg",
           wrap: true,
-        },
-        {
-          type: "button",
-          style: "link",
-          height: "sm",
-          action: {
-            type: "uri",
-            label: "\u8A73\u7D30\u3092\u78BA\u8A8D",
-            uri: `${APP_URL}/my-shifts`,
-          },
         },
       ],
       paddingAll: "20px",
@@ -377,7 +408,7 @@ export function reminderMessage(
 
   return {
     type: "flex",
-    altText: `\u660E\u65E5\u306E\u30B7\u30D5\u30C8: ${shift.store_name}\uFF08${shift.shift_date}\uFF09`,
+    altText: `\u660E\u65E5\u3001${shift.store_name}\u3067\u304A\u5F85\u3061\u3057\u3066\u3044\u307E\u3059: ${shift.shift_date}`,
     contents: bubble,
   };
 }
@@ -415,7 +446,7 @@ export function linkCompleteMessage(): messagingApi.FlexMessage {
         },
         {
           type: "text",
-          text: "\u30A2\u30AB\u30A6\u30F3\u30C8\u9023\u643A\u304C\u5B8C\u4E86\u3057\u307E\u3057\u305F\u3002\u30B7\u30D5\u30C8\u30AA\u30D5\u30A1\u30FC\u3084\u30EA\u30DE\u30A4\u30F3\u30C9\u3092LINE\u3067\u53D7\u3051\u53D6\u308C\u307E\u3059\u3002",
+          text: "\u9023\u643A\u3042\u308A\u304C\u3068\u3046\u3054\u3056\u3044\u307E\u3059\uFF01\u3053\u308C\u304B\u3089\u3042\u306A\u305F\u306B\u3074\u3063\u305F\u308A\u306E\u30B7\u30D5\u30C8\u60C5\u5831\u3092\u304A\u5C4A\u3051\u3057\u307E\u3059\u306D\u3002\u307E\u305A\u306F\u30DB\u30FC\u30E0\u753B\u9762\u3092\u30C1\u30A7\u30C3\u30AF\u3057\u3066\u307F\u3066\u304F\u3060\u3055\u3044\uFF01",
           size: "sm",
           color: COLORS.secondary,
           margin: "lg",
@@ -448,7 +479,7 @@ export function linkCompleteMessage(): messagingApi.FlexMessage {
 
   return {
     type: "flex",
-    altText: "LINE\u9023\u643A\u304C\u5B8C\u4E86\u3057\u307E\u3057\u305F",
+    altText: "LINE\u9023\u643A\u304C\u5B8C\u4E86\u3057\u307E\u3057\u305F\uFF01\u3042\u306A\u305F\u306B\u3074\u3063\u305F\u308A\u306E\u30B7\u30D5\u30C8\u60C5\u5831\u3092\u304A\u5C4A\u3051\u3057\u307E\u3059\u3002",
     contents: bubble,
   };
 }

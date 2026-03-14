@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageCircle, Link2Off, ExternalLink } from "lucide-react";
+import { Loader2, MessageCircle, Link2Off, ExternalLink, Pause, Play } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { updateSpotStatus } from "@/actions/resignation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +36,8 @@ export default function ProfilePage() {
   const [lineLinkedAt, setLineLinkedAt] = useState<string | null>(null);
   const [linkingLine, setLinkingLine] = useState(false);
   const [unlinkingLine, setUnlinkingLine] = useState(false);
+  const [spotStatus, setSpotStatus] = useState<string>("active");
+  const [togglingSpot, setTogglingSpot] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -46,6 +50,7 @@ export default function ProfilePage() {
         .single();
       if (data) {
         setTrainerId(data.id);
+        setSpotStatus(data.spot_status || "active");
         setForm({
           full_name: data.full_name || "",
           full_name_kana: data.full_name_kana || "",
@@ -97,6 +102,7 @@ export default function ProfilePage() {
       toast.error("保存に失敗しました");
     } else {
       toast.success("プロフィールを更新しました");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -133,6 +139,49 @@ export default function ProfilePage() {
   return (
     <div className="animate-fade-in-up p-4 md:p-6 space-y-6 max-w-lg">
       <h1 className="font-heading text-2xl font-bold">プロフィール</h1>
+
+      <Card className="rounded-xl border bg-card shadow-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="font-heading font-semibold text-base flex items-center gap-2">
+              {spotStatus === "active" ? (
+                <Play className="h-4 w-4 text-green-600" />
+              ) : (
+                <Pause className="h-4 w-4 text-amber-600" />
+              )}
+              SPOTワーク受付
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {spotStatus === "active" ? "受付中" : "休止中"}
+              </span>
+              <Switch
+                checked={spotStatus === "active"}
+                disabled={togglingSpot}
+                onCheckedChange={async (checked) => {
+                  setTogglingSpot(true);
+                  const newStatus = checked ? "active" : "paused";
+                  const result = await updateSpotStatus(newStatus as "active" | "paused");
+                  if (result.success) {
+                    setSpotStatus(newStatus);
+                    toast.success(checked ? "SPOTワーク受付を再開しました" : "SPOTワーク受付を休止しました");
+                  } else {
+                    toast.error("変更に失敗しました");
+                  }
+                  setTogglingSpot(false);
+                }}
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {spotStatus === "active"
+              ? "オファーを受け取り、シフトに応募できます。"
+              : "休止中はオファーが届かず、シフト検索にも表示されません。いつでも再開できます。"}
+          </p>
+        </CardContent>
+      </Card>
 
       <Card className="rounded-xl border bg-card shadow-sm">
         <CardHeader><CardTitle className="font-heading font-semibold text-base">基本情報</CardTitle></CardHeader>
@@ -256,7 +305,7 @@ export default function ProfilePage() {
       <Button className="w-full rounded-xl bg-primary text-primary-foreground" onClick={handleSave} disabled={saving}>
         {saving ? (
           <><Loader2 className="mr-2 h-4 w-4 animate-spin" />保存中...</>
-        ) : "保存する"}
+        ) : "変更を保存"}
       </Button>
     </div>
   );
