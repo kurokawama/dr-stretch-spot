@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [["html"], ["json", { outputFile: "playwright-results.json" }]],
   use: {
-    baseURL: process.env.BASE_URL || "http://localhost:3000",
+    baseURL: process.env.BASE_URL || "http://localhost:3001",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -25,8 +25,8 @@ export default defineConfig({
   webServer: process.env.CI
     ? undefined
     : {
-        command: "npm run dev",
-        url: "http://localhost:3000",
+        command: "npm run dev --port 3001",
+        url: "http://localhost:3001",
         reuseExistingServer: true,
         timeout: 30000,
       },
