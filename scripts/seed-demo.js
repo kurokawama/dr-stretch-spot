@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 /**
  * Demo Seed Data for Dr.stretch SPOT
  * Run via: node scripts/seed-demo.js

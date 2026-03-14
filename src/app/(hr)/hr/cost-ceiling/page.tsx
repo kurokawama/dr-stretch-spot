@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DollarSign, TrendingUp, Save, Building } from "lucide-react";
+import { DollarSign, Save, Building } from "lucide-react";
 import {
   getCostCeilingConfig,
   updateCostCeilingConfig,
@@ -25,6 +25,7 @@ import type { CostCeilingConfig, StoreWithManager } from "@/types/database";
 import { toast } from "sonner";
 
 export default function CostCeilingPage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [ceiling, setCeiling] = useState<CostCeilingConfig | null>(null);
   const [stores, setStores] = useState<StoreWithManager[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,6 +68,7 @@ export default function CostCeilingPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 

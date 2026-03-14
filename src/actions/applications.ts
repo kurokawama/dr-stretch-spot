@@ -80,7 +80,7 @@ export async function applyToShift(
   let rateBreakdown: RateBreakdown;
   try {
     rateBreakdown = await calculateHourlyRate(trainer.id, shiftRequestId);
-  } catch (err) {
+  } catch {
     return { success: false, error: "時給計算に失敗しました" };
   }
 

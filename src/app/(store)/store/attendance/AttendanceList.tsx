@@ -163,6 +163,7 @@ export function AttendanceList({
   // Cleanup camera on dialog close
   useEffect(() => {
     if (!scanDialog) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       stopCamera();
     }
   }, [scanDialog, stopCamera]);

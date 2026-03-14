@@ -186,7 +186,7 @@ export async function hrCreateOffer(
       input.trainer_id,
       input.store_id
     );
-  } catch (err) {
+  } catch {
     return { success: false, error: "時給計算に失敗しました" };
   }
 

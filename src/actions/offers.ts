@@ -59,7 +59,7 @@ export async function sendOffer(
       availability.trainer_id,
       manager.store_id
     );
-  } catch (err) {
+  } catch {
     return { success: false, error: "時給計算に失敗しました" };
   }
 

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { AttendanceList } from "./AttendanceList";
-import { getTodayJST, getDaysAgoJST } from "@/lib/date";
+import { getTodayJST } from "@/lib/date";
 
 export default async function StoreAttendancePage() {
   const supabase = await createClient();

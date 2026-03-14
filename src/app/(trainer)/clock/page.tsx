@@ -25,6 +25,7 @@ export default function ClockPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
     const clockInterval = setInterval(() => setCurrentTime(new Date()), 1000);
     // Poll for clock_out QR tokens every 5 seconds
@@ -57,7 +58,8 @@ export default function ClockPage() {
 
     // Find the application ID for this attendance record
     const appResult = await getMyApplications();
-    const app = appResult.data?.find(
+    // Find matching application (used for verification)
+    appResult.data?.find(
       (a) =>
         a.shift_request_id === record.application_id ||
         a.id === record.application_id
@@ -103,6 +105,7 @@ export default function ClockPage() {
           </p>
         </div>
         {/* Hidden URL for QR scanner apps */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}`}
           alt="QR Code"

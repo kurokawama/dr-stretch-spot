@@ -132,7 +132,7 @@ export async function getTomorrowAttendances(
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
-  let query = admin
+  const query = admin
     .from("attendance_records")
     .select(
       "*, trainer:alumni_trainers(full_name, email, phone), store:stores(name, area), application:shift_applications(pre_day_confirmed, pre_day_reminder_sent)"

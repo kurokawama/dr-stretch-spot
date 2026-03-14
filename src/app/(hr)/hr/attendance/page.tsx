@@ -14,6 +14,105 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { redirect } from "next/navigation";
 import { getTodayJST, getDaysAgoJST } from "@/lib/date";
 
+interface AttendanceRow {
+  id: string;
+  shift_date: string;
+  scheduled_start: string | null;
+  scheduled_end: string | null;
+  clock_in_at: string | null;
+  clock_out_at: string | null;
+  actual_work_minutes: number | null;
+  status: string;
+  trainer?: { full_name?: string; email?: string } | null;
+  store?: { name?: string; area?: string } | null;
+}
+
+function statusLabel(status: string) {
+  switch (status) {
+    case "scheduled": return "待機中";
+    case "clocked_in": return "出勤中";
+    case "clocked_out": return "退勤済";
+    case "verified": return "確認済";
+    case "disputed": return "要確認";
+    default: return status;
+  }
+}
+
+function statusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+  switch (status) {
+    case "clocked_in": return "default";
+    case "scheduled": return "secondary";
+    case "clocked_out": return "outline";
+    case "verified": return "outline";
+    case "disputed": return "destructive";
+    default: return "secondary";
+  }
+}
+
+function formatTime(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function AttendanceTable({ records }: { records: AttendanceRow[] }) {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>日付</TableHead>
+          <TableHead>トレーナー</TableHead>
+          <TableHead>店舗</TableHead>
+          <TableHead>エリア</TableHead>
+          <TableHead>予定</TableHead>
+          <TableHead>出勤</TableHead>
+          <TableHead>退勤</TableHead>
+          <TableHead>実働</TableHead>
+          <TableHead>ステータス</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {records.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={9} className="text-center text-muted-foreground">
+              記録がありません
+            </TableCell>
+          </TableRow>
+        ) : (
+          records.map((r) => (
+            <TableRow key={r.id}>
+              <TableCell>{r.shift_date}</TableCell>
+              <TableCell className="font-medium">
+                {r.trainer?.full_name}
+              </TableCell>
+              <TableCell>{r.store?.name}</TableCell>
+              <TableCell>{r.store?.area}</TableCell>
+              <TableCell>
+                {r.scheduled_start?.slice(0, 5)}〜
+                {r.scheduled_end?.slice(0, 5)}
+              </TableCell>
+              <TableCell>{formatTime(r.clock_in_at)}</TableCell>
+              <TableCell>{formatTime(r.clock_out_at)}</TableCell>
+              <TableCell>
+                {r.actual_work_minutes != null
+                  ? `${Math.floor(r.actual_work_minutes / 60)}h${r.actual_work_minutes % 60}m`
+                  : "—"}
+              </TableCell>
+              <TableCell>
+                <Badge variant={statusVariant(r.status)}>
+                  {statusLabel(r.status)}
+                </Badge>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  );
+}
+
 export default async function HRAttendancePage() {
   const supabase = await createClient();
   const {
@@ -69,94 +168,6 @@ export default async function HRAttendancePage() {
 
   const filteredToday = filterByArea(todayRecords ?? []);
   const filteredRecent = filterByArea(recentRecords ?? []);
-
-  const statusLabel = (status: string) => {
-    switch (status) {
-      case "scheduled": return "待機中";
-      case "clocked_in": return "出勤中";
-      case "clocked_out": return "退勤済";
-      case "verified": return "確認済";
-      case "disputed": return "要確認";
-      default: return status;
-    }
-  };
-
-  const statusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (status) {
-      case "clocked_in": return "default";
-      case "scheduled": return "secondary";
-      case "clocked_out": return "outline";
-      case "verified": return "outline";
-      case "disputed": return "destructive";
-      default: return "secondary";
-    }
-  };
-
-  const formatTime = (iso: string | null) => {
-    if (!iso) return "—";
-    return new Date(iso).toLocaleTimeString("ja-JP", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const AttendanceTable = ({
-    records,
-  }: {
-    records: typeof filteredToday;
-  }) => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>日付</TableHead>
-          <TableHead>トレーナー</TableHead>
-          <TableHead>店舗</TableHead>
-          <TableHead>エリア</TableHead>
-          <TableHead>予定</TableHead>
-          <TableHead>出勤</TableHead>
-          <TableHead>退勤</TableHead>
-          <TableHead>実働</TableHead>
-          <TableHead>ステータス</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {records.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={9} className="text-center text-muted-foreground">
-              記録がありません
-            </TableCell>
-          </TableRow>
-        ) : (
-          records.map((r) => (
-            <TableRow key={r.id}>
-              <TableCell>{r.shift_date}</TableCell>
-              <TableCell className="font-medium">
-                {r.trainer?.full_name}
-              </TableCell>
-              <TableCell>{r.store?.name}</TableCell>
-              <TableCell>{r.store?.area}</TableCell>
-              <TableCell>
-                {r.scheduled_start?.slice(0, 5)}〜
-                {r.scheduled_end?.slice(0, 5)}
-              </TableCell>
-              <TableCell>{formatTime(r.clock_in_at)}</TableCell>
-              <TableCell>{formatTime(r.clock_out_at)}</TableCell>
-              <TableCell>
-                {r.actual_work_minutes != null
-                  ? `${Math.floor(r.actual_work_minutes / 60)}h${r.actual_work_minutes % 60}m`
-                  : "—"}
-              </TableCell>
-              <TableCell>
-                <Badge variant={statusVariant(r.status)}>
-                  {statusLabel(r.status)}
-                </Badge>
-              </TableCell>
-            </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
-  );
 
   return (
     <div className="space-y-6 p-6">
