@@ -82,25 +82,25 @@ test.describe("Store dashboard", () => {
     }
 
     await page.locator('aside a[href="/store/shifts"]').click();
-    await expect(page).toHaveURL(/\/store\/shifts$/);
+    await page.waitForURL(/\/store\/shifts$/);
     await expect(
       page.getByRole("heading", { name: "シフト募集管理" })
     ).toBeVisible();
 
     await page.locator('aside a[href="/store/applications"]').click();
-    await expect(page).toHaveURL(/\/store\/applications$/);
+    await page.waitForURL(/\/store\/applications$/);
     await expect(
       page.getByRole("heading", { name: "応募者管理" })
     ).toBeVisible();
 
     await page.locator('aside a[href="/store/attendance"]').click();
-    await expect(page).toHaveURL(/\/store\/attendance$/);
+    await page.waitForURL(/\/store\/attendance$/);
     await expect(
       page.getByRole("heading", { name: "出勤管理" })
     ).toBeVisible();
 
     await page.locator('aside a[href="/store/evaluations"]').click();
-    await expect(page).toHaveURL(/\/store\/evaluations$/);
+    await page.waitForURL(/\/store\/evaluations$/);
     await expect(
       page.getByRole("heading", { name: "評価入力" })
     ).toBeVisible();

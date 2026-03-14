@@ -24,11 +24,11 @@ test.describe("HR trainers", () => {
 
     const statusSelect = page.getByRole("combobox").first();
     await statusSelect.click();
-    await page.getByRole("option", { name: "アクティブ" }).click();
+    await page.getByRole("option", { name: "アクティブ", exact: true }).click();
     await page.waitForLoadState("networkidle");
 
     await expect(
-      page.getByText(/条件に一致するトレーナーがいません|名のトレーナー/)
+      page.getByText(/条件に一致するトレーナーがいません|名のトレーナー/).first()
     ).toBeVisible();
   });
 

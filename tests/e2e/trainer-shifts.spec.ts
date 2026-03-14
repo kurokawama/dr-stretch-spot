@@ -50,10 +50,10 @@ test.describe("Trainer Shift Search Page", () => {
     const filterToggle = page.locator("button").filter({ has: page.locator("svg") }).first();
     if (await filterToggle.isVisible().catch(() => false)) {
       await filterToggle.click();
-      // Search form elements
-      await expect(page.locator("text=エリア")).toBeVisible();
-      await expect(page.locator("text=開始日")).toBeVisible();
-      await expect(page.locator("text=終了日")).toBeVisible();
+      // Search form elements - use Label locators to avoid matching placeholder text
+      await expect(page.getByText("エリア", { exact: true }).first()).toBeVisible();
+      await expect(page.getByText("開始日", { exact: true })).toBeVisible();
+      await expect(page.getByText("終了日", { exact: true })).toBeVisible();
     }
   });
 });

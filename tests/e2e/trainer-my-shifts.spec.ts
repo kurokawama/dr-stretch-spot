@@ -14,9 +14,9 @@ test.describe("Trainer My Shifts Page", () => {
   });
 
   test("has 3 tabs: upcoming, history, cancelled", async ({ page }) => {
-    await expect(page.locator("text=予定")).toBeVisible();
-    await expect(page.locator("text=履歴")).toBeVisible();
-    await expect(page.locator("text=取消")).toBeVisible();
+    await expect(page.getByRole("tab", { name: /予定/ })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /履歴/ })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /取消/ })).toBeVisible();
   });
 
   test("upcoming tab empty state shows search CTA", async ({ page }) => {

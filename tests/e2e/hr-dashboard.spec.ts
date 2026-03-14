@@ -10,7 +10,7 @@ test.describe("HR dashboard", () => {
 
   test("renders dashboard with KPI cards", async ({ page }) => {
     await expect(page.getByRole("heading", { name: /ダッシュボード/ })).toBeVisible();
-    await expect(page.getByText("本日のマッチング")).toBeVisible();
+    await expect(page.getByText("本日のマッチング", { exact: true })).toBeVisible();
     await expect(page.getByText("承認待ちシフト")).toBeVisible();
     await expect(page.getByText("本日の出勤状況")).toBeVisible();
     await expect(page.getByText("明日の予定")).toBeVisible();
