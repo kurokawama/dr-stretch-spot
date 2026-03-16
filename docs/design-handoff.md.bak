@@ -1,0 +1,183 @@
+# Design Handoff — Dr.stretch SPOT Redesign
+
+## Source
+- **Stitch Project**: Dr.stretch SPOT Redesign (ID: 17456943550248554887)
+- **Screens**: 4 screens (2 mobile + 2 desktop) + 1 empty state variant
+- **Figma Score**: 23-24/25 all screens
+- **User Approval**: Granted (Gate 4 D3 passed)
+
+---
+
+## Brand Tokens
+
+### Colors
+| Token | Value | CSS Variable | Usage |
+|-------|-------|-------------|-------|
+| Primary Red | `#E60012` | `--primary: oklch(0.53 0.22 29)` | CTAs, active states, brand accent |
+| Accent Green | `#DADF00` | `--accent: oklch(0.87 0.18 110)` | Success, highlights, progress |
+| Background | `#FCFCFC` | `--background: oklch(0.99 0 0)` | Page backgrounds |
+| Card | `#FFFFFF` | `--card: oklch(1 0 0)` | Card surfaces |
+| Muted BG | `#F5F5F5` | `--muted: oklch(0.96 0 0)` | Section backgrounds |
+| Foreground | `#1A1A1A` | `--foreground: oklch(0.13 0 0)` | Primary text |
+| Muted FG | `#808080` | `--muted-foreground: oklch(0.5 0 0)` | Secondary text |
+| LINE Green | `#06C755` | hardcoded | LINE integration elements |
+
+### Typography
+- **Headings**: `font-heading` (Montserrat) — bold, sporty feel
+- **Body**: `font-sans` (Inter + Noto Sans JP) — clean readability
+- **Sizes**: body `text-sm` (14px), headings `text-lg` to `text-2xl`
+
+### Shape
+- **Cards**: `rounded-lg` (8px)
+- **Buttons/Inputs**: `rounded-xl` (12px)
+- **Filter chips**: `rounded-full`
+- **Shadow**: `shadow-sm` for cards, no heavy shadows
+
+### Status Badge Colors
+| Status | Background | Text |
+|--------|-----------|------|
+| 充足 / 承認済 | `bg-green-100` | `text-green-800` |
+| 募集中 / 保留中 | `bg-yellow-100` | `text-yellow-800` |
+| 未充足 / キャンセル | `bg-red-100` | `text-red-800` |
+| 完了 | `bg-gray-100` | `text-gray-800` |
+
+---
+
+## Screen Specifications
+
+### Screen 1: Trainer Home (Mobile — `/home`)
+
+**Layout** (top to bottom):
+1. **Hero Section**: Light warm gradient background (white to very light red tint)
+   - Greeting: "おかえりなさい、[名前]さん" with wave emoji
+   - Today's shift CTA card (if scheduled): Red background card with store name, time, "打刻する" button
+   - Use `bg-gradient-to-b from-white to-red-50/30`
+
+2. **Quick Stats Row**: 3 cards in `grid grid-cols-3 gap-3`
+   - "次のシフト": Calendar icon, date + store name
+   - "今月の収入": Wallet icon, yen amount, tiny trend indicator
+   - "ランク": Star icon, rank badge (ゴールド/シルバー/ブロンズ)
+   - Each card: White bg, `border-l-4` with brand color accent
+
+3. **Available Shifts Section**: "募集中のシフト" header with "すべて見る >" link
+   - Vertical card list (3-4 items)
+   - Each card: Store name (bold), date, time, "¥X,XXX/h" in red, area badge, "応募" button
+
+4. **Bottom Nav**: 5 items (ホーム active, シフト, マイシフト, 打刻, 設定)
+
+### Screen 2: Shift Search (Mobile — `/shifts`)
+
+**Layout**:
+1. **Header**: "シフト検索" + filter icon button
+2. **Quick Filter Chips**: Horizontal scroll, `rounded-full`
+   - Selected: `bg-primary text-white`
+   - Unselected: `border border-gray-300 text-gray-700`
+   - Chips: 今週, 来週, 関東, 関西, 午前, 午後, 高時給
+3. **Results Count**: "N件の募集" in muted text
+4. **Shift Card List**: Same card design as home page
+   - Store name (bold) + verified badge
+   - Date, time, duration badge
+   - Rate "¥X,XXX/h" in red + area pill badge + "応募する" button
+5. **Empty State**: Illustration area + "条件に合うシフトが見つかりません" + "フィルターを変更" button
+
+### Screen 3: Store Dashboard (Desktop — `/store`)
+
+**Layout**:
+1. **Sidebar** (w-56, already implemented in layout.tsx):
+   - Active item: `bg-primary/10 text-primary border-l-4 border-primary`
+   - Bottom: Store name display
+
+2. **KPI Cards Row** (`grid grid-cols-3 gap-4`):
+   - Card 1: "本日のカバー率" — Large percentage, circular progress ring (green when >80%)
+   - Card 2: "未対応の応募" — Count with mini bar chart (last 7 days)
+   - Card 3: "今月の利用回数" — Count with sparkline + month comparison
+   - Each card: `border-t-4` with brand color, white bg, `rounded-lg shadow-sm`
+
+3. **Upcoming Shifts Table**: "今週のシフト" header + "新規作成" red button
+   - Columns: 日付, 時間, 必要人数, 応募数, ステータス
+   - Status badges (see badge colors above)
+   - Alternating row backgrounds
+
+4. **Recent Activity**: "最近のアクティビティ" — timestamp + description list
+
+### Screen 4: HR Management (Desktop — `/hr/matchings`)
+
+**Layout**:
+1. **Sidebar**: Same pattern as store, with HR-specific nav items
+   - Active item highlight same as store
+
+2. **Summary Stats** (`grid grid-cols-4 gap-4`):
+   - "全マッチング数" with sparkline
+   - "承認待ち" with pulsing indicator dot
+   - "今月の充足率" with donut/ring chart
+   - "キャンセル率" with mini area chart
+   - Each card: `border-t-4` colored accent (red/yellow/green/blue)
+
+3. **Filter Bar**: Dropdowns (status, area, period) + search input + "エクスポート" button
+
+4. **Data Table**:
+   - Columns: トレーナー名, 店舗名, シフト日, 時間, 時給, ステータス, アクション
+   - Status badges with distinct colors
+   - Action column: "承認" green button, "詳細" link
+   - Row hover: `hover:bg-muted/50`
+   - Pagination: "1-10 / N件" with page buttons
+
+---
+
+## Component Patterns
+
+### Card (Reusable)
+```
+className="rounded-lg border bg-card shadow-sm"
+```
+- With top accent: add `border-t-4 border-primary` (or other brand color)
+- With left accent: add `border-l-4 border-primary`
+
+### Button Variants
+- Primary CTA: `bg-primary text-primary-foreground rounded-xl`
+- Secondary: `bg-secondary text-secondary-foreground rounded-xl`
+- Outline: `border border-input rounded-xl`
+- LINE: `bg-[#06C755] hover:bg-[#06C755]/90 text-white rounded-xl`
+
+### Filter Chip
+```
+className={cn(
+  "rounded-full px-3 py-1.5 text-sm transition-colors",
+  active ? "bg-primary text-white" : "border border-gray-300 text-gray-700 hover:bg-gray-100"
+)}
+```
+
+### Status Badge
+```
+className={cn(
+  "rounded-full px-2 py-0.5 text-xs font-medium",
+  status === "approved" && "bg-green-100 text-green-800",
+  status === "pending" && "bg-yellow-100 text-yellow-800",
+  status === "cancelled" && "bg-red-100 text-red-800"
+)}
+```
+
+### Empty State
+Use `<ErrorState>` component from `@/components/shared/ErrorState` or create inline:
+```
+<div className="flex flex-col items-center gap-4 py-12 text-center">
+  <div className="rounded-full bg-muted p-4">
+    <SearchIcon className="h-8 w-8 text-muted-foreground" />
+  </div>
+  <p className="text-sm text-muted-foreground">[message]</p>
+  <Button variant="outline">[action]</Button>
+</div>
+```
+
+---
+
+## Critical Implementation Rules
+
+1. **DO NOT use shadcn/ui defaults** — always apply brand colors and rounded corners from this file
+2. **All CTAs must be brand red** `bg-primary` — never gray or default blue
+3. **Cards always have** `rounded-lg border bg-card shadow-sm`
+4. **Mobile pages**: `max-w-lg` container, `p-4` padding
+5. **Desktop pages**: Full width content area (sidebar in layout handles constraint)
+6. **Status badges**: Use the color mapping table above, never improvise colors
+7. **Empty states**: Never show a blank white page — always use ErrorState or inline empty state
+8. **Animations**: Use `animate-fade-in-up` on page content, `stagger-children` on card lists

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<title>Store Manager Dashboard Overview - Dr.stretch SPOT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#da0b1d",
+              "background-light": "#f8f5f6",
+              "background-dark": "#221011",
+            },
+            fontFamily: {
+              "display": ["Lexend", "sans-serif"],
+              "heading": ["Montserrat", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Lexend', sans-serif; }
+        .heading-font { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="flex min-h-screen">
+<!-- LEFT SIDEBAR -->
+<aside class="w-[224px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col fixed h-full z-10">
+<div class="p-6 flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-xl">fitness_center</span>
+</div>
+<h1 class="text-primary font-bold text-lg tracking-tight">Dr.stretch <span class="text-slate-900 dark:text-white">SPOT</span></h1>
+</div>
+<nav class="flex-1 px-0 py-4 space-y-1">
+<a class="flex items-center gap-3 px-6 py-3 bg-primary/10 text-primary border-l-4 border-primary font-medium" href="#">
+<span class="material-symbols-outlined fill-1">dashboard</span>
+<span class="text-sm">ダッシュボード</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-sm">シフト募集</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm">応募者</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">history_toggle_off</span>
+<span class="text-sm">出勤管理</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">star</span>
+<span class="text-sm">評価</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm">テンプレート</span>
+</a>
+</nav>
+<div class="p-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Store manager profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAfl-XlVAfQxQrnFLQq7OjwVTGn8nBNuh81OWZqR1IoQH4sNjt0kef6cUpo_zQhc88boQ1HIOG0XZsUQnz6WfXD5WguiaTiW0TOWm65fk4_Qj_XZXSiVBS0JPihgCMQMk6Jci_UbGbunMFczk_MTwTLpzKBS4B9ld3cqoYR-d40rT0nuGRfQ1la6VUn0SWoeIg61Gw8okLWScCoSrGI0HV1RiCX8ygs0P0_9cGbCqpPdLPP5ga0LpTT-SisjNMQk8gumjB_qgJABo64')"></div>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Dr.stretch 渋谷店</p>
+<p class="text-[10px] text-slate-500">Store Manager</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- MAIN CONTENT -->
+<main class="flex-1 ml-[224px] p-8">
+<!-- TOP BAR -->
+<header class="flex items-center justify-between mb-8">
+<div>
+<h2 class="text-2xl font-bold heading-font">ダッシュボード</h2>
+<p class="text-slate-500 text-sm">2024年3月12日 (火)</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm cursor-pointer border border-slate-100 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+<span class="absolute top-1 right-1 size-4 bg-primary text-white text-[10px] flex items-center justify-center rounded-full font-bold">3</span>
+</div>
+<div class="size-10 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">settings</span>
+</div>
+</div>
+</header>
+<!-- KPI CARDS -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- KPI 1 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<div>
+<p class="text-slate-500 text-sm font-medium mb-1">本日のカバー率</p>
+<h3 class="text-3xl font-bold heading-font">87%</h3>
+<p class="text-emerald-500 text-xs mt-2 flex items-center gap-1 font-bold">
+<span class="material-symbols-outlined text-sm">trending_up</span> +2.4%
+                        </p>
+</div>
+<div class="relative size-16">
+<svg class="size-full" viewbox="0 0 36 36">
+<circle class="stroke-slate-100 dark:stroke-slate-800" cx="18" cy="18" fill="none" r="16" stroke-width="3"></circle>
+<circle class="stroke-emerald-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="87, 100" stroke-linecap="round" stroke-width="3"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-500">check_circle</span>
+</div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<div>
+<p class="text-slate-500 text-sm font-medium mb-1">未対応の応募</p>
+<h3 class="text-3xl font-bold heading-font">4</h3>
+<p class="text-primary text-xs mt-2 flex items-center gap-1 font-bold">
+                            要確認
+                        </p>
+</div>
+<div class="flex items-end gap-1 h-10">
+<div class="w-2 bg-slate-100 dark:bg-slate-800 h-4 rounded-t-sm"></div>
+<div class="w-2 bg-slate-100 dark:bg-slate-800 h-6 rounded-t-sm"></div>
+<div class="w-2 bg-primary h-8 rounded-t-sm"></div>
+<div class="w-2 bg-primary/60 h-5 rounded-t-sm"></div>
+<div class="w-2 bg-primary h-10 rounded-t-sm"></div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<div>
+<p class="text-slate-500 text-sm font-medium mb-1">今月の利用回数</p>
+<h3 class="text-3xl font-bold heading-font">23<span class="text-sm font-normal ml-1">回</span></h3>
+<p class="text-slate-400 text-xs mt-2 flex items-center gap-1">
+                            先月比 -5%
+                        </p>
+</div>
+<div class="w-20">
+<svg class="w-full h-auto" viewbox="0 0 100 40">
+<path class="stroke-primary" d="M0,35 Q10,10 20,25 T40,15 T60,30 T80,5 T100,20" fill="none" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- UPCOMING SHIFTS TABLE -->
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+<div class="p-6 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+<h3 class="font-bold heading-font">今週のシフト</h3>
+<button class="bg-primary hover:bg-primary/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1 transition-all">
+<span class="material-symbols-outlined text-sm">add</span> 新規作成
+                        </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-[10px] uppercase font-bold tracking-wider">
+<tr>
+<th class="px-6 py-4">日付</th>
+<th class="px-6 py-4">時間</th>
+<th class="px-6 py-4">必要人数</th>
+<th class="px-6 py-4">応募数</th>
+<th class="px-6 py-4">ステータス</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50 dark:divide-slate-800">
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium">3/13 (水)</td>
+<td class="px-6 py-4 text-sm text-slate-500">10:00 - 19:00</td>
+<td class="px-6 py-4 text-sm">3名</td>
+<td class="px-6 py-4 text-sm">3名</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded">充足</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-primary">3/14 (木)</td>
+<td class="px-6 py-4 text-sm text-slate-500">12:00 - 21:00</td>
+<td class="px-6 py-4 text-sm">2名</td>
+<td class="px-6 py-4 text-sm">0名</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded">未充足</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium">3/15 (金)</td>
+<td class="px-6 py-4 text-sm text-slate-500">10:00 - 19:00</td>
+<td class="px-6 py-4 text-sm">4名</td>
+<td class="px-6 py-4 text-sm">2名</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-lime-100 dark:bg-lime-900/30 text-lime-600 dark:text-lime-400 text-[10px] font-bold rounded">募集中</span>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 text-sm font-medium">3/16 (土)</td>
+<td class="px-6 py-4 text-sm text-slate-500">10:00 - 21:00</td>
+<td class="px-6 py-4 text-sm">5名</td>
+<td class="px-6 py-4 text-sm">5名</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded">充足</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- RECENT ACTIVITY -->
+<div class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+<div class="p-6 border-b border-slate-50 dark:border-slate-800">
+<h3 class="font-bold heading-font">最近のアクティビティ</h3>
+</div>
+<div class="p-6 space-y-6">
+<div class="flex gap-4">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary text-sm">person_add</span>
+</div>
+<div>
+<p class="text-sm">
+<span class="font-bold">田中太郎さん</span>が3/15のシフトに応募しました。
+                                </p>
+<p class="text-[10px] text-slate-400 mt-1">10分前</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-emerald-600 text-sm">task_alt</span>
+</div>
+<div>
+<p class="text-sm">
+<span class="font-bold">佐藤美咲さん</span>の出勤が承認されました。
+                                </p>
+<p class="text-[10px] text-slate-400 mt-1">1時間前</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-blue-600 text-sm">mail</span>
+</div>
+<div>
+<p class="text-sm">
+                                    新しい<span class="font-bold">メッセージ</span>が届いています。
+                                </p>
+<p class="text-[10px] text-slate-400 mt-1">3時間前</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400 text-sm">edit</span>
+</div>
+<div>
+<p class="text-sm">
+                                    シフト募集の<span class="font-bold">テンプレート</span>を更新しました。
+                                </p>
+<p class="text-[10px] text-slate-400 mt-1">昨日</p>
+</div>
+</div>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/50 text-center">
+<button class="text-xs text-primary font-bold hover:underline">すべて表示</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

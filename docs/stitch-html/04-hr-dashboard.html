@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html lang="ja"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<title>HR Matching Management Dashboard | Dr.stretch SPOT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Montserrat:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#da0b1d",
+                        "background-light": "#f8f5f6",
+                        "background-dark": "#221011",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "headings": ["Montserrat", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headings { font-family: 'Montserrat', sans-serif; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="flex min-h-screen">
+<!-- SIDEBAR -->
+<aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col fixed h-full z-50">
+<div class="p-6">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-2xl">exercise</span>
+</div>
+<div>
+<h1 class="font-headings text-sm font-bold leading-tight">Dr.stretch SPOT</h1>
+<span class="inline-block bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase">HR Badge</span>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-sm font-medium">ダッシュボード</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg border-l-4 border-primary" href="#">
+<span class="material-symbols-outlined text-[22px] fill-1">handshake</span>
+<span class="text-sm font-bold">マッチング管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">check_box</span>
+<span class="text-sm font-medium">シフト承認</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">group</span>
+<span class="text-sm font-medium">トレーナー管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">store</span>
+<span class="text-sm font-medium">店舗管理</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">payments</span>
+<span class="text-sm font-medium">報酬支払い</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-sm font-medium">設定</span>
+</a>
+</div>
+</aside>
+<!-- MAIN CONTENT -->
+<main class="ml-64 flex-1 flex flex-col min-w-0">
+<!-- TOP BAR -->
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 sticky top-0 z-40">
+<div class="flex flex-col">
+<div class="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-bold tracking-wider">
+<span>HR</span>
+<span class="material-symbols-outlined text-[12px]">chevron_right</span>
+<span class="text-slate-600 dark:text-slate-300">マッチング管理</span>
+</div>
+<h2 class="font-headings text-lg font-bold text-slate-900 dark:text-slate-100">マッチング管理</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-400 text-sm mr-2">calendar_today</span>
+<span class="text-xs font-bold text-slate-600 dark:text-slate-300 tracking-tight">2025/3/1 - 3/31</span>
+</div>
+<button class="size-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="size-10 rounded-full overflow-hidden border-2 border-primary/20">
+<img alt="Admin Avatar" class="w-full h-full object-cover" data-alt="Headshot of the HR manager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBATy0TZgwDsk3VFxj3o54WPzWfVsTYVopICpPpNiQfFnNxAtcX-Pdb7ZrfOm2DNYcA8RM8Qf6jpqj6QRbSVHQi61Her3_Upj6SLvEKum4NuHaJpmmCpTGcxV2xVgnvkq7jzjpFikXBXtDeDNvwXj9NOuwa3hMPvJqxFatIe47v1HWBv4X5ooUEYdVnG8-syAEgKnDlKWdVfOO8lLNnX3lEME8sdaibNJTnzHJJJMyWPOHP04Tb-prziNQXe8pRGqaQ7S2n2gQZOCYP"/>
+</div>
+</div>
+</header>
+<!-- DASHBOARD CONTENT -->
+<div class="p-8 space-y-6">
+<!-- SUMMARY STATS -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden relative">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400">全マッチング数</span>
+<span class="text-emerald-500 text-[10px] font-bold bg-emerald-50 px-1.5 py-0.5 rounded">+12%</span>
+</div>
+<div class="text-3xl font-bold font-headings mb-4">156</div>
+<div class="h-10 w-full bg-gradient-to-t from-primary/5 to-transparent rounded flex items-end">
+<div class="w-full flex items-end gap-1 h-full px-1">
+<div class="flex-1 bg-primary/20 rounded-t-sm h-[30%]"></div>
+<div class="flex-1 bg-primary/20 rounded-t-sm h-[45%]"></div>
+<div class="flex-1 bg-primary/30 rounded-t-sm h-[40%]"></div>
+<div class="flex-1 bg-primary/40 rounded-t-sm h-[60%]"></div>
+<div class="flex-1 bg-primary/50 rounded-t-sm h-[55%]"></div>
+<div class="flex-1 bg-primary/70 rounded-t-sm h-[80%]"></div>
+<div class="flex-1 bg-primary rounded-t-sm h-[100%]"></div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400">承認待ち</span>
+<span class="flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-amber-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+</span>
+</div>
+<div class="text-3xl font-bold font-headings mb-1">12</div>
+<p class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Pending approval</p>
+<div class="mt-4 flex gap-2 overflow-hidden">
+<div class="size-6 rounded-full bg-slate-200 border-2 border-white dark:border-slate-900"></div>
+<div class="size-6 rounded-full bg-slate-300 border-2 border-white dark:border-slate-900 -ml-2"></div>
+<div class="size-6 rounded-full bg-slate-400 border-2 border-white dark:border-slate-900 -ml-2"></div>
+<div class="size-6 flex items-center justify-center text-[8px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white dark:border-slate-900 -ml-2">+9</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+<div>
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 block mb-2">今月の充足率</span>
+<div class="text-3xl font-bold font-headings mb-1">89%</div>
+<p class="text-emerald-500 text-[10px] font-bold">+5% <span class="text-slate-400 font-normal ml-1">vs last mo.</span></p>
+</div>
+<div class="relative size-16">
+<svg class="size-full transform -rotate-90" viewbox="0 0 36 36">
+<circle class="stroke-slate-100 dark:stroke-slate-800" cx="18" cy="18" fill="none" r="16" stroke-width="4"></circle>
+<circle class="stroke-primary" cx="18" cy="18" fill="none" r="16" stroke-dasharray="89, 100" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-lg">trending_up</span>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden relative">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400">キャンセル率</span>
+<span class="text-rose-500 text-[10px] font-bold bg-rose-50 px-1.5 py-0.5 rounded">-0.4%</span>
+</div>
+<div class="text-3xl font-bold font-headings mb-4">3.2%</div>
+<div class="absolute bottom-0 left-0 right-0 h-12">
+<div class="w-full h-full opacity-20 bg-gradient-to-r from-rose-500 via-primary to-rose-400" style="clip-path: polygon(0 80%, 15% 70%, 30% 85%, 45% 65%, 60% 75%, 75% 55%, 90% 65%, 100% 45%, 100% 100%, 0% 100%);"></div>
+</div>
+</div>
+</div>
+<!-- FILTERS & ACTIONS -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row gap-4 items-center">
+<div class="flex-1 w-full relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary/20" placeholder="トレーナー名・店舗名で検索" type="text"/>
+</div>
+<div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+<button class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-sm font-medium transition-colors">
+<span class="text-slate-500">ステータス:</span>
+<span>すべて</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<button class="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-sm font-medium transition-colors">
+<span class="text-slate-500">エリア:</span>
+<span>東京23区</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+<div class="h-6 w-px bg-slate-200 dark:border-slate-700 hidden lg:block"></div>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg text-sm font-bold transition-colors">
+<span class="material-symbols-outlined text-sm">ios_share</span>
+<span>エクスポート</span>
+</button>
+</div>
+</div>
+<!-- DATA TABLE -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">トレーナー名</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">店舗名</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">日付</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">時間</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">時給</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">ステータス</th>
+<th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">アクション</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[10px]">YK</div>
+<span class="text-sm font-semibold">佐藤 健一</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">新宿西口店</td>
+<td class="px-6 py-4 text-sm font-medium">2025/03/12</td>
+<td class="px-6 py-4 text-sm">10:00 - 18:00</td>
+<td class="px-6 py-4 text-sm font-medium">¥1,500</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 uppercase">保留中</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<button class="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded transition-colors">承認</button>
+<a class="text-xs font-bold text-primary hover:underline" href="#">詳細</a>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[10px]">MT</div>
+<span class="text-sm font-semibold">田中 美咲</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">渋谷宮益坂店</td>
+<td class="px-6 py-4 text-sm font-medium">2025/03/12</td>
+<td class="px-6 py-4 text-sm">13:00 - 21:00</td>
+<td class="px-6 py-4 text-sm font-medium">¥1,600</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase">承認済</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-500">check_circle</span>
+<a class="text-xs font-bold text-primary hover:underline" href="#">詳細</a>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[10px]">HS</div>
+<span class="text-sm font-semibold">鈴木 宏</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">池袋サンシャイン店</td>
+<td class="px-6 py-4 text-sm font-medium">2025/03/13</td>
+<td class="px-6 py-4 text-sm">09:00 - 15:00</td>
+<td class="px-6 py-4 text-sm font-medium">¥1,450</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 uppercase">キャンセル</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="text-xs text-slate-400 italic">キャンセル済</span>
+<a class="text-xs font-bold text-primary hover:underline" href="#">詳細</a>
+</div>
+</td>
+</tr>
+<!-- Row 4-8 Repeat pattern -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4"><div class="flex items-center gap-3"><div class="size-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[10px]">RI</div><span class="text-sm font-semibold">伊藤 亮太</span></div></td>
+<td class="px-6 py-4 text-sm">銀座店</td>
+<td class="px-6 py-4 text-sm">2025/03/14</td>
+<td class="px-6 py-4 text-sm">10:00 - 19:00</td>
+<td class="px-6 py-4 text-sm">¥1,800</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">保留中</span></td>
+<td class="px-6 py-4"><div class="flex items-center gap-3"><button class="px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded">承認</button><a class="text-xs font-bold text-primary" href="#">詳細</a></div></td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4"><div class="flex items-center gap-3"><div class="size-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[10px]">YK</div><span class="text-sm font-semibold">山田 加奈</span></div></td>
+<td class="px-6 py-4 text-sm">表参道店</td>
+<td class="px-6 py-4 text-sm">2025/03/14</td>
+<td class="px-6 py-4 text-sm">11:00 - 20:00</td>
+<td class="px-6 py-4 text-sm">¥1,600</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">承認済</span></td>
+<td class="px-6 py-4"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-emerald-500">check_circle</span><a class="text-xs font-bold text-primary" href="#">詳細</a></div></td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4"><div class="flex items-center gap-3"><div class="size-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-[10px]">SK</div><span class="text-sm font-semibold">小林 駿</span></div></td>
+<td class="px-6 py-4 text-sm">吉祥寺店</td>
+<td class="px-6 py-4 text-sm">2025/03/15</td>
+<td class="px-6 py-4 text-sm">10:00 - 17:00</td>
+<td class="px-6 py-4 text-sm">¥1,500</td>
+<td class="px-6 py-4"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">保留中</span></td>
+<td class="px-6 py-4"><div class="flex items-center gap-3"><button class="px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded">承認</button><a class="text-xs font-bold text-primary" href="#">詳細</a></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- FOOTER / PAGINATION -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+<button class="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all">
+<span class="material-symbols-outlined text-sm">done_all</span>
+<span>表示中の項目を一括承認</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="text-xs text-slate-500 mr-4">全156件中 1-10件を表示</span>
+<nav class="flex gap-1">
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-400">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="size-8 flex items-center justify-center rounded border-none bg-primary text-white text-xs font-bold">1</button>
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium hover:bg-slate-50">2</button>
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium hover:bg-slate-50">3</button>
+<span class="size-8 flex items-center justify-center text-slate-400">...</span>
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium hover:bg-slate-50">16</button>
+<button class="size-8 flex items-center justify-center rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-400">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</nav>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

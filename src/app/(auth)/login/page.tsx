@@ -14,49 +14,44 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Mail, KeyRound } from "lucide-react";
+import { Mail, Lock, UserPlus, LogIn } from "lucide-react";
 
-type Step = "email" | "otp";
+type Mode = "login" | "signup";
 
 export default function LoginPage() {
-  const [step, setStep] = useState<Step>("email");
+  const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const supabase = createClient();
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || !password) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        options: {
-          shouldCreateUser: true,
-        },
+        password,
       });
 
       if (error) {
-        // Rate limit (429) - still show OTP input so user can use a previously sent code
-        if (error.message?.includes("rate") || error.message?.includes("limit") || error.status === 429) {
-          toast.warning("メール送信の制限に達しました。前回送信されたコードをお試しください。");
-          setStep("otp");
+        if (error.message?.includes("Invalid login credentials")) {
+          toast.error("メールアドレスまたはパスワードが正しくありません。");
           return;
         }
-        // User not found (shouldCreateUser: false)
-        if (error.message?.includes("Signups not allowed") || error.message?.includes("User not found")) {
-          toast.error("このメールアドレスは登録されていません。管理者にお問い合わせください。");
+        if (error.message?.includes("Email not confirmed")) {
+          toast.error("メールアドレスが確認されていません。");
           return;
         }
-        toast.error(error.message || "エラーが発生しました。もう一度お試しください。");
+        toast.error(error.message || "ログインに失敗しました。");
         return;
       }
 
-      toast.success("認証コードを送信しました。メールをご確認ください。");
-      setStep("otp");
+      window.location.href = "/";
     } catch {
       toast.error("予期しないエラーが発生しました。");
     } finally {
@@ -64,33 +59,50 @@ export default function LoginPage() {
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp.trim()) return;
+    if (!email.trim() || !password) return;
+
+    if (password.length < 6) {
+      toast.error("パスワードは6文字以上で入力してください。");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("パスワードが一致しません。");
+      return;
+    }
 
     setLoading(true);
     try {
-      // Try email type first, then magiclink as fallback
-      const { error } = await supabase.auth.verifyOtp({
+      const { error } = await supabase.auth.signUp({
         email: email.trim(),
-        token: otp.trim(),
-        type: "email",
+        password,
       });
 
       if (error) {
-        const { error: mlError } = await supabase.auth.verifyOtp({
-          email: email.trim(),
-          token: otp.trim(),
-          type: "magiclink",
-        });
-
-        if (mlError) {
-          toast.error("認証コードが正しくありません。もう一度お試しください。");
+        if (error.message?.includes("User already registered")) {
+          toast.error("このメールアドレスは既に登録されています。ログインしてください。");
+          setMode("login");
           return;
         }
+        toast.error(error.message || "登録に失敗しました。");
+        return;
       }
 
-      // Successful login - redirect will be handled by middleware
+      toast.success("アカウントを作成しました。ログインします...");
+      // autoconfirm=true なので、そのままサインインする
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (signInError) {
+        toast.error("アカウント作成後のログインに失敗しました。ログイン画面からお試しください。");
+        setMode("login");
+        return;
+      }
+
       window.location.href = "/";
     } catch {
       toast.error("予期しないエラーが発生しました。");
@@ -129,26 +141,27 @@ export default function LoginPage() {
       <Card className="relative w-full max-w-sm border-0 shadow-xl animate-scale-in">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-2 rounded-full bg-primary/10 p-3 w-fit">
-            {step === "email" ? (
-              <Mail className="h-5 w-5 text-primary" />
+            {mode === "login" ? (
+              <LogIn className="h-5 w-5 text-primary" />
             ) : (
-              <KeyRound className="h-5 w-5 text-primary" />
+              <UserPlus className="h-5 w-5 text-primary" />
             )}
           </div>
           <CardTitle className="font-heading text-xl">
-            {step === "email" ? "ログイン" : "認証コード入力"}
+            {mode === "login" ? "ログイン" : "新規登録"}
           </CardTitle>
           <CardDescription className="leading-relaxed">
-            {step === "email"
-              ? "登録済みのメールアドレスを入力してください"
-              : `${email} に送信された認証コードを入力してください`}
+            {mode === "login"
+              ? "メールアドレスとパスワードを入力してください"
+              : "新しいアカウントを作成します"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {step === "email" ? (
-            <form onSubmit={handleSendOtp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">メールアドレス</Label>
+          <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">メールアドレス</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
@@ -157,60 +170,71 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoFocus
-                  className="h-11"
+                  className="h-11 pl-10"
                 />
               </div>
-              <Button type="submit" className="w-full h-11 font-medium" disabled={loading}>
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    送信中...
-                  </span>
-                ) : (
-                  "認証コードを送信"
-                )}
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="otp">認証コード</Label>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">パスワード</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="otp"
-                  type="text"
-                  placeholder="12345678"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  maxLength={8}
+                  id="password"
+                  type="password"
+                  placeholder={mode === "signup" ? "6文字以上" : "パスワードを入力"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoFocus
-                  className="text-center text-xl tracking-[0.3em] h-12 font-mono"
+                  minLength={6}
+                  className="h-11 pl-10"
                 />
               </div>
-              <Button type="submit" className="w-full h-11 font-medium" disabled={loading}>
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    確認中...
-                  </span>
-                ) : (
-                  "ログイン"
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full text-muted-foreground"
-                onClick={() => {
-                  setStep("email");
-                  setOtp("");
-                }}
-              >
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                メールアドレスを変更
-              </Button>
-            </form>
-          )}
+            </div>
+            {mode === "signup" && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">パスワード（確認）</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="もう一度入力"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    minLength={6}
+                    className="h-11 pl-10"
+                  />
+                </div>
+              </div>
+            )}
+            <Button type="submit" className="w-full h-11 font-medium" disabled={loading}>
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  {mode === "login" ? "ログイン中..." : "登録中..."}
+                </span>
+              ) : mode === "login" ? (
+                "ログイン"
+              ) : (
+                "アカウントを作成"
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full text-muted-foreground"
+              onClick={() => {
+                setMode(mode === "login" ? "signup" : "login");
+                setPassword("");
+                setConfirmPassword("");
+              }}
+            >
+              {mode === "login"
+                ? "アカウントをお持ちでない方はこちら"
+                : "既にアカウントをお持ちの方はこちら"}
+            </Button>
+          </form>
         </CardContent>
       </Card>
 

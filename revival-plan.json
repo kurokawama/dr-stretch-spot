@@ -1,0 +1,311 @@
+{
+  "project": "dr-stretch-spot",
+  "projectDir": "C:\\Users\\m-kur\\dr-stretch-spot",
+  "level": "L2",
+  "generatedAt": "2026-03-14T23:08:17.671Z",
+  "git": {
+    "lastCommitHash": "81d3d58e8b21412e281ea4410778b223cdfd861c",
+    "lastCommitDate": "2026-03-15 01:50:09 +0900",
+    "lastCommitMessage": "chore: update playwright config to use port 3001",
+    "totalCommits": 60,
+    "remoteBranches": [
+      "origin/HEAD -> origin/master",
+      "origin/cursor/new-cloud-agent-d943",
+      "origin/cursor/shift-availability-direct-offers-abd3",
+      "origin/cursor/spot-platform-ui-b18e",
+      "origin/cursor/store-hr-dashboard-redesign-c77f",
+      "origin/cursor/store-hr-e2e-tests-7ec6",
+      "origin/cursor/trainer-mobile-experience-c6de",
+      "origin/master"
+    ],
+    "daysSinceLastCommit": 0
+  },
+  "buildLint": {
+    "build": "pass",
+    "lint": {
+      "status": "pass",
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "tests": {
+    "hasPlaywrightConfig": true,
+    "hasTestDir": true,
+    "testFileCount": 12,
+    "testFiles": [
+      "auth.spec.ts",
+      "hr-dashboard.spec.ts",
+      "hr-resignations.spec.ts",
+      "hr-trainers.spec.ts",
+      "role-access.spec.ts",
+      "store-applications.spec.ts",
+      "store-dashboard.spec.ts",
+      "store-shifts.spec.ts",
+      "trainer-home.spec.ts",
+      "trainer-my-shifts.spec.ts",
+      "trainer-profile.spec.ts",
+      "trainer-shifts.spec.ts"
+    ]
+  },
+  "artifacts": {
+    "hasFlowDiagram": true,
+    "hasDesignHandoff": true,
+    "hasDesignBrief": true,
+    "hasImplInstructions": false,
+    "hasHandoffNotes": true
+  },
+  "roles": [
+    "trainer",
+    "store_manager",
+    "hr",
+    "admin"
+  ],
+  "gateEvidence": {
+    "0": {
+      "exists": false,
+      "file": "flow-diagram.json"
+    },
+    "1": {
+      "exists": true,
+      "file": "ai-assignment.json",
+      "signed": false,
+      "signed_at": null
+    },
+    "2": {
+      "exists": false,
+      "file": "agent-review.json"
+    },
+    "3": {
+      "exists": false,
+      "file": "navigation-check.json"
+    },
+    "4": {
+      "exists": true,
+      "file": "figma-review.json",
+      "signed": false,
+      "signed_at": null
+    },
+    "5": {
+      "exists": true,
+      "file": "build-check.json",
+      "signed": false,
+      "signed_at": null
+    },
+    "7": {
+      "exists": false,
+      "file": "design-review-evidence.json"
+    },
+    "1.5": {
+      "exists": false,
+      "file": "playwright-results.json"
+    },
+    "2.5": {
+      "exists": false,
+      "file": "role-test-results.json"
+    },
+    "M": {
+      "exists": false,
+      "file": "memory-log.json"
+    }
+  },
+  "memoryLog": {
+    "coveredSteps": [],
+    "lastStep": null,
+    "entryCount": 0
+  },
+  "sharedMemory": {
+    "entryCount": 3,
+    "topics": [
+      "design_tokens",
+      "design_decision",
+      "review_result"
+    ],
+    "error": null
+  },
+  "incompleteItems": [
+    {
+      "type": "gate_missing",
+      "gate": "1.5",
+      "file": "playwright-results.json",
+      "action": "Gate 1.5 証拠ファイル再生成が必要",
+      "priority": "high"
+    },
+    {
+      "type": "gate_missing",
+      "gate": "2",
+      "file": "agent-review.json",
+      "action": "Gate 2 証拠ファイル再生成が必要",
+      "priority": "high"
+    },
+    {
+      "type": "gate_missing",
+      "gate": "2.5",
+      "file": "role-test-results.json",
+      "action": "Gate 2.5 証拠ファイル再生成が必要",
+      "priority": "high"
+    },
+    {
+      "type": "gate_missing",
+      "gate": "3",
+      "file": "navigation-check.json",
+      "action": "Gate 3 証拠ファイル再生成が必要",
+      "priority": "high"
+    },
+    {
+      "type": "gate_missing",
+      "gate": "M",
+      "file": "memory-log.json",
+      "action": "Gate M 証拠ファイル再生成が必要",
+      "priority": "high"
+    }
+  ],
+  "aiAssignment": [
+    {
+      "wave": 0,
+      "tool": "team-agent (3名採点)",
+      "task": "UXスコアリング 30点満点（導線/情報設計/視覚的一貫性）"
+    },
+    {
+      "wave": 1,
+      "tool": "claude-code + cursor-agent",
+      "task": "UX低スコア項目の改善実装"
+    },
+    {
+      "wave": 2,
+      "tool": "playwright (docker)",
+      "task": "E2Eテスト実行 → 全合格確認"
+    },
+    {
+      "wave": 3,
+      "tool": "team-agent",
+      "task": "ロール別動線テスト（4ロール: trainer, store_manager, hr, admin）",
+      "roles": [
+        "trainer",
+        "store_manager",
+        "hr",
+        "admin"
+      ]
+    },
+    {
+      "wave": 4,
+      "tool": "bash + n8n",
+      "task": "build+lint最終確認 → git push → LINE通知"
+    }
+  ],
+  "checklist": [
+    {
+      "phase": "L1",
+      "name": "コード品質チェック",
+      "tasks": [
+        {
+          "id": "l1-build",
+          "task": "npm run build でビルド成功確認",
+          "status": "done",
+          "tool": "bash"
+        },
+        {
+          "id": "l1-lint",
+          "task": "ESLint エラー修正（現在: 0エラー / 0警告）",
+          "status": "done",
+          "tool": "claude-code + cursor-agent"
+        },
+        {
+          "id": "l1-playwright-setup",
+          "task": "Playwrightテスト環境確認（現在: 12ファイル）",
+          "status": "done",
+          "tool": "claude-code"
+        },
+        {
+          "id": "l1-playwright-run",
+          "task": "Playwrightテスト実行 → 全合格確認",
+          "status": "todo",
+          "tool": "playwright (local or docker)"
+        },
+        {
+          "id": "l1-role-walkthrough",
+          "task": "ロール別動線テスト（4ロール並列Agent）",
+          "status": "todo",
+          "tool": "team-agent",
+          "roles": [
+            "trainer",
+            "store_manager",
+            "hr",
+            "admin"
+          ],
+          "description": "各ロールのAgentが全画面をpreview_snapshotで歩き、UX観点でレビュー"
+        },
+        {
+          "id": "l1-fix",
+          "task": "発見された問題の修正",
+          "status": "todo",
+          "tool": "claude-code + cursor-agent"
+        }
+      ]
+    },
+    {
+      "phase": "L2",
+      "name": "UI/UX改善",
+      "tasks": [
+        {
+          "id": "l2-ux-scoring",
+          "task": "3名Agent並列でUXスコアリング（30点満点）",
+          "status": "todo",
+          "tool": "team-agent (3名採点)",
+          "criteria": [
+            "導線の自然さ (10点)",
+            "情報設計の適切さ (10点)",
+            "視覚的一貫性 (10点)"
+          ]
+        },
+        {
+          "id": "l2-ux-threshold",
+          "task": "スコア判定: ≥24点→合格 / 21-23点→部分改善 / ≤20点→大幅改善",
+          "status": "todo",
+          "tool": "auto"
+        },
+        {
+          "id": "l2-ux-fix",
+          "task": "UX改善実装（低スコア項目のみ）",
+          "status": "todo",
+          "tool": "claude-code + cursor-agent"
+        },
+        {
+          "id": "l2-re-test",
+          "task": "改善後のPlaywright再テスト + ロール再動線テスト",
+          "status": "todo",
+          "tool": "playwright + team-agent"
+        }
+      ]
+    },
+    {
+      "phase": "Final",
+      "name": "最終確認・報告",
+      "tasks": [
+        {
+          "id": "final-build",
+          "task": "npm run build + lint = エラーゼロ最終確認",
+          "status": "todo",
+          "tool": "bash"
+        },
+        {
+          "id": "final-playwright",
+          "task": "Playwright全テスト合格最終確認",
+          "status": "todo",
+          "tool": "playwright"
+        },
+        {
+          "id": "final-push",
+          "task": "git push + LINE通知",
+          "status": "todo",
+          "tool": "bash + n8n"
+        },
+        {
+          "id": "final-report",
+          "task": "リバイバルレポート作成（変更点・改善点・残課題）",
+          "status": "todo",
+          "tool": "claude-code"
+        }
+      ]
+    }
+  ]
+}
