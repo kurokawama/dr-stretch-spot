@@ -21,31 +21,39 @@ export async function getNotifications(
     limit?: number;
   }
 ): Promise<ActionResult<NotificationLog[]>> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "ログインが必要です" };
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "ログインが必要です" };
 
-  const admin = createAdminClient();
-  let query = admin
-    .from("notification_logs")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(filters?.limit ?? 50);
+    const admin = createAdminClient();
+    let query = admin
+      .from("notification_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(filters?.limit ?? 50);
 
-  if (filters?.category) {
-    query = query.eq("category", filters.category);
+    if (filters?.category) {
+      query = query.eq("category", filters.category);
+    }
+    if (filters?.unread_only) {
+      query = query.is("read_at", null);
+    }
+
+    const { data, error } = await query;
+    if (error) return { success: false, error: error.message };
+    return { success: true, data: data ?? [] };
+  } catch (err) {
+    console.error("[getNotifications] Unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "通知の取得に失敗しました",
+    };
   }
-  if (filters?.unread_only) {
-    query = query.is("read_at", null);
-  }
-
-  const { data, error } = await query;
-  if (error) return { success: false, error: error.message };
-  return { success: true, data: data ?? [] };
 }
 
 // =============================================

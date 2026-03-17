@@ -149,32 +149,41 @@ export async function clockOut(input: ClockInput): Promise<ActionResult> {
 export async function getTodayAttendance(): Promise<
   ActionResult<AttendanceRecord[]>
 > {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "ログインが必要です" };
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "ログインが必要です" };
 
-  const { data: trainer } = await supabase
-    .from("alumni_trainers")
-    .select("id")
-    .eq("auth_user_id", user.id)
-    .single();
+    const { data: trainer, error: trainerError } = await supabase
+      .from("alumni_trainers")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
 
-  if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
+    if (trainerError) return { success: false, error: trainerError.message };
+    if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
 
-  const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString().split("T")[0];
 
-  const { data, error } = await supabase
-    .from("attendance_records")
-    .select("*, store:stores(name, address)")
-    .eq("trainer_id", trainer.id)
-    .eq("shift_date", today)
-    .order("scheduled_start");
+    const { data, error } = await supabase
+      .from("attendance_records")
+      .select("*, store:stores(name, address)")
+      .eq("trainer_id", trainer.id)
+      .eq("shift_date", today)
+      .order("scheduled_start");
 
-  if (error) return { success: false, error: error.message };
-  return { success: true, data: data ?? [] };
+    if (error) return { success: false, error: error.message };
+    return { success: true, data: data ?? [] };
+  } catch (err) {
+    console.error("[getTodayAttendance] Unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "出勤情報の取得に失敗しました",
+    };
+  }
 }
 
 export async function verifyAttendance(

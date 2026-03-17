@@ -169,28 +169,37 @@ export async function unlinkLineAccount(): Promise<ActionResult> {
 export async function getLineStatus(): Promise<
   ActionResult<{ linked: boolean; linked_at: string | null }>
 > {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "ログインが必要です" };
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "ログインが必要です" };
 
-  const { data: trainer } = await supabase
-    .from("alumni_trainers")
-    .select("line_user_id, line_linked_at")
-    .eq("auth_user_id", user.id)
-    .single();
+    const { data: trainer, error: trainerError } = await supabase
+      .from("alumni_trainers")
+      .select("line_user_id, line_linked_at")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
 
-  if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
+    if (trainerError) return { success: false, error: trainerError.message };
+    if (!trainer) return { success: false, error: "トレーナー情報が見つかりません" };
 
-  return {
-    success: true,
-    data: {
-      linked: !!trainer.line_user_id,
-      linked_at: trainer.line_linked_at,
-    },
-  };
+    return {
+      success: true,
+      data: {
+        linked: !!trainer.line_user_id,
+        linked_at: trainer.line_linked_at,
+      },
+    };
+  } catch (err) {
+    console.error("[getLineStatus] Unexpected error:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "LINE連携状態の取得に失敗しました",
+    };
+  }
 }
 
 // =============================================
