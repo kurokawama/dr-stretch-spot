@@ -8,7 +8,7 @@
 
 | ロール | ログインURL | 認証方法 |
 |--------|-----------|---------|
-| **トレーナー** | https://dr-stretch-spot.vercel.app/login | OTP（メール認証コード） |
+| **トレーナー** | https://dr-stretch-spot.vercel.app/login | Email/Password（新規登録可） |
 | **店舗マネージャー** | https://dr-stretch-spot.vercel.app/login/store | Email/Password |
 | **人事部（HR）** | https://dr-stretch-spot.vercel.app/login/hr | Email/Password |
 | **管理者（Admin）** | https://dr-stretch-spot.vercel.app/login/admin | Email/Password |
@@ -19,7 +19,7 @@
 
 | ロール | Email | パスワード | ログインURL |
 |--------|-------|-----------|------------|
-| トレーナー | OTP認証（登録メールアドレス入力） | — | `/login` |
+| トレーナー | trainer@test.com | test1234 | `/login` |
 | 店舗マネージャー | store@test.com | test1234 | `/login/store` |
 | 人事部（HR） | hr@test.com | test1234 | `/login/hr` |
 | 管理者（Admin） | admin@test.com | test1234 | `/login/admin` |
@@ -35,8 +35,8 @@
 
 #### 1-1. ログイン
 1. https://dr-stretch-spot.vercel.app/login を開く
-2. 「デモアカウントでログイン」ボタンをタップ（簡易テスト時）
-   - または、登録済みメールアドレスを入力 → 「認証コードを送信」→ メールに届いたコードを入力
+2. Email: `trainer@test.com` / Password: `test1234` を入力してログイン
+   - または「デモアカウントでログイン」ボタンをタップ（簡易テスト時）
 3. ホーム画面（`/home`）が表示されることを確認
 
 #### 1-2. シフト検索 → 応募

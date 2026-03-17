@@ -29,7 +29,7 @@ Dr.ストレッチを退職した認定トレーナー（OB/OG）が、好きな
 
 | ロール | ログインURL | 主な機能 |
 |--------|-----------|---------|
-| **トレーナー**（スポットバイト） | https://dr-stretch-spot.vercel.app/login | シフト検索・応募・QR打刻・収入確認 |
+| **トレーナー**（スポットバイト） | https://dr-stretch-spot.vercel.app/login | シフト検索・応募・QR打刻・収入確認・新規登録 |
 | **店舗マネージャー** | https://dr-stretch-spot.vercel.app/login/store | シフト作成・応募管理・勤怠管理・評価 |
 | **人事（HR）** | https://dr-stretch-spot.vercel.app/login/hr | 全店横断管理・時給設定・コスト管理・承認 |
 | **管理者（Admin）** | https://dr-stretch-spot.vercel.app/login/admin | KPI・コスト分析・全権限 |

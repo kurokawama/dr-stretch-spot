@@ -42,7 +42,7 @@
 
 | ロール | 説明 | ログインURL | ログイン方法 |
 |--------|------|------------|-------------|
-| トレーナー | 退職トレーナー。シフト応募・打刻・収入管理 | `/login` | OTP（メール認証コード） |
+| トレーナー | 退職トレーナー。シフト応募・打刻・収入管理 | `/login` | Email/Password（新規登録可） |
 | 店舗マネージャー | 店舗責任者。シフト作成・応募管理・評価入力 | `/login/store` | Email/Password |
 | エリアマネージャー | 複数店舗管轄。HR権限の一部 | `/login/hr` | Email/Password |
 | HR（人事部） | 全体管理。時給・ルール設定・直接オファー | `/login/hr` | Email/Password |
@@ -405,7 +405,7 @@ LINE アプリで以下のいずれかの方法で友だち追加:
 |-------------|--------|------|
 | `/api/line/webhook` | POST | LINE Webhook（署名検証 + イベント処理） |
 | `/api/attendance/verify` | POST | QR トークン検証（打刻処理） |
-| `/api/auth/demo-login` | GET | デモクイックログイン（テスト用） |
+| `/api/auth/demo-login` | GET | デモログイン（`ENABLE_DEMO_LOGIN=true`時のみ有効） |
 | `/api/auth/token-login` | POST | トークンベースログイン |
 | `/api/confirm` | GET | メールからの出勤確認 |
 | `/api/cron/reminders` | GET | 日次リマインダー送信（Vercel Cron 毎朝 07:00 JST） |
@@ -495,7 +495,7 @@ docs/
 
 | ロール | ログインURL | テスト用Email | パスワード |
 |--------|-----------|--------------|-----------|
-| トレーナー | https://dr-stretch-spot.vercel.app/login | OTP認証（メールアドレス入力） | — |
+| トレーナー | https://dr-stretch-spot.vercel.app/login | trainer@test.com | test1234 |
 | 店舗マネージャー | https://dr-stretch-spot.vercel.app/login/store | store@test.com | test1234 |
 | HR（人事部） | https://dr-stretch-spot.vercel.app/login/hr | hr@test.com | test1234 |
 | 管理者（Admin） | https://dr-stretch-spot.vercel.app/login/admin | admin@test.com | test1234 |

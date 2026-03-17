@@ -28,12 +28,12 @@ Alumni trainer registers on SPOT
 
 | Role | Description | How they log in |
 |------|-------------|-----------------|
-| **Trainer** | Retired Dr.stretch trainer | Email/Password or OTP |
-| **Store Manager** | Dr.stretch store staff | Email/Password or OTP |
-| **HR** | Headquarters HR staff | Email/Password or OTP |
-| **Area Manager** | Regional manager | Email/Password or OTP |
-| **Admin** | System administrator | Email/Password or OTP |
-| **Employee** | Current employee (pre-resignation) | Email/Password or OTP |
+| **Trainer** | Retired Dr.stretch trainer | Email/Password |
+| **Store Manager** | Dr.stretch store staff | Email/Password |
+| **HR** | Headquarters HR staff | Email/Password |
+| **Area Manager** | Regional manager | Email/Password |
+| **Admin** | System administrator | Email/Password |
+| **Employee** | Current employee (pre-resignation) | Email/Password |
 
 ---
 
@@ -338,7 +338,7 @@ SPOT is an internal HR tool — not a marketplace that charges fees:
 | Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
 | Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth (OTP + Password) |
+| Auth | Supabase Auth (Email/Password) |
 | UI | shadcn/ui + Tailwind CSS v4 |
 | Email | Resend API |
 | Hosting | Vercel |

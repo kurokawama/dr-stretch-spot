@@ -37,7 +37,7 @@
 
 | 変更内容 | 対象ファイル | 概要 |
 |---------|-------------|------|
-| トレーナーログイン | `src/app/(auth)/login/page.tsx` | OTP認証（従来通り） |
+| トレーナーログイン | `src/app/(auth)/login/page.tsx` | Email/Password認証 + 新規登録機能 |
 | 店舗ログイン | `src/app/(auth)/login/store/page.tsx` | Email/Password認証（新規） |
 | HRログイン | `src/app/(auth)/login/hr/page.tsx` | Email/Password認証（新規） |
 | Adminログイン | `src/app/(auth)/login/admin/page.tsx` | Email/Password認証（新規） |
@@ -201,7 +201,7 @@ flow-diagram.json        # 画面遷移図（JSON）
 
 | ロール | URL | 認証方法 | コンポーネント |
 |--------|-----|---------|--------------|
-| トレーナー | `/login` | OTP（メール認証コード） | 専用UI |
+| トレーナー | `/login` | Email/Password（新規登録可） | 専用UI |
 | 店舗マネージャー | `/login/store` | Email/Password | `StaffLoginForm` |
 | HR | `/login/hr` | Email/Password | `StaffLoginForm` |
 | Admin | `/login/admin` | Email/Password | `StaffLoginForm` |
@@ -287,11 +287,7 @@ resignation_requests (auth_user_id → profiles)
 
 ## 9. 既知のLint警告（既存・今回未修正）
 
-`npm run lint` でwarningsが出る場合がありますが、主に以下のパターン：
-- `react-hooks/exhaustive-deps` — useEffect依存配列
-- `react-hooks/set-state-in-effect` — イベントハンドラ内のsetState
-
-必要に応じて修正してください。
+`npm run lint` はエラー・警告ともにゼロです（2026-03-17 確認済み）。
 
 ---
 
