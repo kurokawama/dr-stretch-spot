@@ -46,7 +46,7 @@ export async function submitResignation(formData: {
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -83,7 +83,7 @@ export async function cancelResignation(resignationId: string) {
     .eq("auth_user_id", user.id)
     .in("status", ["draft", "submitted"]);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -151,7 +151,7 @@ export async function receiveResignation(resignationId: string) {
     .eq("id", resignationId)
     .eq("status", "submitted");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -325,7 +325,7 @@ export async function activateSpot(formData: {
     })
     .eq("auth_user_id", user.id);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -344,6 +344,6 @@ export async function updateSpotStatus(status: "active" | "inactive" | "paused")
     })
     .eq("auth_user_id", user.id);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }

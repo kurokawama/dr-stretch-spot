@@ -178,8 +178,8 @@ export async function getAllTrainers(filters?: {
   }
   if (filters?.search) {
     // Sanitize search input to prevent PostgREST filter injection
-    const sanitized = filters.search.replace(/[%_\\'"(),]/g, "");
-    if (sanitized.length > 0) {
+    const sanitized = filters.search.replace(/[%_\\'"(),.*+?^${}|[\]\\\/]/g, "").trim();
+    if (sanitized.length > 0 && sanitized.length <= 100) {
       query = query.or(
         `full_name.ilike.%${sanitized}%,email.ilike.%${sanitized}%`
       );
@@ -187,7 +187,10 @@ export async function getAllTrainers(filters?: {
   }
 
   const { data, error } = await query;
-  if (error) return { success: false, error: error.message };
+  if (error) {
+    console.error("[getAllTrainers] DB error:", error);
+    return { success: false, error: "トレーナー情報の取得に失敗しました" };
+  }
   return { success: true, data: data ?? [] };
 }
 
@@ -248,7 +251,7 @@ export async function updateTrainer(
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq("id", trainerId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -319,7 +322,7 @@ export async function updateStoreConfig(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -443,7 +446,7 @@ export async function getSkillCheckSchedule(filters?: {
   }
 
   const { data, error } = await query;
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -475,7 +478,7 @@ export async function createSkillCheck(input: {
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -513,7 +516,7 @@ export async function updateSkillCheckResult(
     })
     .eq("id", checkId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // If passed, update trainer blank status
   if (result === "pass") {
@@ -559,6 +562,6 @@ export async function getTrainersRequiringChecks(): Promise<
     .order("blank_status")
     .order("last_shift_date", { ascending: true, nullsFirst: true });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }

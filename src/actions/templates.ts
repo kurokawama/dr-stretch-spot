@@ -28,7 +28,7 @@ export async function getShiftTemplates(
     .eq("store_id", storeId)
     .order("name");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -72,7 +72,7 @@ export async function createShiftTemplate(input: {
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -109,7 +109,7 @@ export async function updateShiftTemplate(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -132,7 +132,7 @@ export async function deleteShiftTemplate(
     })
     .eq("id", templateId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 

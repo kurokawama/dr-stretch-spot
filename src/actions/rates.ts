@@ -23,7 +23,7 @@ export async function getRateConfigs(): Promise<
     .eq("is_active", true)
     .order("tenure_min_years");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -80,7 +80,7 @@ export async function updateRateConfig(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Count affected trainers
   const { count } = await supabase
@@ -145,7 +145,7 @@ export async function createRateConfig(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Audit log
   await supabase.from("rate_change_logs").insert({
@@ -194,7 +194,7 @@ export async function deleteRateConfig(
     .update({ is_active: false })
     .eq("id", configId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Audit log
   await supabase.from("rate_change_logs").insert({
@@ -225,7 +225,7 @@ export async function getBlankRules(): Promise<
     .eq("is_active", true)
     .order("threshold_days");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -266,7 +266,7 @@ export async function updateBlankRule(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Audit log
   await supabase.from("rate_change_logs").insert({
@@ -313,6 +313,6 @@ export async function getAuditLogs(filters?: {
 
   const { data, error } = await query;
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }

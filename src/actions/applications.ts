@@ -108,7 +108,7 @@ export async function applyToShift(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // If auto-confirmed, atomically increment filled_count and create attendance record
   if (autoConfirm && data) {
@@ -307,7 +307,7 @@ export async function rejectApplication(
     })
     .eq("id", applicationId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Phase 2: Notify trainer about rejection
   if (application) {
@@ -384,7 +384,7 @@ export async function cancelApplication(
     .eq("trainer_id", trainer.id)
     .eq("status", "pending");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -412,6 +412,6 @@ export async function getMyApplications(): Promise<
     .eq("trainer_id", trainer.id)
     .order("applied_at", { ascending: false });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }

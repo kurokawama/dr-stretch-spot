@@ -73,7 +73,7 @@ export async function hrSearchTrainers(filters?: {
   }
 
   const { data: trainers, error } = await query;
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   if (!trainers || trainers.length === 0) {
     return { success: true, data: [] };
   }
@@ -211,7 +211,7 @@ export async function hrCreateOffer(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Notify trainer (Web notification)
   await createNotification({
@@ -259,7 +259,7 @@ export async function getHrOffers(): Promise<ActionResult<ShiftOffer[]>> {
     .order("created_at", { ascending: false })
     .limit(50);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -282,6 +282,6 @@ export async function getActiveStores(): Promise<ActionResult<Store[]>> {
     .order("area")
     .order("name");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }

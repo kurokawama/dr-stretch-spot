@@ -22,8 +22,6 @@ interface StaffLoginFormProps {
   subtitle: string;
   redirectTo: string;
   accentColor: string;
-  demoEmail: string;
-  demoPassword: string;
 }
 
 export function StaffLoginForm({
@@ -32,13 +30,10 @@ export function StaffLoginForm({
   subtitle,
   redirectTo,
   accentColor,
-  demoEmail,
-  demoPassword,
 }: StaffLoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [demoLoading, setDemoLoading] = useState(false);
 
   const supabase = createClient();
 
@@ -71,27 +66,6 @@ export function StaffLoginForm({
       toast.error("予期しないエラーが発生しました。");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async () => {
-    setDemoLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: demoEmail,
-        password: demoPassword,
-      });
-
-      if (error) {
-        toast.error("デモログインに失敗しました: " + error.message);
-        return;
-      }
-
-      window.location.href = redirectTo;
-    } catch {
-      toast.error("予期しないエラーが発生しました。");
-    } finally {
-      setDemoLoading(false);
     }
   };
 
@@ -136,7 +110,7 @@ export function StaffLoginForm({
             {subtitle}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor={`${role}-email`}>メールアドレス</Label>
@@ -181,36 +155,6 @@ export function StaffLoginForm({
               )}
             </Button>
           </form>
-
-          {/* Demo login divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
-                または
-              </span>
-            </div>
-          </div>
-
-          {/* Demo login button */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full h-11"
-            onClick={handleDemoLogin}
-            disabled={demoLoading}
-          >
-            {demoLoading ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
-                ログイン中...
-              </span>
-            ) : (
-              "デモアカウントでログイン"
-            )}
-          </Button>
         </CardContent>
       </Card>
 

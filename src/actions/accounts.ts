@@ -54,7 +54,7 @@ export async function getStaffAccounts(): Promise<ActionResult<StaffAccount[]>> 
     .in("role", ["hr", "admin", "area_manager", "store_manager"])
     .order("created_at", { ascending: false });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Get auth user data for emails and last sign-in
   const { data: authUsers } = await admin.auth.admin.listUsers();
@@ -176,7 +176,7 @@ export async function updateStaffRole(
     .update({ role: newRole, updated_at: new Date().toISOString() })
     .eq("id", userId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -197,7 +197,7 @@ export async function deleteStaffAccount(userId: string): Promise<ActionResult> 
     .update({ role: "trainer", updated_at: new Date().toISOString() })
     .eq("id", userId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   return { success: true };
 }

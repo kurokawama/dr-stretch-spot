@@ -33,7 +33,7 @@ export async function getCostCeilingConfig(): Promise<
     .limit(1)
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -93,7 +93,7 @@ export async function updateCostCeilingConfig(updates: {
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Log the change
   await admin.from("rate_change_logs").insert({
@@ -143,7 +143,7 @@ export async function updateStoreEmergencyBudget(
     })
     .eq("id", storeId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Log the change
   await admin.from("rate_change_logs").insert({
@@ -225,7 +225,7 @@ export async function createConfigSnapshot(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -251,7 +251,7 @@ export async function getConfigSnapshots(
   }
 
   const { data, error } = await query;
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 

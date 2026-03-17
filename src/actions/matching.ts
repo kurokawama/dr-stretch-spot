@@ -40,7 +40,7 @@ export async function getAllMatchings(filters?: {
 
   const { data, error } = await query;
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Filter by store_id or area if needed (post-filter due to join)
   let filtered = data ?? [];
@@ -102,7 +102,7 @@ export async function hrCancelMatching(
     })
     .eq("id", applicationId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // If was approved, decrement filled_count and re-open shift
   if (application.status === "approved") {
@@ -142,7 +142,7 @@ export async function getTomorrowAttendances(
 
   const { data, error } = await query;
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   let filtered = data ?? [];
   if (area) {
@@ -169,7 +169,7 @@ export async function getTodayAllAttendances(
     .eq("shift_date", today)
     .order("scheduled_start");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   let filtered = data ?? [];
   if (area) {
@@ -207,7 +207,7 @@ export async function getAllShiftRequests(filters?: {
 
   const { data, error } = await query;
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   let filtered = data ?? [];
   if (filters?.area) {
@@ -258,7 +258,7 @@ export async function confirmPreDayAttendance(
     })
     .eq("id", applicationId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 

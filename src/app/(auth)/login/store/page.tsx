@@ -8,8 +8,6 @@ export default function StoreLoginPage() {
       subtitle="店舗マネージャー専用のログインページです"
       redirectTo="/store"
       accentColor="blue-500"
-      demoEmail="store@test.com"
-      demoPassword="test1234"
     />
   );
 }

@@ -80,7 +80,7 @@ export async function clockIn(input: ClockInput): Promise<ActionResult> {
     })
     .eq("id", input.attendance_id);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -124,7 +124,7 @@ export async function clockOut(input: ClockInput): Promise<ActionResult> {
     })
     .eq("id", input.attendance_id);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Update trainer's last_shift_date
   const { data: attendanceRecord } = await supabase
@@ -175,7 +175,7 @@ export async function getTodayAttendance(): Promise<
       .eq("shift_date", today)
       .order("scheduled_start");
 
-    if (error) return { success: false, error: error.message };
+    if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
     return { success: true, data: data ?? [] };
   } catch (err) {
     console.error("[getTodayAttendance] Unexpected error:", err);
@@ -223,6 +223,6 @@ export async function verifyAttendance(
     })
     .eq("id", attendanceId);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }

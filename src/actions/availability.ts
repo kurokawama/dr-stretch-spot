@@ -76,7 +76,7 @@ export async function submitAvailability(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Notify store managers about new availability
   const admin = createAdminClient();
@@ -129,7 +129,7 @@ export async function getMyAvailabilities(): Promise<
     .gte("available_date", new Date().toISOString().split("T")[0])
     .order("available_date", { ascending: true });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -154,7 +154,7 @@ export async function getStoreAvailabilities(
     .gte("available_date", new Date().toISOString().split("T")[0])
     .order("available_date", { ascending: true });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -186,7 +186,7 @@ export async function cancelAvailability(
     .eq("trainer_id", trainer.id)
     .in("status", ["open"]);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -203,7 +203,7 @@ export async function getAvailabilityStats(): Promise<
     .select("status")
     .gte("available_date", new Date().toISOString().split("T")[0]);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   const stats = {
     total: data?.length ?? 0,
@@ -231,6 +231,6 @@ export async function getAllAvailabilities(): Promise<
     .order("available_date", { ascending: true })
     .limit(50);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }

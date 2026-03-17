@@ -56,7 +56,7 @@ export async function createEvaluation(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Mark application as completed
   await supabase
@@ -78,6 +78,6 @@ export async function getTrainerEvaluations(
     .eq("trainer_id", trainerId)
     .order("created_at", { ascending: false });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }

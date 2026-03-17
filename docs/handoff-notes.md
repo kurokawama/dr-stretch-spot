@@ -4,9 +4,9 @@
 
 ---
 
-## 1. ローンチ前最終改善（2026-03-14〜15 実施済み）
+## 1. ローンチ前最終改善
 
-### ビジネス要件に基づく改善（G1〜G8）
+### ビジネス要件に基づく改善（G1〜G8）— 2026-03-14〜15 実施済み
 
 | # | 改善内容 | 対象ファイル | 目的 |
 |---|---------|-------------|------|
@@ -19,31 +19,30 @@
 | G7 | SPOT設定完了時LINE連携誘導 | `src/app/(trainer)/spot-setup/page.tsx` | 完了画面にLINE連携カード追加 |
 | G8 | LINE全メッセージの温かみ改善 | `src/lib/line/templates.ts` | パーソナライズ+温かい表現に全面書き換え |
 
-### UI/UX改善（P0〜P1）
-
-| # | 改善内容 | 対象ファイル |
-|---|---------|-------------|
-| P0-1 | Demo Quick Login 本番非表示 | `src/app/(auth)/login/page.tsx` — `NODE_ENV !== "production"` で制御 |
-| P1-1 | キャンセルボタン文言改善 | `src/app/(trainer)/my-shifts/page.tsx` — 「電話でキャンセル」+Phoneアイコン |
-| P1-2 | ホーム空状態改善 | `src/app/(trainer)/home/page.tsx` — アイコン+説明+「シフト検索で探す」CTA |
-| P1-3 | プロフィール保存UX | `src/app/(trainer)/profile/page.tsx` — 「変更を保存」+保存後スクロールトップ |
-| P1-4 | 高時給フィルタ説明追加 | `src/app/(trainer)/shifts/page.tsx` — 「緊急手当付きシフト」の説明表示 |
-| P1-5 | SPOT設定確認セクション強調 | `src/app/(trainer)/spot-setup/page.tsx` — 枠線+背景色で視認性向上 |
-| 追加 | 履歴タブ空状態CTA | `src/app/(trainer)/my-shifts/page.tsx` — 「シフトを探す」ボタン追加 |
-
-### ロール別独立ログインページ（2026-03-17 実施済み）
-
-各ロール専用の独立したログインページを新設。従来の1ページにボタン集約方式から、URLで分離するセキュリティ強化設計に変更。
+### 本番セキュリティ強化（2026-03-17 実施済み）
 
 | 変更内容 | 対象ファイル | 概要 |
 |---------|-------------|------|
-| トレーナーログイン | `src/app/(auth)/login/page.tsx` | Email/Password認証 + 新規登録機能 |
-| 店舗ログイン | `src/app/(auth)/login/store/page.tsx` | Email/Password認証（新規） |
-| HRログイン | `src/app/(auth)/login/hr/page.tsx` | Email/Password認証（新規） |
-| Adminログイン | `src/app/(auth)/login/admin/page.tsx` | Email/Password認証（新規） |
+| デモログイン機能完全削除 | `StaffLoginForm.tsx`, 全login/page.tsx | デモボタン・デモprops・デモAPIルート全削除 |
+| 自己登録（signup）完全削除 | `src/app/(auth)/login/page.tsx` | ログインのみ。新規登録UIを完全除去 |
+| ミドルウェア強化 | `src/middleware.ts` | `/register` をPUBLIC_ROUTESから除外 |
+| テストアカウントパスワード変更 | Supabase Auth | 全4アカウントを強固なパスワードに変更 |
+| エラーメッセージ漏洩防止 | 全Server Actions（18ファイル） | `error.message` → 汎用日本語メッセージに変更 |
+| 通知所有権検証追加 | `src/actions/notifications.ts` | 他ユーザーの通知アクセスをブロック |
+| 検索入力サニタイゼーション強化 | `src/actions/admin.ts` | PostgREST filter injection防止 |
+
+### ロール別独立ログインページ（2026-03-17 実施済み）
+
+各ロール専用の独立したログインページを新設。URLで分離するセキュリティ強化設計。
+
+| 変更内容 | 対象ファイル | 概要 |
+|---------|-------------|------|
+| トレーナーログイン | `src/app/(auth)/login/page.tsx` | Email/Password認証（ログインのみ） |
+| 店舗ログイン | `src/app/(auth)/login/store/page.tsx` | Email/Password認証 |
+| HRログイン | `src/app/(auth)/login/hr/page.tsx` | Email/Password認証 |
+| Adminログイン | `src/app/(auth)/login/admin/page.tsx` | Email/Password認証 |
 | 共通ログインフォーム | `src/components/shared/StaffLoginForm.tsx` | store/hr/admin共通のログインUIコンポーネント |
 | ミドルウェア更新 | `src/middleware.ts` | 未認証時にロール別ログインURLにリダイレクト |
-| デモログインAPI | `src/app/api/auth/demo-login/route.ts` | 本番ガード追加（`ENABLE_DEMO_LOGIN=true` 必須） |
 
 ### アカウント管理機能（2026-03-17 実施済み）
 
@@ -63,7 +62,7 @@
 | 対象 | 原因 | 修正 |
 |------|------|------|
 | `src/actions/attendance.ts` | `.single()` が RLS で0行時に PGRST116 エラー + try-catch なし | `.maybeSingle()` + try-catch |
-| `src/actions/notifications.ts` | 同上 | try-catch 追加 |
+| `src/actions/notifications.ts` | 同上 | try-catch 追加 + 所有権検証追加 |
 | `src/actions/line.ts` | `.single()` + try-catch なし | `.maybeSingle()` + try-catch |
 
 ---
@@ -156,12 +155,12 @@ npm run lint   # 修正ファイルにエラーがないことを確認
 ```
 src/
 ├── app/
-│   ├── (auth)/          # ログイン・登録（PUBLIC_ROUTES）
+│   ├── (auth)/          # ログイン・プロフィール登録
 │   ├── (trainer)/       # トレーナー向け（モバイルファースト）
 │   ├── (store)/         # 店舗マネージャー向け（サイドバー+ボトムナビ）
 │   ├── (hr)/            # HR向け（サイドバー）
 │   ├── (admin)/         # 管理者向け
-│   └── api/             # APIエンドポイント
+│   └── api/             # APIエンドポイント（LINE Webhook）
 ├── actions/             # Server Actions（全ビジネスロジック）
 ├── components/ui/       # shadcn/uiコンポーネント
 ├── lib/
@@ -173,11 +172,12 @@ src/
 └── types/               # TypeScript型定義
 
 docs/
-├── specification.md     # プロジェクト企画書・全仕様書
-├── handoff-notes.md     # このファイル（引き継ぎノート）
-└── test-guide.md        # テスト手順書
+├── specification.md              # プロジェクト企画書・全仕様書
+├── handoff-notes.md              # このファイル（引き継ぎノート）
+├── test-guide.md                 # テスト手順書
+└── trainer-registration-flow.md  # トレーナー登録フロー設計書
 
-flow-diagram.json        # 画面遷移図（JSON）
+flow-diagram.json                 # 画面遷移図（JSON）
 ```
 
 ---
@@ -186,7 +186,8 @@ flow-diagram.json        # 画面遷移図（JSON）
 
 ### ミドルウェア（`src/middleware.ts`）
 
-- PUBLIC_ROUTES: `/login`, `/register`, `/auth/callback`, `/auth/magic`
+- PUBLIC_ROUTES: `/login`, `/auth/callback`, `/auth/magic`
+- **`/register` はPUBLIC_ROUTESから除外**（認証済みユーザーのプロフィール設定のみ）
 - **ロール別ログインリダイレクト**: 未認証時、アクセス先に応じたログインページにリダイレクト
   - `/store/*` → `/login/store`
   - `/hr/*` → `/login/hr`
@@ -201,49 +202,66 @@ flow-diagram.json        # 画面遷移図（JSON）
 
 | ロール | URL | 認証方法 | コンポーネント |
 |--------|-----|---------|--------------|
-| トレーナー | `/login` | Email/Password（新規登録可） | 専用UI |
+| トレーナー | `/login` | Email/Password（ログインのみ） | 専用UI |
 | 店舗マネージャー | `/login/store` | Email/Password | `StaffLoginForm` |
 | HR | `/login/hr` | Email/Password | `StaffLoginForm` |
 | Admin | `/login/admin` | Email/Password | `StaffLoginForm` |
 
-### Demo Login
+### アカウント作成方法
 
-- `src/app/api/auth/demo-login/route.ts`
-- **本番環境では `ENABLE_DEMO_LOGIN=true` 環境変数が必須**（未設定時は403エラー）
-- 各ログインページの「デモアカウントでログイン」ボタンから呼び出し
-- テストアカウント: `trainer@test.com`, `store@test.com`, `hr@test.com`, `admin@test.com`（パスワード: `test1234`）
+- **トレーナー**: HRまたはAdminが作成（自己登録不可）→ 詳細は `docs/trainer-registration-flow.md`
+- **店舗/HR/Admin**: Adminがアカウント管理画面（`/admin/accounts`）で作成
+- **デモログイン機能**: 完全削除済み（本番環境）
+
+### テストアカウント
+
+| ロール | Email | ログインURL |
+|--------|-------|------------|
+| トレーナー | trainer@test.com | `/login` |
+| 店舗マネージャー | store@test.com | `/login/store` |
+| 人事部（HR） | hr@test.com | `/login/hr` |
+| 管理者（Admin） | admin@test.com | `/login/admin` |
+
+**パスワードは管理者に確認してください（セキュリティのためドキュメントに記載しません）。**
 
 ---
 
 ## 6. ローンチ前チェックリスト
 
-### 必須
+### 完了済み
 
 - [x] ビルドエラーゼロ
-- [x] Demo Quick Login 本番非表示
+- [x] デモログイン機能完全削除（ボタン・API・ハードコードされた認証情報）
 - [x] 確定済みシフトの直接キャンセルブロック
 - [x] LINE通知ボタン2つ化
-- [ ] Supabase RLS ポリシー全テーブル確認
-- [ ] LINE Webhook URL を本番URLに設定
-- [ ] Vercel 環境変数の設定
-- [ ] Resend ドメイン認証
-- [ ] 本番Supabaseでメール送信制限の確認（Proプランで解除推奨）
+- [x] Supabase RLS ポリシー全テーブル確認（匿名アクセスで全テーブル0行確認済み）
+- [x] テストアカウントパスワード変更（強固なパスワードに更新済み）
+- [x] 入力サニタイゼーション強化（PostgREST filter injection防止）
+- [x] 所有権検証（通知APIに他ユーザーアクセスブロック追加）
+- [x] エラーメッセージから内部情報漏洩防止（全Server Actions修正済み）
+- [x] トレーナー自己登録UI完全削除
 
-### セキュリティ確認推奨
+### 要手動設定（Supabase Dashboard）
 
-- [x] `demo-login` APIルートに本番環境ガード追加（`ENABLE_DEMO_LOGIN`チェック実装済み）
-- [ ] 入力サニタイゼーション（ilike/eq等のフィルタ値）
-- [ ] 所有権検証（トレーナーが他人のリソースを操作できないか）
-- [ ] Rate limiting（メール送信等のリソース消費操作）
-- [ ] エラーメッセージから内部情報が漏洩しないか
+- [ ] **Supabase DISABLE_SIGNUP設定**: Authentication > Settings > User Signups > 「Enable sign ups」をOFF
+  - ※ Management APIトークン期限切れのため手動設定が必要
+  - ※ コード側の自己登録UIは全て削除済み
+
+### 要設定確認（デプロイ環境）
+
+- [ ] LINE Webhook URL を本番URLに設定（`https://dr-stretch-spot.vercel.app/api/line/webhook`）
+- [ ] Vercel 環境変数の設定（.env.localの全変数）
+- [ ] Resend ドメイン認証（メール送信用）
 
 ### Phase 2 推奨改善
 
+- [ ] HR招待制トレーナー登録フロー実装（`docs/trainer-registration-flow.md` 参照）
 - [ ] 「今月の収入」を全件集計に変更（現在は直近5件のみ）
 - [ ] ランク昇格プログレスのホーム表示
 - [ ] シフト検索の「全シフトを見る」リセットボタン
 - [ ] QRコードのローカル生成（外部API依存の削除）
 - [ ] 法定労働条件通知の表示
+- [ ] Rate limiting（メール送信等のリソース消費操作）
 
 ---
 
@@ -285,17 +303,33 @@ resignation_requests (auth_user_id → profiles)
 
 ---
 
-## 9. 既知のLint警告（既存・今回未修正）
+## 9. セキュリティ対策（実施済み）
+
+| 対策 | 状態 | 詳細 |
+|------|------|------|
+| RLS（Row Level Security） | 全テーブル有効 | 匿名アクセスで全テーブル0行確認済み |
+| 自己登録ブロック | UI削除済み / Supabase設定待ち | signupフォーム削除、`/register` 非公開化 |
+| デモログイン | 完全削除 | APIルート・UIボタン・ハードコード認証情報全削除 |
+| テストアカウント | パスワード変更済み | 強固なパスワードに更新（`test1234`は無効） |
+| エラーメッセージ | 汎用化済み | 内部情報（テーブル名・カラム名）非露出 |
+| 入力サニタイゼーション | 強化済み | PostgREST filter injection防止 |
+| 所有権検証 | 追加済み | 通知APIで他ユーザーアクセスブロック |
+
+---
+
+## 10. 既知のLint警告
 
 `npm run lint` はエラー・警告ともにゼロです（2026-03-17 確認済み）。
 
 ---
 
-## 10. 変更履歴
+## 11. 変更履歴
 
-| 日付 | コミット | 内容 |
-|------|---------|------|
-| 2026-03-17 | `9fc50b2` | ロール別独立ログインページ新設 |
-| 2026-03-17 | `90c8bf0` | アカウント管理機能（Admin） |
-| 2026-03-17 | `298b8e4` | Server Action ハング修正（attendance/notifications/line） |
-| 2026-03-15 | — | ローンチ前最終改善（G1〜G8, P0〜P1） |
+| 日付 | 内容 |
+|------|------|
+| 2026-03-17 | 本番セキュリティ強化（デモ削除・signup削除・パスワード変更・エラー漏洩防止・所有権検証） |
+| 2026-03-17 | トレーナー登録フロー設計書作成（`docs/trainer-registration-flow.md`） |
+| 2026-03-17 | ロール別独立ログインページ新設 |
+| 2026-03-17 | アカウント管理機能（Admin） |
+| 2026-03-17 | Server Action ハング修正（attendance/notifications/line） |
+| 2026-03-15 | ローンチ前最終改善（G1〜G8, P0〜P1） |

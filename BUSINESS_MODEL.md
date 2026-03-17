@@ -386,24 +386,24 @@ Below is a list of features that exist in the UI but are NOT yet fully working. 
 
 https://dr-stretch-spot.vercel.app
 
-### Login Page
+### Login Pages (Role-specific)
 
-https://dr-stretch-spot.vercel.app/login
+Each role has its own login page:
 
-Login page has demo buttons for each role. Click the button for the role you want to test:
+- **Trainer**: https://dr-stretch-spot.vercel.app/login
+- **Store Manager**: https://dr-stretch-spot.vercel.app/login/store
+- **HR**: https://dr-stretch-spot.vercel.app/login/hr
+- **Admin**: https://dr-stretch-spot.vercel.app/login/admin
 
-- **Trainer** - Click "Trainer Demo Login" button
-- **Store Manager** - Click "Store Demo Login" button
-- **HR** - Click "HR Demo Login" button
-- **Admin** - Click "Admin Demo Login" button
+Self-registration is disabled. Accounts are created by Admin via `/admin/accounts`.
 
 ### Recommended Test Flow
 
-1. Open the login page: https://dr-stretch-spot.vercel.app/login
-2. Click "Trainer Demo Login" to see the trainer experience
-3. Log out, then click "Store Demo Login" to see the store manager view
-4. Log out, then click "HR Demo Login" to see the HR dashboard
-5. Log out, then click "Admin Demo Login" to see the admin overview
+1. Open the trainer login page: https://dr-stretch-spot.vercel.app/login
+2. Log in with trainer credentials (ask admin for password)
+3. Log out, then open /login/store to see the store manager view
+4. Log out, then open /login/hr to see the HR dashboard
+5. Log out, then open /login/admin to see the admin overview
 
 ### Source Code
 

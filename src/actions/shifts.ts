@@ -74,7 +74,7 @@ export async function createShiftRequest(
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -123,7 +123,7 @@ export async function approveShiftRequest(
     .select("id, target_areas, title")
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   // Phase 2: Notify trainers in matching areas
   if (updatedShift?.target_areas && updatedShift.target_areas.length > 0) {
@@ -187,7 +187,7 @@ export async function rejectShiftRequest(
     .eq("id", shiftId)
     .eq("status", "pending_approval");
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -203,7 +203,7 @@ export async function getPendingShifts(): Promise<ActionResult<ShiftRequest[]>> 
     .eq("status", "pending_approval")
     .order("created_at", { ascending: true });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -237,7 +237,7 @@ export async function searchShifts(filters: {
 
   const { data, error } = await query;
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: data ?? [] };
 }
 
@@ -252,7 +252,7 @@ export async function getShiftDetail(
     .eq("id", shiftId)
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -293,6 +293,6 @@ export async function cancelShiftRequest(
     .eq("id", shiftId)
     .in("status", ["pending_approval", "open"]);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }

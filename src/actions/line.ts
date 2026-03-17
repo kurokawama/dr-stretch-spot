@@ -55,7 +55,7 @@ export async function generateLinkToken(
     used: false,
   });
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
 
   return { success: true, data: { token, expires_at: expiresAt } };
 }
@@ -155,7 +155,7 @@ export async function unlinkLineAccount(): Promise<ActionResult> {
     })
     .eq("id", trainer.id);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 

@@ -8,8 +8,6 @@ export default function HRLoginPage() {
       subtitle="人事部・エリアマネージャー専用のログインページです"
       redirectTo="/hr"
       accentColor="violet-500"
-      demoEmail="hr@test.com"
-      demoPassword="test1234"
     />
   );
 }

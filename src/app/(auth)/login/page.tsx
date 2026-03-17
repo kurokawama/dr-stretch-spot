@@ -14,15 +14,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, UserPlus, LogIn } from "lucide-react";
-
-type Mode = "login" | "signup";
+import { Mail, Lock, LogIn } from "lucide-react";
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const supabase = createClient();
@@ -48,58 +44,6 @@ export default function LoginPage() {
           return;
         }
         toast.error(error.message || "ログインに失敗しました。");
-        return;
-      }
-
-      window.location.href = "/";
-    } catch {
-      toast.error("予期しないエラーが発生しました。");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !password) return;
-
-    if (password.length < 6) {
-      toast.error("パスワードは6文字以上で入力してください。");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("パスワードが一致しません。");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-      });
-
-      if (error) {
-        if (error.message?.includes("User already registered")) {
-          toast.error("このメールアドレスは既に登録されています。ログインしてください。");
-          setMode("login");
-          return;
-        }
-        toast.error(error.message || "登録に失敗しました。");
-        return;
-      }
-
-      toast.success("アカウントを作成しました。ログインします...");
-      // autoconfirm=true なので、そのままサインインする
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-
-      if (signInError) {
-        toast.error("アカウント作成後のログインに失敗しました。ログイン画面からお試しください。");
-        setMode("login");
         return;
       }
 
@@ -141,23 +85,17 @@ export default function LoginPage() {
       <Card className="relative w-full max-w-sm border-0 shadow-xl animate-scale-in">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-2 rounded-full bg-primary/10 p-3 w-fit">
-            {mode === "login" ? (
-              <LogIn className="h-5 w-5 text-primary" />
-            ) : (
-              <UserPlus className="h-5 w-5 text-primary" />
-            )}
+            <LogIn className="h-5 w-5 text-primary" />
           </div>
           <CardTitle className="font-heading text-xl">
-            {mode === "login" ? "ログイン" : "新規登録"}
+            ログイン
           </CardTitle>
           <CardDescription className="leading-relaxed">
-            {mode === "login"
-              ? "メールアドレスとパスワードを入力してください"
-              : "新しいアカウントを作成します"}
+            メールアドレスとパスワードを入力してください
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={mode === "login" ? handleLogin : handleSignup} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">メールアドレス</Label>
               <div className="relative">
@@ -181,7 +119,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder={mode === "signup" ? "6文字以上" : "パスワードを入力"}
+                  placeholder="パスワードを入力"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -190,49 +128,15 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            {mode === "signup" && (
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">パスワード（確認）</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="もう一度入力"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    className="h-11 pl-10"
-                  />
-                </div>
-              </div>
-            )}
             <Button type="submit" className="w-full h-11 font-medium" disabled={loading}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  {mode === "login" ? "ログイン中..." : "登録中..."}
+                  ログイン中...
                 </span>
-              ) : mode === "login" ? (
-                "ログイン"
               ) : (
-                "アカウントを作成"
+                "ログイン"
               )}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full text-muted-foreground"
-              onClick={() => {
-                setMode(mode === "login" ? "signup" : "login");
-                setPassword("");
-                setConfirmPassword("");
-              }}
-            >
-              {mode === "login"
-                ? "アカウントをお持ちでない方はこちら"
-                : "既にアカウントをお持ちの方はこちら"}
             </Button>
           </form>
         </CardContent>

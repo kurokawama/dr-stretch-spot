@@ -8,7 +8,7 @@
 
 | ロール | ログインURL | 認証方法 |
 |--------|-----------|---------|
-| **トレーナー** | https://dr-stretch-spot.vercel.app/login | Email/Password（新規登録可） |
+| **トレーナー** | https://dr-stretch-spot.vercel.app/login | Email/Password（ログインのみ） |
 | **店舗マネージャー** | https://dr-stretch-spot.vercel.app/login/store | Email/Password |
 | **人事部（HR）** | https://dr-stretch-spot.vercel.app/login/hr | Email/Password |
 | **管理者（Admin）** | https://dr-stretch-spot.vercel.app/login/admin | Email/Password |
@@ -17,15 +17,16 @@
 
 ## テストアカウント
 
-| ロール | Email | パスワード | ログインURL |
-|--------|-------|-----------|------------|
-| トレーナー | trainer@test.com | test1234 | `/login` |
-| 店舗マネージャー | store@test.com | test1234 | `/login/store` |
-| 人事部（HR） | hr@test.com | test1234 | `/login/hr` |
-| 管理者（Admin） | admin@test.com | test1234 | `/login/admin` |
+| ロール | Email | ログインURL |
+|--------|-------|------------|
+| トレーナー | trainer@test.com | `/login` |
+| 店舗マネージャー | store@test.com | `/login/store` |
+| 人事部（HR） | hr@test.com | `/login/hr` |
+| 管理者（Admin） | admin@test.com | `/login/admin` |
 
-各ログインページに「デモアカウントでログイン」ボタンがあり、ワンクリックでテストアカウントにログインできます。
-（環境変数 `ENABLE_DEMO_LOGIN=true` 設定時のみ表示）
+**パスワードは管理者に確認してください。セキュリティのためドキュメントには記載しません。**
+
+**注意**: 自己登録（サインアップ）機能は無効化されています。新規アカウントはAdmin画面（`/admin/accounts`）から作成してください。
 
 ---
 
@@ -35,8 +36,7 @@
 
 #### 1-1. ログイン
 1. https://dr-stretch-spot.vercel.app/login を開く
-2. Email: `trainer@test.com` / Password: `test1234` を入力してログイン
-   - または「デモアカウントでログイン」ボタンをタップ（簡易テスト時）
+2. Email: `trainer@test.com` / Password: 管理者に確認 を入力してログイン
 3. ホーム画面（`/home`）が表示されることを確認
 
 #### 1-2. シフト検索 → 応募
@@ -75,8 +75,7 @@
 
 #### 2-1. ログイン
 1. https://dr-stretch-spot.vercel.app/login/store を開く
-2. 「デモアカウントでログイン」ボタンをタップ
-   - または、Email: `store@test.com` / Password: `test1234` を入力してログイン
+2. Email: `store@test.com` / Password: 管理者に確認 を入力してログイン
 3. 店舗ダッシュボード（`/store`）が表示されることを確認
 
 #### 2-2. シフト作成
@@ -113,8 +112,8 @@
 
 ### シナリオ3: HR管理フロー（概要確認）
 
-1. https://dr-stretch-spot.vercel.app/login/hr を開き、「デモアカウントでログイン」をタップ
-   - または、Email: `hr@test.com` / Password: `test1234` でログイン
+1. https://dr-stretch-spot.vercel.app/login/hr を開く
+2. Email: `hr@test.com` / Password: 管理者に確認 でログイン
 2. ダッシュボードのKPI確認
 3. マッチング管理 → 全応募の一覧・ステータス確認
 4. 時給テーブル → 勤続年数別の時給設定確認
@@ -136,8 +135,8 @@
 
 ### シナリオ4: 管理者フロー（概要確認）
 
-1. https://dr-stretch-spot.vercel.app/login/admin を開き、「デモアカウントでログイン」をタップ
-   - または、Email: `admin@test.com` / Password: `test1234` でログイン
+1. https://dr-stretch-spot.vercel.app/login/admin を開く
+2. Email: `admin@test.com` / Password: 管理者に確認 でログイン
 2. トレーナー管理 → 検索・フィルタ確認
 3. 店舗管理 → 店舗一覧確認
 4. コスト管理 → 月間レポート確認
@@ -225,7 +224,7 @@
 ## 既知の制限事項
 - メール送信: 無料プランでは 2通/時間 の制限あり（テスト時は間隔を空ける）
 - QR打刻: GPS位置情報を使用。テスト時は店舗位置（大阪市中央区）から200m以内で操作が必要
-- デモログイン: 本番環境では `ENABLE_DEMO_LOGIN=true` 環境変数が必要（未設定時はデモボタン非表示かつAPI 403）
+- 自己登録不可: トレーナーの自己登録は無効化済み。新規アカウントはAdmin画面から作成
 - ロール別ログイン: 各ロールのログインURLは独立しており、URLを知っている人のみアクセス可能
 
 ---

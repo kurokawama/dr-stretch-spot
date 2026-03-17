@@ -240,7 +240,6 @@ last_shift_date からの経過日数:
 
 | Method | Path | 認証 | 用途 |
 |--------|------|------|------|
-| GET | `/api/auth/demo-login?role=` | 不要 | デモログイン（開発環境のみ） |
 | GET | `/api/auth/token-login?token=` | 不要 | マジックリンクログイン |
 | GET/POST | `/api/attendance/verify?token=` | 不要* | QRコード打刻検証 |
 | POST | `/api/confirm` | 不要 | メール確認リンク（前日リマインダー） |
@@ -395,18 +394,11 @@ cp .env.local.example .env.local
 npm run dev          # http://localhost:3000
 
 # 4. ロール別ログインURL
-# /login           (トレーナー — Email/Password + 新規登録)
+# /login           (トレーナー — Email/Password、ログインのみ)
 # /login/store     (店舗マネージャー — Email/Password)
 # /login/hr        (HR — Email/Password)
 # /login/admin     (管理者 — Email/Password)
-# 各ページに「デモアカウントでログイン」ボタンあり（ENABLE_DEMO_LOGIN=true時）
-
-# 5. デモログインAPI（内部用）
-# /api/auth/demo-login?role=trainer  (トレーナー)
-# /api/auth/demo-login?role=store    (店舗マネージャー)
-# /api/auth/demo-login?role=hr       (HR)
-# /api/auth/demo-login?role=admin    (管理者)
-# 本番環境ではENABLE_DEMO_LOGIN=true が必要（未設定時は403エラー）
+# 自己登録は無効化済み。アカウントはAdmin画面(/admin/accounts)から作成
 ```
 
 ### コーディングルール
@@ -501,7 +493,7 @@ employee      → /home, /resignation, /profile のみ
 
 > 現時点で開発を進めるにあたり、以下の情報が不足している。
 
-1. **テストアカウント情報**: `seed-demo.js` で作成されるデモアカウントのメール/パスワードの一覧は？（本番環境にデモアカウントは残すのか）
+1. **テストアカウント情報**: テストアカウントのパスワードは変更済み。新パスワードは管理者に確認
 2. **LINE Bot設計**: 現在 Webhook 受信のみ。トレーナー側からのコマンド受付（シフト確認・応募等）の仕様は決まっているか？
 3. **メール配信**: Resend の送信ドメイン設定は完了しているか？（SPF/DKIM/DMARC）
 4. **GPS精度要件**: `geofence_radius` のデフォルト値と許容誤差は？屋内精度の問題は？

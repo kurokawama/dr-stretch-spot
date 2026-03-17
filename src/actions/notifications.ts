@@ -29,6 +29,11 @@ export async function getNotifications(
     } = await supabase.auth.getUser();
     if (!user) return { success: false, error: "ログインが必要です" };
 
+    // Ownership verification: users can only access their own notifications
+    if (userId !== user.id) {
+      return { success: false, error: "権限がありません" };
+    }
+
     const admin = createAdminClient();
     let query = admin
       .from("notification_logs")
@@ -45,13 +50,16 @@ export async function getNotifications(
     }
 
     const { data, error } = await query;
-    if (error) return { success: false, error: error.message };
+    if (error) {
+      console.error("[getNotifications] DB error:", error);
+      return { success: false, error: "通知の取得に失敗しました" };
+    }
     return { success: true, data: data ?? [] };
   } catch (err) {
     console.error("[getNotifications] Unexpected error:", err);
     return {
       success: false,
-      error: err instanceof Error ? err.message : "通知の取得に失敗しました",
+      error: "通知の取得に失敗しました",
     };
   }
 }
@@ -78,7 +86,7 @@ export async function getUnreadNotificationCount(
     .eq("user_id", userId)
     .is("read_at", null);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: count ?? 0 };
 }
 
@@ -104,7 +112,7 @@ export async function markNotificationRead(
     .eq("id", notificationId)
     .eq("user_id", user.id);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -130,7 +138,7 @@ export async function markAllNotificationsRead(
     .eq("user_id", userId)
     .is("read_at", null);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true };
 }
 
@@ -167,7 +175,7 @@ export async function createNotification(params: {
     .select()
     .single();
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data };
 }
 
@@ -204,6 +212,6 @@ export async function createBatchNotifications(
 
   const { error } = await admin.from("notification_logs").insert(records);
 
-  if (error) return { success: false, error: error.message };
+  if (error) { console.error("[action] DB error:", error.message); return { success: false, error: "操作に失敗しました。もう一度お試しください" }; }
   return { success: true, data: { count: userIds.length } };
 }

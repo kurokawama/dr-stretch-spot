@@ -8,8 +8,6 @@ export default function AdminLoginPage() {
       subtitle="管理者専用のログインページです"
       redirectTo="/admin"
       accentColor="amber-500"
-      demoEmail="admin@test.com"
-      demoPassword="test1234"
     />
   );
 }
