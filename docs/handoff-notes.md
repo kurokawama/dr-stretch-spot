@@ -1,6 +1,6 @@
 # Dr.stretch SPOT エンジニア引き継ぎノート
 
-> 最終更新: 2026-03-15
+> 最終更新: 2026-03-17
 
 ---
 
@@ -30,6 +30,41 @@
 | P1-4 | 高時給フィルタ説明追加 | `src/app/(trainer)/shifts/page.tsx` — 「緊急手当付きシフト」の説明表示 |
 | P1-5 | SPOT設定確認セクション強調 | `src/app/(trainer)/spot-setup/page.tsx` — 枠線+背景色で視認性向上 |
 | 追加 | 履歴タブ空状態CTA | `src/app/(trainer)/my-shifts/page.tsx` — 「シフトを探す」ボタン追加 |
+
+### ロール別独立ログインページ（2026-03-17 実施済み）
+
+各ロール専用の独立したログインページを新設。従来の1ページにボタン集約方式から、URLで分離するセキュリティ強化設計に変更。
+
+| 変更内容 | 対象ファイル | 概要 |
+|---------|-------------|------|
+| トレーナーログイン | `src/app/(auth)/login/page.tsx` | OTP認証（従来通り） |
+| 店舗ログイン | `src/app/(auth)/login/store/page.tsx` | Email/Password認証（新規） |
+| HRログイン | `src/app/(auth)/login/hr/page.tsx` | Email/Password認証（新規） |
+| Adminログイン | `src/app/(auth)/login/admin/page.tsx` | Email/Password認証（新規） |
+| 共通ログインフォーム | `src/components/shared/StaffLoginForm.tsx` | store/hr/admin共通のログインUIコンポーネント |
+| ミドルウェア更新 | `src/middleware.ts` | 未認証時にロール別ログインURLにリダイレクト |
+| デモログインAPI | `src/app/api/auth/demo-login/route.ts` | 本番ガード追加（`ENABLE_DEMO_LOGIN=true` 必須） |
+
+### アカウント管理機能（2026-03-17 実施済み）
+
+管理者がスタッフアカウント（店舗マネージャー/HR/Admin）をCRUD管理できる機能を追加。
+
+| 変更内容 | 対象ファイル | 概要 |
+|---------|-------------|------|
+| Server Action | `src/actions/accounts.ts` | Supabase Admin API によるアカウントCRUD |
+| サーバーコンポーネント | `src/app/(admin)/admin/accounts/page.tsx` | アカウント一覧取得・権限チェック |
+| クライアントUI | `src/app/(admin)/admin/accounts/accounts-client.tsx` | 作成/編集/削除ダイアログ付きCRUD UI |
+| レイアウト更新 | `src/app/(admin)/layout.tsx` | サイドバーに「アカウント管理」追加 |
+
+### Server Action ハング修正（2026-03-17 実施済み）
+
+3つのServer Actionが特定条件で無応答になるバグを修正。
+
+| 対象 | 原因 | 修正 |
+|------|------|------|
+| `src/actions/attendance.ts` | `.single()` が RLS で0行時に PGRST116 エラー + try-catch なし | `.maybeSingle()` + try-catch |
+| `src/actions/notifications.ts` | 同上 | try-catch 追加 |
+| `src/actions/line.ts` | `.single()` + try-catch なし | `.maybeSingle()` + try-catch |
 
 ---
 
@@ -152,15 +187,31 @@ flow-diagram.json        # 画面遷移図（JSON）
 ### ミドルウェア（`src/middleware.ts`）
 
 - PUBLIC_ROUTES: `/login`, `/register`, `/auth/callback`, `/auth/magic`
-- 未認証 → `/login?redirect={pathname}` にリダイレクト
+- **ロール別ログインリダイレクト**: 未認証時、アクセス先に応じたログインページにリダイレクト
+  - `/store/*` → `/login/store`
+  - `/hr/*` → `/login/hr`
+  - `/admin/*` → `/login/admin`
+  - その他 → `/login`
 - ロール別ルーティング: trainer→`/home`, store_manager→`/store`, hr→`/hr`, admin→全アクセス可
+- employee→`/home`, `/resignation`, `/profile` のみ
 
-### Demo Quick Login
+### ロール別ログインページ
+
+各ロール専用の独立したログインページ:
+
+| ロール | URL | 認証方法 | コンポーネント |
+|--------|-----|---------|--------------|
+| トレーナー | `/login` | OTP（メール認証コード） | 専用UI |
+| 店舗マネージャー | `/login/store` | Email/Password | `StaffLoginForm` |
+| HR | `/login/hr` | Email/Password | `StaffLoginForm` |
+| Admin | `/login/admin` | Email/Password | `StaffLoginForm` |
+
+### Demo Login
 
 - `src/app/api/auth/demo-login/route.ts`
-- `NODE_ENV !== "production"` でログインページに表示
-- **本番デプロイ時は自動的に非表示**（Vercelは`NODE_ENV=production`）
-- 追加対策: demo-login APIルート自体にも本番ガードを追加推奨
+- **本番環境では `ENABLE_DEMO_LOGIN=true` 環境変数が必須**（未設定時は403エラー）
+- 各ログインページの「デモアカウントでログイン」ボタンから呼び出し
+- テストアカウント: `trainer@test.com`, `store@test.com`, `hr@test.com`, `admin@test.com`（パスワード: `test1234`）
 
 ---
 
@@ -180,7 +231,7 @@ flow-diagram.json        # 画面遷移図（JSON）
 
 ### セキュリティ確認推奨
 
-- [ ] `demo-login` APIルートに本番環境ガード追加（`NODE_ENV`チェック）
+- [x] `demo-login` APIルートに本番環境ガード追加（`ENABLE_DEMO_LOGIN`チェック実装済み）
 - [ ] 入力サニタイゼーション（ilike/eq等のフィルタ値）
 - [ ] 所有権検証（トレーナーが他人のリソースを操作できないか）
 - [ ] Rate limiting（メール送信等のリソース消費操作）
@@ -236,8 +287,19 @@ resignation_requests (auth_user_id → profiles)
 
 ## 9. 既知のLint警告（既存・今回未修正）
 
-`npm run lint` で24 errors / 24 warningsが出ますが、今回の修正ファイルには含まれていません。主に以下のパターン：
+`npm run lint` でwarningsが出る場合がありますが、主に以下のパターン：
 - `react-hooks/exhaustive-deps` — useEffect依存配列
 - `react-hooks/set-state-in-effect` — イベントハンドラ内のsetState
 
 必要に応じて修正してください。
+
+---
+
+## 10. 変更履歴
+
+| 日付 | コミット | 内容 |
+|------|---------|------|
+| 2026-03-17 | `9fc50b2` | ロール別独立ログインページ新設 |
+| 2026-03-17 | `90c8bf0` | アカウント管理機能（Admin） |
+| 2026-03-17 | `298b8e4` | Server Action ハング修正（attendance/notifications/line） |
+| 2026-03-15 | — | ローンチ前最終改善（G1〜G8, P0〜P1） |

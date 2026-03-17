@@ -62,6 +62,7 @@ LINE_CHANNEL_SECRET=
 LINE_CHANNEL_ACCESS_TOKEN=
 RESEND_API_KEY=
 NEXT_PUBLIC_APP_URL=
+ENABLE_DEMO_LOGIN=true          # デモログインボタン表示（本番ではfalseまたは未設定）
 ```
 
 ## ドキュメント
@@ -71,6 +72,7 @@ NEXT_PUBLIC_APP_URL=
 | [docs/specification.md](docs/specification.md) | プロジェクト企画書・全仕様書 |
 | [docs/handoff-notes.md](docs/handoff-notes.md) | エンジニア引き継ぎノート（ローンチ前改善内容・セットアップ・チェックリスト） |
 | [docs/test-guide.md](docs/test-guide.md) | テスト手順書 |
+| [SPEC.md](SPEC.md) | システム仕様書（技術詳細） |
 | [flow-diagram.json](flow-diagram.json) | 画面遷移図（JSON） |
 
 ## ディレクトリ構造
@@ -84,8 +86,10 @@ src/
 │   ├── (hr)/         # HR向け画面
 │   ├── (admin)/      # 管理者向け画面
 │   └── api/          # APIエンドポイント
-├── actions/          # Server Actions
-├── components/ui/    # shadcn/uiコンポーネント
+├── actions/          # Server Actions（17ファイル）
+├── components/
+│   ├── shared/       # 共有コンポーネント（Header, BottomNav, StaffLoginForm等）
+│   └── ui/           # shadcn/uiコンポーネント
 ├── lib/              # ユーティリティ
 └── types/            # TypeScript型定義
 ```
