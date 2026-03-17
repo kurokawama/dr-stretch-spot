@@ -21,7 +21,7 @@ export default async function AdminLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login/admin");
   }
 
   const { data: profile } = await supabase
@@ -31,7 +31,7 @@ export default async function AdminLayout({
     .single();
 
   if (!profile || profile.role !== "admin") {
-    redirect("/login");
+    redirect("/login/admin");
   }
 
   const navItems = [

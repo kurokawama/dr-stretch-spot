@@ -25,7 +25,7 @@ export default async function StoreLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login/store");
   }
 
   const { data: profile } = await supabase
@@ -38,7 +38,7 @@ export default async function StoreLayout({
     !profile ||
     (profile.role !== "store_manager" && profile.role !== "admin")
   ) {
-    redirect("/login");
+    redirect("/login/store");
   }
 
   // All nav items for sidebar (desktop)

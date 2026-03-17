@@ -28,7 +28,7 @@ export default async function HRLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login/hr");
   }
 
   const { data: profile } = await supabase
@@ -41,7 +41,7 @@ export default async function HRLayout({
     !profile ||
     !["hr", "admin", "area_manager"].includes(profile.role)
   ) {
-    redirect("/login");
+    redirect("/login/hr");
   }
 
   const navItems = [

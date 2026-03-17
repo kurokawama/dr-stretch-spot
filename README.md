@@ -23,6 +23,19 @@ Dr.ストレッチを退職した認定トレーナー（OB/OG）が、好きな
 | メール | Resend API |
 | 言語 | TypeScript (strict) |
 
+## ロール別ログインURL
+
+各ロール専用の独立したログインページがあります。URLを知っている人だけがアクセスできます。
+
+| ロール | ログインURL | 主な機能 |
+|--------|-----------|---------|
+| **トレーナー**（スポットバイト） | https://dr-stretch-spot.vercel.app/login | シフト検索・応募・QR打刻・収入確認 |
+| **店舗マネージャー** | https://dr-stretch-spot.vercel.app/login/store | シフト作成・応募管理・勤怠管理・評価 |
+| **人事（HR）** | https://dr-stretch-spot.vercel.app/login/hr | 全店横断管理・時給設定・コスト管理・承認 |
+| **管理者（Admin）** | https://dr-stretch-spot.vercel.app/login/admin | KPI・コスト分析・全権限 |
+
+> 各ページに「デモアカウントでログイン」ボタンがあります（レビュー用）。
+
 ## セットアップ
 
 ```bash

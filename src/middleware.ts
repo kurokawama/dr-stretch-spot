@@ -26,7 +26,16 @@ export async function middleware(request: NextRequest) {
 
   if (!user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    // Redirect to role-specific login page based on the requested path
+    if (pathname.startsWith("/store")) {
+      url.pathname = "/login/store";
+    } else if (pathname.startsWith("/hr")) {
+      url.pathname = "/login/hr";
+    } else if (pathname.startsWith("/admin")) {
+      url.pathname = "/login/admin";
+    } else {
+      url.pathname = "/login";
+    }
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
