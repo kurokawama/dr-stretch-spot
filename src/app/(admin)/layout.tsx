@@ -8,6 +8,7 @@ import {
   Building,
   DollarSign,
   ClipboardCheck,
+  ShieldCheck,
 } from "lucide-react";
 
 export default async function AdminLayout({
@@ -43,6 +44,11 @@ export default async function AdminLayout({
       href: "/admin/skill-checks",
       icon: ClipboardCheck,
       label: "技術チェック管理",
+    },
+    {
+      href: "/admin/accounts",
+      icon: ShieldCheck,
+      label: "アカウント管理",
     },
   ];
 
