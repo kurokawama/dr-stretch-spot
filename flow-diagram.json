@@ -161,6 +161,58 @@
     }
   ],
 
+  "actors": [
+    {
+      "id": "anonymous",
+      "name": "未認証ユーザー",
+      "type": "pre-auth",
+      "states": ["初回訪問"],
+      "flows": ["signup", "login", "LP閲覧"],
+      "canSelfRegister": false
+    },
+    {
+      "id": "trainer",
+      "name": "トレーナー",
+      "type": "authenticated",
+      "states": ["初回登録", "通常利用", "休眠復帰"],
+      "flows": ["シフト検索", "応募", "打刻", "プロフィール編集"],
+      "canSelfRegister": true
+    },
+    {
+      "id": "store_manager",
+      "name": "店舗マネージャー",
+      "type": "authenticated",
+      "states": ["招待後初回", "通常利用"],
+      "flows": ["シフト作成", "応募承認", "勤怠管理"],
+      "canSelfRegister": false
+    },
+    {
+      "id": "hr",
+      "name": "HR",
+      "type": "authenticated",
+      "states": ["招待後初回", "通常利用"],
+      "flows": ["トレーナー管理", "評価", "給与計算"],
+      "canSelfRegister": false
+    },
+    {
+      "id": "admin",
+      "name": "管理者",
+      "type": "admin",
+      "states": ["初回", "通常利用"],
+      "flows": ["ユーザー管理", "システム設定", "全体ダッシュボード"],
+      "canSelfRegister": false
+    }
+  ],
+  "authFlows": {
+    "signup": { "path": "/signup", "actors": ["anonymous"], "required": true },
+    "login": {
+      "paths": ["/login", "/login/hr", "/login/store", "/login/admin"],
+      "required": true
+    },
+    "register": { "path": "/register", "actors": ["trainer"], "required": true },
+    "logout": { "required": true },
+    "password_reset": { "required": true }
+  },
   "cross_role_interactions": [
     {
       "id": "xrole_resign",
