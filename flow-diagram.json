@@ -121,6 +121,46 @@
       ]
     }
   ],
+  "businessFlows": [
+    {
+      "id": "bf_shift_cycle",
+      "name": "シフト募集〜勤務完了サイクル",
+      "description": "店舗がシフトを公開し、トレーナーが応募、承認後に勤務、評価・給与計算まで",
+      "steps": [
+        { "order": 1, "actor": "店舗マネージャー", "action": "シフトを作成・公開", "result": "status=open で公開", "next": "2" },
+        { "order": 2, "actor": "トレーナー", "action": "シフトを検索して応募", "result": "応募 status=pending", "next": "3" },
+        { "order": 3, "actor": "店舗マネージャー", "action": "応募を確認して承認", "result": "status=approved", "next": "4" },
+        { "order": 4, "actor": "トレーナー", "action": "当日 QR打刻（出勤）", "result": "clock_in_at 記録", "next": "5" },
+        { "order": 5, "actor": "トレーナー", "action": "QR打刻（退勤）", "result": "clock_out_at 記録", "next": "6" },
+        { "order": 6, "actor": "店舗マネージャー", "action": "勤怠確認・トレーナー評価", "result": "evaluation 作成", "next": "7" },
+        { "order": 7, "actor": "HR", "action": "給与計算・コスト管理", "result": "月次処理完了", "next": null }
+      ]
+    },
+    {
+      "id": "bf_trainer_onboard",
+      "name": "トレーナー登録〜初回勤務",
+      "description": "退職トレーナーがアカウント登録し、初めてシフトに入るまで",
+      "steps": [
+        { "order": 1, "actor": "トレーナー", "action": "新規登録（メール+パスワード）", "result": "アカウント作成", "next": "2" },
+        { "order": 2, "actor": "トレーナー", "action": "プロフィール入力（氏名・在籍年数・希望エリア）", "result": "alumni_trainers レコード作成", "next": "3" },
+        { "order": 3, "actor": "HR", "action": "トレーナー情報を確認・承認", "result": "status=active", "next": "4" },
+        { "order": 4, "actor": "トレーナー", "action": "シフトを検索して初回応募", "result": "応募 status=pending", "next": "シフトサイクルへ" }
+      ]
+    },
+    {
+      "id": "bf_blank_management",
+      "name": "ブランク管理フロー",
+      "description": "長期未稼働トレーナーのアラート〜復帰まで",
+      "steps": [
+        { "order": 1, "actor": "システム", "action": "60日未稼働を検知", "result": "blank_status=alert_60", "next": "2" },
+        { "order": 2, "actor": "HR", "action": "アラート確認・トレーナーに連絡", "result": "通知送信", "next": "3" },
+        { "order": 3, "actor": "システム", "action": "90日未稼働を検知", "result": "blank_status=skill_check_required", "next": "4" },
+        { "order": 4, "actor": "店舗マネージャー", "action": "スキルチェック実施", "result": "pass/fail 記録", "next": "5" },
+        { "order": 5, "actor": "HR", "action": "復帰承認", "result": "blank_status=ok に戻る", "next": null }
+      ]
+    }
+  ],
+
   "cross_role_interactions": [
     {
       "id": "xrole_resign",

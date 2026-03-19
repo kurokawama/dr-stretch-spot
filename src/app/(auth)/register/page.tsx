@@ -66,14 +66,19 @@ export default function RegisterPage() {
         return;
       }
 
-      // Create profile
-      const { error: profileError } = await supabase.from("profiles").upsert({
+      // Create profile (INSERT only — upsertだとUPDATEのWITH CHECKでrole比較がNULLになり500エラー)
+      const { error: profileError } = await supabase.from("profiles").insert({
         id: user.id,
         role: "trainer",
         display_name: formData.fullName,
-      });
+      }).select().maybeSingle();
 
-      if (profileError) {
+      // 既に存在する場合はdisplay_nameのみ更新
+      if (profileError?.code === "23505") {
+        await supabase.from("profiles")
+          .update({ display_name: formData.fullName })
+          .eq("id", user.id);
+      } else if (profileError) {
         toast.error("プロフィールの作成に失敗しました。");
         return;
       }

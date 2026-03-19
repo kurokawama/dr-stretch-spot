@@ -1,8 +1,25 @@
-%% Dr.stretch SPOT - フロー図（自動生成）
-%% 生成日時: 2026-03-19T05:36:52.614Z
-%% ソース: flow-diagram.json
-
-%% === 業務フロー図（誰が何をしてどう流れるか） ===
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Dr.stretch SPOT - フロー図</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+    header { width: 100%; padding: 20px 32px; background: #16213e; border-bottom: 2px solid #0f3460; display: flex; justify-content: space-between; align-items: center; }
+    h1 { font-size: 18px; color: #e94560; }
+    .meta { font-size: 12px; color: #888; }
+    .diagram { flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; padding: 40px 20px; overflow: auto; }
+    .mermaid { background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); max-width: 95vw; overflow: auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dr.stretch SPOT フロー図</h1>
+    <span class="meta">自動生成: 2026/3/19 | source: flow-diagram.json</span>
+  </header>
+  <div class="diagram">
+    <div class="mermaid">
 flowchart TD
   %% === シフト募集〜勤務完了サイクル ===
   bf_bf_shift_cycle_1["店舗マネージャー\nシフトを作成・公開"]
@@ -39,34 +56,9 @@ flowchart TD
   bf_bf_blank_management_5["HR\n復帰承認"]
   bf_bf_blank_management_4 -->|"pass/fail 記録"| bf_bf_blank_management_5
 
-
-%% === 画面遷移図 ===
-flowchart TD
-  subgraph OB_OG["🧑 トレーナー（OB/OG）"]
-    OB_OG_login["ログイン"]
-    OB_OG_home["トレーナーホーム"]
-    OB_OG_shifts["シフト検索"]
-    OB_OG_shifts_id["シフト詳細"]
-    OB_OG_shifts_id_apply["応募確認"]
-  end
-  subgraph node["🧑 店舗マネージャー"]
-    login["ログイン"]
-    home["トレーナーホーム"]
-    shifts["シフト検索"]
-    shifts_id["シフト詳細"]
-    shifts_id_apply["応募確認"]
-  end
-  subgraph HR["🧑 HR/人事部"]
-    HR_login["ログイン"]
-    HR_home["トレーナーホーム"]
-    HR_shifts["シフト検索"]
-    HR_shifts_id["シフト詳細"]
-    HR_shifts_id_apply["応募確認"]
-  end
-  subgraph node["🧑 管理者"]
-    login["ログイン"]
-    home["トレーナーホーム"]
-    shifts["シフト検索"]
-    shifts_id["シフト詳細"]
-    shifts_id_apply["応募確認"]
-  end
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' } });</script>
+</body>
+</html>

@@ -109,63 +109,39 @@ npm run start    # 本番サーバー
 
 ```mermaid
 flowchart TD
-  subgraph trainer["🧑 トレーナー（OB/OG）"]
-    t_login["ログイン"]
-    t_home["ホーム"]
-    t_shifts["シフト検索"]
-    t_detail["シフト詳細"]
-    t_apply["応募確認"]
-    t_clock["QR打刻"]
-    t_earnings["収入確認"]
-    t_profile["プロフィール"]
-  end
+  %% === シフト募集〜勤務完了サイクル ===
+  bf_bf_shift_cycle_1["店舗マネージャー\nシフトを作成・公開"]
+  bf_bf_shift_cycle_2["トレーナー\nシフトを検索して応募"]
+  bf_bf_shift_cycle_1 -->|"status=open で公開"| bf_bf_shift_cycle_2
+  bf_bf_shift_cycle_3["店舗マネージャー\n応募を確認して承認"]
+  bf_bf_shift_cycle_2 -->|"応募 status=pending"| bf_bf_shift_cycle_3
+  bf_bf_shift_cycle_4["トレーナー\n当日 QR打刻（出勤）"]
+  bf_bf_shift_cycle_3 -->|"status=approved"| bf_bf_shift_cycle_4
+  bf_bf_shift_cycle_5["トレーナー\nQR打刻（退勤）"]
+  bf_bf_shift_cycle_4 -->|"clock_in_at 記録"| bf_bf_shift_cycle_5
+  bf_bf_shift_cycle_6["店舗マネージャー\n勤怠確認・トレーナー評価"]
+  bf_bf_shift_cycle_5 -->|"clock_out_at 記録"| bf_bf_shift_cycle_6
+  bf_bf_shift_cycle_7["HR\n給与計算・コスト管理"]
+  bf_bf_shift_cycle_6 -->|"evaluation 作成"| bf_bf_shift_cycle_7
 
-  subgraph store["🏪 店舗マネージャー"]
-    s_login["ログイン"]
-    s_dash["ダッシュボード"]
-    s_create["シフト作成"]
-    s_apps["応募管理"]
-    s_attend["勤怠管理"]
-    s_eval["評価"]
-  end
+  %% === トレーナー登録〜初回勤務 ===
+  bf_bf_trainer_onboard_1["トレーナー\n新規登録（メール+パスワード）"]
+  bf_bf_trainer_onboard_2["トレーナー\nプロフィール入力（氏名・在籍年数・希望エリア）"]
+  bf_bf_trainer_onboard_1 -->|"アカウント作成"| bf_bf_trainer_onboard_2
+  bf_bf_trainer_onboard_3["HR\nトレーナー情報を確認・承認"]
+  bf_bf_trainer_onboard_2 -->|"alumni_trainers レコード作成"| bf_bf_trainer_onboard_3
+  bf_bf_trainer_onboard_4["トレーナー\nシフトを検索して初回応募"]
+  bf_bf_trainer_onboard_3 -->|"status=active"| bf_bf_trainer_onboard_4
 
-  subgraph hr["👔 HR / 人事部"]
-    h_login["ログイン"]
-    h_dash["ダッシュボード"]
-    h_trainers["トレーナー管理"]
-    h_rates["時給設定"]
-    h_offers["直接オファー"]
-    h_resign["退職処理"]
-    h_cost["コスト管理"]
-  end
+  %% === ブランク管理フロー ===
+  bf_bf_blank_management_1["システム\n60日未稼働を検知"]
+  bf_bf_blank_management_2["HR\nアラート確認・トレーナーに連絡"]
+  bf_bf_blank_management_1 -->|"blank_status=alert_60"| bf_bf_blank_management_2
+  bf_bf_blank_management_3["システム\n90日未稼働を検知"]
+  bf_bf_blank_management_2 -->|"通知送信"| bf_bf_blank_management_3
+  bf_bf_blank_management_4["店舗マネージャー\nスキルチェック実施"]
+  bf_bf_blank_management_3 -->|"blank_status=skill_check_required"| bf_bf_blank_management_4
+  bf_bf_blank_management_5["HR\n復帰承認"]
+  bf_bf_blank_management_4 -->|"pass/fail 記録"| bf_bf_blank_management_5
 
-  subgraph admin["⚙️ 管理者"]
-    a_login["ログイン"]
-    a_dash["KPIダッシュボード"]
-    a_accounts["アカウント管理"]
-    a_stores["店舗管理"]
-  end
-
-  t_login --> t_home
-  t_home --> t_shifts --> t_detail --> t_apply
-  t_home --> t_clock
-  t_home --> t_earnings
-  t_home --> t_profile
-
-  s_login --> s_dash
-  s_dash --> s_create
-  s_dash --> s_apps
-  s_dash --> s_attend
-  s_dash --> s_eval
-
-  h_login --> h_dash
-  h_dash --> h_trainers
-  h_dash --> h_rates
-  h_dash --> h_offers
-  h_dash --> h_resign
-  h_dash --> h_cost
-
-  a_login --> a_dash
-  a_dash --> a_accounts
-  a_dash --> a_stores
 ```
