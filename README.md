@@ -109,32 +109,63 @@ npm run start    # 本番サーバー
 
 ```mermaid
 flowchart TD
-  subgraph OB_OG["🧑 トレーナー（OB/OG）"]
-    OB_OG_login["ログイン"]
-    OB_OG_home["トレーナーホーム"]
-    OB_OG_shifts["シフト検索"]
-    OB_OG_shifts_id["シフト詳細"]
-    OB_OG_shifts_id_apply["応募確認"]
+  subgraph trainer["🧑 トレーナー（OB/OG）"]
+    t_login["ログイン"]
+    t_home["ホーム"]
+    t_shifts["シフト検索"]
+    t_detail["シフト詳細"]
+    t_apply["応募確認"]
+    t_clock["QR打刻"]
+    t_earnings["収入確認"]
+    t_profile["プロフィール"]
   end
-  subgraph node["🧑 店舗マネージャー"]
-    login["ログイン"]
-    home["トレーナーホーム"]
-    shifts["シフト検索"]
-    shifts_id["シフト詳細"]
-    shifts_id_apply["応募確認"]
+
+  subgraph store["🏪 店舗マネージャー"]
+    s_login["ログイン"]
+    s_dash["ダッシュボード"]
+    s_create["シフト作成"]
+    s_apps["応募管理"]
+    s_attend["勤怠管理"]
+    s_eval["評価"]
   end
-  subgraph HR["🧑 HR/人事部"]
-    HR_login["ログイン"]
-    HR_home["トレーナーホーム"]
-    HR_shifts["シフト検索"]
-    HR_shifts_id["シフト詳細"]
-    HR_shifts_id_apply["応募確認"]
+
+  subgraph hr["👔 HR / 人事部"]
+    h_login["ログイン"]
+    h_dash["ダッシュボード"]
+    h_trainers["トレーナー管理"]
+    h_rates["時給設定"]
+    h_offers["直接オファー"]
+    h_resign["退職処理"]
+    h_cost["コスト管理"]
   end
-  subgraph node["🧑 管理者"]
-    login["ログイン"]
-    home["トレーナーホーム"]
-    shifts["シフト検索"]
-    shifts_id["シフト詳細"]
-    shifts_id_apply["応募確認"]
+
+  subgraph admin["⚙️ 管理者"]
+    a_login["ログイン"]
+    a_dash["KPIダッシュボード"]
+    a_accounts["アカウント管理"]
+    a_stores["店舗管理"]
   end
+
+  t_login --> t_home
+  t_home --> t_shifts --> t_detail --> t_apply
+  t_home --> t_clock
+  t_home --> t_earnings
+  t_home --> t_profile
+
+  s_login --> s_dash
+  s_dash --> s_create
+  s_dash --> s_apps
+  s_dash --> s_attend
+  s_dash --> s_eval
+
+  h_login --> h_dash
+  h_dash --> h_trainers
+  h_dash --> h_rates
+  h_dash --> h_offers
+  h_dash --> h_resign
+  h_dash --> h_cost
+
+  a_login --> a_dash
+  a_dash --> a_accounts
+  a_dash --> a_stores
 ```
