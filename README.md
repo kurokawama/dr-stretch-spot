@@ -102,3 +102,39 @@ npm run build    # ビルド
 npm run lint     # Lint
 npm run start    # 本番サーバー
 ```
+
+## フロー図
+
+> 自動生成: 2026/3/19 | ソース: `flow-diagram.json`
+
+```mermaid
+flowchart TD
+  subgraph OB_OG["🧑 トレーナー（OB/OG）"]
+    OB_OG_login["ログイン"]
+    OB_OG_home["トレーナーホーム"]
+    OB_OG_shifts["シフト検索"]
+    OB_OG_shifts_id["シフト詳細"]
+    OB_OG_shifts_id_apply["応募確認"]
+  end
+  subgraph node["🧑 店舗マネージャー"]
+    login["ログイン"]
+    home["トレーナーホーム"]
+    shifts["シフト検索"]
+    shifts_id["シフト詳細"]
+    shifts_id_apply["応募確認"]
+  end
+  subgraph HR["🧑 HR/人事部"]
+    HR_login["ログイン"]
+    HR_home["トレーナーホーム"]
+    HR_shifts["シフト検索"]
+    HR_shifts_id["シフト詳細"]
+    HR_shifts_id_apply["応募確認"]
+  end
+  subgraph node["🧑 管理者"]
+    login["ログイン"]
+    home["トレーナーホーム"]
+    shifts["シフト検索"]
+    shifts_id["シフト詳細"]
+    shifts_id_apply["応募確認"]
+  end
+```

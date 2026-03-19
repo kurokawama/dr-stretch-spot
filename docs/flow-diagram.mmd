@@ -1,0 +1,34 @@
+%% Dr.stretch SPOT - フロー図（自動生成）
+%% 生成日時: 2026-03-19T05:03:13.077Z
+%% ソース: flow-diagram.json
+
+%% === 画面遷移図 ===
+flowchart TD
+  subgraph OB_OG["🧑 トレーナー（OB/OG）"]
+    OB_OG_login["ログイン"]
+    OB_OG_home["トレーナーホーム"]
+    OB_OG_shifts["シフト検索"]
+    OB_OG_shifts_id["シフト詳細"]
+    OB_OG_shifts_id_apply["応募確認"]
+  end
+  subgraph node["🧑 店舗マネージャー"]
+    login["ログイン"]
+    home["トレーナーホーム"]
+    shifts["シフト検索"]
+    shifts_id["シフト詳細"]
+    shifts_id_apply["応募確認"]
+  end
+  subgraph HR["🧑 HR/人事部"]
+    HR_login["ログイン"]
+    HR_home["トレーナーホーム"]
+    HR_shifts["シフト検索"]
+    HR_shifts_id["シフト詳細"]
+    HR_shifts_id_apply["応募確認"]
+  end
+  subgraph node["🧑 管理者"]
+    login["ログイン"]
+    home["トレーナーホーム"]
+    shifts["シフト検索"]
+    shifts_id["シフト詳細"]
+    shifts_id_apply["応募確認"]
+  end
