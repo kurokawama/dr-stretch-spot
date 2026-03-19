@@ -135,4 +135,41 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
       expect(page.url()).toContain("/login");
     });
   });
+
+  test.describe("認証後ダッシュボード遷移テスト", () => {
+    const roleDashboards = [
+      { role: "trainer", dashboardPath: "/home", name: "トレーナー" },
+      {
+        role: "store_manager",
+        dashboardPath: "/store",
+        name: "店舗マネージャー",
+      },
+      { role: "hr", dashboardPath: "/hr", name: "HR" },
+      { role: "admin", dashboardPath: "/admin", name: "管理者" },
+    ];
+
+    for (const { role, dashboardPath, name } of roleDashboards) {
+      test(`${name}がログイン後にダッシュボードに到達できる`, async ({
+        page,
+      }) => {
+        // デモログインAPIでセッション取得
+        await page.goto(`/api/auth/demo-login?role=${role}`);
+        await page.waitForLoadState("networkidle");
+
+        // デモログインが有効な環境でのみ検証
+        // (demo-login APIが存在しない場合はスキップ)
+        if (page.url().includes("/login") || page.url().includes("error")) {
+          test.skip();
+          return;
+        }
+
+        // ダッシュボードに遷移できることを確認
+        await page.goto(dashboardPath);
+        await page.waitForLoadState("networkidle");
+
+        // ログインページにリダイレクトされていないことを確認
+        expect(page.url()).not.toContain("/login");
+      });
+    }
+  });
 });

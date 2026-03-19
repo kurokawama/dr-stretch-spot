@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+// Note: Use createClient<Database>() after `npm run db:types` generates
+// optimized types from Supabase CLI
 export async function createClient() {
   const cookieStore = await cookies();
 

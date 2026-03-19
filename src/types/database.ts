@@ -519,6 +519,161 @@ export interface LineNotification {
 }
 
 // =============================================
+// Supabase Database Type (for createClient<Database>())
+// =============================================
+
+export type Database = {
+  public: {
+    Tables: {
+      profiles: {
+        Row: Profile;
+        Insert: Partial<Profile> & { id: string; role: UserRole };
+        Update: Partial<Profile>;
+        Relationships: [];
+      };
+      alumni_trainers: {
+        Row: AlumniTrainer;
+        Insert: Partial<AlumniTrainer> & { auth_user_id: string; email: string; full_name: string };
+        Update: Partial<AlumniTrainer>;
+        Relationships: [];
+      };
+      stores: {
+        Row: Store;
+        Insert: Partial<Store> & { name: string; area: string; prefecture: string; address: string };
+        Update: Partial<Store>;
+        Relationships: [];
+      };
+      store_managers: {
+        Row: StoreManager;
+        Insert: Partial<StoreManager> & { auth_user_id: string; email: string; full_name: string; store_id: string };
+        Update: Partial<StoreManager>;
+        Relationships: [];
+      };
+      shift_requests: {
+        Row: ShiftRequest;
+        Insert: Partial<ShiftRequest> & { store_id: string; title: string; shift_date: string; start_time: string; end_time: string };
+        Update: Partial<ShiftRequest>;
+        Relationships: [];
+      };
+      shift_templates: {
+        Row: ShiftTemplate;
+        Insert: Partial<ShiftTemplate> & { store_id: string; created_by: string; name: string; title: string; start_time: string; end_time: string };
+        Update: Partial<ShiftTemplate>;
+        Relationships: [];
+      };
+      shift_applications: {
+        Row: ShiftApplication;
+        Insert: Partial<ShiftApplication> & { shift_request_id: string; trainer_id: string };
+        Update: Partial<ShiftApplication>;
+        Relationships: [];
+      };
+      attendance_records: {
+        Row: AttendanceRecord;
+        Insert: Partial<AttendanceRecord> & { application_id: string; trainer_id: string; store_id: string; shift_date: string };
+        Update: Partial<AttendanceRecord>;
+        Relationships: [];
+      };
+      qr_tokens: {
+        Row: QrToken;
+        Insert: Partial<QrToken> & { matching_id: string; type: QrTokenType; token: string; expires_at: string };
+        Update: Partial<QrToken>;
+        Relationships: [];
+      };
+      notification_logs: {
+        Row: NotificationLog;
+        Insert: Partial<NotificationLog> & { user_id: string; type: NotificationType; category: NotificationCategory };
+        Update: Partial<NotificationLog>;
+        Relationships: [];
+      };
+      skill_checks: {
+        Row: SkillCheck;
+        Insert: Partial<SkillCheck> & { trainer_id: string; check_type: SkillCheckType; check_date: string };
+        Update: Partial<SkillCheck>;
+        Relationships: [];
+      };
+      evaluations: {
+        Row: Evaluation;
+        Insert: Partial<Evaluation> & { application_id: string; trainer_id: string; store_id: string; evaluator_id: string; rating: number };
+        Update: Partial<Evaluation>;
+        Relationships: [];
+      };
+      notification_preferences: {
+        Row: NotificationPreference;
+        Insert: Partial<NotificationPreference> & { trainer_id: string };
+        Update: Partial<NotificationPreference>;
+        Relationships: [];
+      };
+      hourly_rate_configs: {
+        Row: HourlyRateConfig;
+        Insert: Partial<HourlyRateConfig> & { tenure_min_years: number; base_rate: number; effective_from: string };
+        Update: Partial<HourlyRateConfig>;
+        Relationships: [];
+      };
+      blank_rule_configs: {
+        Row: BlankRuleConfig;
+        Insert: Partial<BlankRuleConfig> & { rule_type: BlankRuleType; threshold_days: number; action_required: string };
+        Update: Partial<BlankRuleConfig>;
+        Relationships: [];
+      };
+      rate_change_logs: {
+        Row: RateChangeLog;
+        Insert: Partial<RateChangeLog> & { changed_by: string; change_type: ChangeLogType; table_name: string };
+        Update: Partial<RateChangeLog>;
+        Relationships: [];
+      };
+      resignation_requests: {
+        Row: ResignationRequest;
+        Insert: Partial<ResignationRequest> & { auth_user_id: string; full_name: string; desired_resignation_date: string };
+        Update: Partial<ResignationRequest>;
+        Relationships: [];
+      };
+      config_snapshots: {
+        Row: ConfigSnapshot;
+        Insert: Partial<ConfigSnapshot> & { snapshot_type: ConfigSnapshotType; snapshot_data: Record<string, unknown>; created_by: string };
+        Update: Partial<ConfigSnapshot>;
+        Relationships: [];
+      };
+      cost_ceiling_configs: {
+        Row: CostCeilingConfig;
+        Insert: Partial<CostCeilingConfig> & { max_hourly_rate: number };
+        Update: Partial<CostCeilingConfig>;
+        Relationships: [];
+      };
+      shift_availabilities: {
+        Row: ShiftAvailability;
+        Insert: Partial<ShiftAvailability> & { trainer_id: string; store_id: string; available_date: string; start_time: string; end_time: string };
+        Update: Partial<ShiftAvailability>;
+        Relationships: [];
+      };
+      shift_offers: {
+        Row: ShiftOffer;
+        Insert: Partial<ShiftOffer> & { trainer_id: string; store_id: string; title: string; shift_date: string; start_time: string; end_time: string };
+        Update: Partial<ShiftOffer>;
+        Relationships: [];
+      };
+      line_link_tokens: {
+        Row: LineLinkToken;
+        Insert: Partial<LineLinkToken> & { token: string; trainer_id: string; expires_at: string };
+        Update: Partial<LineLinkToken>;
+        Relationships: [];
+      };
+      line_notifications: {
+        Row: LineNotification;
+        Insert: Partial<LineNotification> & { trainer_id: string; line_user_id: string; message_type: string };
+        Update: Partial<LineNotification>;
+        Relationships: [];
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+  };
+};
+
+// =============================================
 // Action Result Types
 // =============================================
 
