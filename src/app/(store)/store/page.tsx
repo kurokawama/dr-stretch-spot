@@ -12,7 +12,7 @@ export default async function StoreDashboardPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/login/store");
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -20,7 +20,7 @@ export default async function StoreDashboardPage() {
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) redirect("/login");
+  if (!manager) redirect("/login/store");
 
   const store = manager.store as unknown as {
     name: string;

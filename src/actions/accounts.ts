@@ -135,17 +135,23 @@ export async function createStaffAccount(input: {
   // If store_manager or area_manager, create store_managers entry
   if (input.role === "store_manager" && input.storeId) {
     await admin.from("store_managers").upsert({
-      user_id: userId,
+      auth_user_id: userId,
+      email: input.email,
+      full_name: input.displayName,
       store_id: input.storeId,
       role: "store_manager",
+      status: "active",
     });
   }
 
   if (input.role === "area_manager" && input.managedAreas?.length) {
     await admin.from("store_managers").upsert({
-      user_id: userId,
+      auth_user_id: userId,
+      email: input.email,
+      full_name: input.displayName,
       role: "area_manager",
       managed_areas: input.managedAreas,
+      status: "active",
     });
   }
 

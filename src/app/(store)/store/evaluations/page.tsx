@@ -8,7 +8,7 @@ import { Star } from "lucide-react";
 export default async function StoreEvaluationsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/login/store");
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -16,7 +16,7 @@ export default async function StoreEvaluationsPage() {
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) redirect("/login");
+  if (!manager) redirect("/login/store");
 
   // Completed shifts awaiting evaluation (approved applications with completed attendance but no evaluation yet)
   const { data: pendingEvals } = await supabase

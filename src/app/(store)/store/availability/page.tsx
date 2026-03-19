@@ -11,7 +11,7 @@ export default async function StoreAvailabilityPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login/store");
   }
 
   const { data: manager } = await supabase
@@ -21,7 +21,7 @@ export default async function StoreAvailabilityPage() {
     .maybeSingle();
 
   if (!manager?.store_id) {
-    redirect("/login");
+    redirect("/login/store");
   }
 
   const [availabilitiesResult, offersResult] = await Promise.all([

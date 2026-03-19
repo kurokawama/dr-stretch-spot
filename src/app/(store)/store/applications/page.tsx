@@ -7,7 +7,7 @@ export default async function StoreApplicationsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/login/store");
 
   const { data: manager } = await supabase
     .from("store_managers")
@@ -15,7 +15,7 @@ export default async function StoreApplicationsPage() {
     .eq("auth_user_id", user.id)
     .single();
 
-  if (!manager) redirect("/login");
+  if (!manager) redirect("/login/store");
 
   // Get ALL applications for this store's shifts (all statuses)
   const { data: applications } = await supabase
