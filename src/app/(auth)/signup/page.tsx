@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,46 +15,87 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { Mail, Lock, UserPlus, CheckCircle } from "lucide-react";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const supabase = createClient();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password) return;
 
+    if (password !== confirmPassword) {
+      toast.error("パスワードが一致しません。");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("パスワードは6文字以上で入力してください。");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
       if (error) {
-        if (error.message?.includes("Invalid login credentials")) {
-          toast.error("メールアドレスまたはパスワードが正しくありません。");
+        if (error.message?.includes("already registered")) {
+          toast.error("このメールアドレスは既に登録されています。ログインページからお試しください。");
           return;
         }
-        if (error.message?.includes("Email not confirmed")) {
-          toast.error("メールアドレスが確認されていません。");
-          return;
-        }
-        toast.error(error.message || "ログインに失敗しました。");
+        toast.error(error.message || "登録に失敗しました。");
         return;
       }
 
-      window.location.href = "/";
+      setSuccess(true);
     } catch {
       toast.error("予期しないエラーが発生しました。");
     } finally {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-[oklch(0.87_0.18_110)]/5" />
+
+        <Card className="relative w-full max-w-sm border-0 shadow-xl">
+          <CardHeader className="text-center pb-4">
+            <div className="mx-auto mb-2 rounded-full bg-green-100 p-3 w-fit">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+            </div>
+            <CardTitle className="font-heading text-xl">
+              登録が完了しました
+            </CardTitle>
+            <CardDescription className="leading-relaxed">
+              ログインページからメールアドレスとパスワードでログインしてください。
+              初回ログイン後、プロフィール情報の入力画面が表示されます。
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/login">
+              <Button className="w-full h-11 font-medium">
+                ログインページへ
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4 relative overflow-hidden">
@@ -81,21 +123,21 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Login Card */}
+      {/* Signup Card */}
       <Card className="relative w-full max-w-sm border-0 shadow-xl animate-scale-in">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-2 rounded-full bg-primary/10 p-3 w-fit">
-            <LogIn className="h-5 w-5 text-primary" />
+            <UserPlus className="h-5 w-5 text-primary" />
           </div>
           <CardTitle className="font-heading text-xl">
-            ログイン
+            新規登録
           </CardTitle>
           <CardDescription className="leading-relaxed">
-            メールアドレスとパスワードを入力してください
+            メールアドレスとパスワードを設定してください
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">メールアドレス</Label>
               <div className="relative">
@@ -119,9 +161,25 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="パスワードを入力"
+                  placeholder="6文字以上"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="h-11 pl-10"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">パスワード（確認）</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="もう一度入力"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   minLength={6}
                   className="h-11 pl-10"
@@ -132,10 +190,10 @@ export default function LoginPage() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ログイン中...
+                  登録中...
                 </span>
               ) : (
-                "ログイン"
+                "登録する"
               )}
             </Button>
           </form>
@@ -143,12 +201,12 @@ export default function LoginPage() {
       </Card>
 
       <div className="relative mt-6 text-center space-y-3">
-        <a
-          href="/signup"
+        <Link
+          href="/login"
           className="block text-sm font-medium text-primary hover:underline"
         >
-          新規登録はこちら
-        </a>
+          既にアカウントをお持ちの方はこちら
+        </Link>
         <p className="text-xs text-muted-foreground leading-relaxed">
           Dr.ストレッチ認定トレーナー<br />副業マッチングプラットフォーム
         </p>
