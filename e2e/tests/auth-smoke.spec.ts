@@ -75,15 +75,13 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
       }
     });
 
-    test("register form: empty submit shows validation error", async ({
+    test("register page requires authentication", async ({
       page,
     }) => {
       await page.goto("/register");
-      const submitBtn = page.locator("button[type='submit']");
-      if (await submitBtn.isVisible()) {
-        await submitBtn.click();
-        expect(page.url()).toContain("/register");
-      }
+      // Register page redirects unauthenticated users to login
+      await page.waitForURL("**/login**", { timeout: 10000 });
+      expect(page.url()).toContain("/login");
     });
   });
 
