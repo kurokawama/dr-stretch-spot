@@ -1,0 +1,11 @@
+{
+  "name": "dr-stretch-spot-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:list": "playwright test --reporter=list"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0"
+  }
+}
