@@ -1,20 +1,9 @@
-import { test, expect, type Page } from "@playwright/test";
-
-async function loginAsHR(page: Page) {
-  await page.goto("/api/auth/demo-login?role=hr");
-  await page.waitForLoadState("networkidle");
-  if (!page.url().includes("/hr")) {
-    const email = process.env.TEST_HR_EMAIL || "hr@test.com";
-    await page.goto("/login/hr");
-    await page.locator("input[type='email']").fill(email);
-    await page.locator("button[type='submit']").click();
-    await page.waitForLoadState("networkidle");
-  }
-}
+import { test, expect } from "@playwright/test";
+import { loginAsRole } from "./helpers/login";
 
 test.describe("HR Role Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await loginAsHR(page);
+    await loginAsRole(page, "hr");
   });
 
   test("HR dashboard is accessible", async ({ page }) => {

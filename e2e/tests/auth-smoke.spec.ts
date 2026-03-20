@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { loginAsRole } from "./helpers/login";
 
 test.describe("Auth Smoke Tests - All Authentication Flows", () => {
   test.describe("Public Pages Accessibility", () => {
@@ -37,6 +38,18 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
       expect(response?.status()).toBe(200);
       await expect(page.locator("body")).toBeVisible();
     });
+
+    test("/privacy page renders with 200", async ({ page }) => {
+      const response = await page.goto("/privacy");
+      expect(response?.status()).toBe(200);
+      await expect(page.locator("body")).toBeVisible();
+    });
+
+    test("/terms page renders with 200", async ({ page }) => {
+      const response = await page.goto("/terms");
+      expect(response?.status()).toBe(200);
+      await expect(page.locator("body")).toBeVisible();
+    });
   });
 
   test.describe("Form Validation - Empty Submit", () => {
@@ -47,7 +60,6 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
       const submitBtn = page.locator("button[type='submit']");
       if (await submitBtn.isVisible()) {
         await submitBtn.click();
-        // After empty submit, page should still be on /signup (not navigated away)
         expect(page.url()).toContain("/signup");
       }
     });
@@ -59,7 +71,6 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
       const submitBtn = page.locator("button[type='submit']");
       if (await submitBtn.isVisible()) {
         await submitBtn.click();
-        // Should remain on login page
         expect(page.url()).toContain("/login");
       }
     });
@@ -85,7 +96,6 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
       await emailInput.fill("not-an-email");
       const submitBtn = page.locator("button[type='submit']");
       await submitBtn.click();
-      // Should remain on login page due to validation
       await page.waitForTimeout(500);
       expect(page.url()).toContain("/login");
     });
@@ -103,7 +113,6 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
 
     test("signup page navigation works", async ({ page }) => {
       await page.goto("/signup");
-      // Check for any navigation links on the page
       const links = page.locator("a[href]");
       const count = await links.count();
       expect(count).toBeGreaterThan(0);
@@ -152,22 +161,9 @@ test.describe("Auth Smoke Tests - All Authentication Flows", () => {
       test(`${name}がログイン後にダッシュボードに到達できる`, async ({
         page,
       }) => {
-        // デモログインAPIでセッション取得
-        await page.goto(`/api/auth/demo-login?role=${role}`);
-        await page.waitForLoadState("networkidle");
-
-        // デモログインが有効な環境でのみ検証
-        // (demo-login APIが存在しない場合はスキップ)
-        if (page.url().includes("/login") || page.url().includes("error")) {
-          test.skip();
-          return;
-        }
-
-        // ダッシュボードに遷移できることを確認
+        await loginAsRole(page, role);
         await page.goto(dashboardPath);
         await page.waitForLoadState("networkidle");
-
-        // ログインページにリダイレクトされていないことを確認
         expect(page.url()).not.toContain("/login");
       });
     }

@@ -1,37 +1,14 @@
-import { test, expect, type Page } from "@playwright/test";
-
-const TRAINER_EMAIL = process.env.TEST_TRAINER_EMAIL || "trainer@test.com";
-const TRAINER_PASSWORD = process.env.TEST_TRAINER_PASSWORD || "";
-
-async function loginAsTrainer(page: Page) {
-  // Use demo login API if available (development/staging)
-  const response = await page.goto("/api/auth/demo-login?role=trainer");
-  await page.waitForLoadState("networkidle");
-  // Verify we landed on trainer home
-  if (!page.url().includes("/home")) {
-    // Fallback: try form login
-    await page.goto("/login");
-    await page.locator("input[type='email']").fill(TRAINER_EMAIL);
-    if (TRAINER_PASSWORD) {
-      const pwInput = page.locator("input[type='password']");
-      if (await pwInput.isVisible()) {
-        await pwInput.fill(TRAINER_PASSWORD);
-      }
-    }
-    await page.locator("button[type='submit']").click();
-    await page.waitForLoadState("networkidle");
-  }
-}
+import { test, expect } from "@playwright/test";
+import { loginAsRole } from "./helpers/login";
 
 test.describe("Trainer Role Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await loginAsTrainer(page);
+    await loginAsRole(page, "trainer");
   });
 
   test("dashboard shows shift information", async ({ page }) => {
     await page.goto("/home");
     await expect(page.locator("body")).toBeVisible();
-    // Trainer home should have shift-related content
     const body = await page.textContent("body");
     expect(body).toBeTruthy();
   });
@@ -44,7 +21,6 @@ test.describe("Trainer Role Tests", () => {
 
   test("shift detail page is navigable", async ({ page }) => {
     await page.goto("/shifts");
-    // Check if shift cards/links exist
     const shiftLinks = page.locator('a[href*="/shifts/"]');
     const count = await shiftLinks.count();
     if (count > 0) {
@@ -80,7 +56,6 @@ test.describe("Trainer Role Tests", () => {
 
   test("navigation buttons exist and are clickable", async ({ page }) => {
     await page.goto("/home");
-    // Check for main navigation elements
     const buttons = page.locator("button, a[role='button']");
     const count = await buttons.count();
     expect(count).toBeGreaterThan(0);

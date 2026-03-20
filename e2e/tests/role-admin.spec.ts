@@ -1,20 +1,9 @@
-import { test, expect, type Page } from "@playwright/test";
-
-async function loginAsAdmin(page: Page) {
-  await page.goto("/api/auth/demo-login?role=admin");
-  await page.waitForLoadState("networkidle");
-  if (!page.url().includes("/admin")) {
-    const email = process.env.TEST_ADMIN_EMAIL || "admin@test.com";
-    await page.goto("/login/admin");
-    await page.locator("input[type='email']").fill(email);
-    await page.locator("button[type='submit']").click();
-    await page.waitForLoadState("networkidle");
-  }
-}
+import { test, expect } from "@playwright/test";
+import { loginAsRole } from "./helpers/login";
 
 test.describe("Admin Role Tests", () => {
   test.beforeEach(async ({ page }) => {
-    await loginAsAdmin(page);
+    await loginAsRole(page, "admin");
   });
 
   test("admin dashboard is accessible", async ({ page }) => {
@@ -31,7 +20,6 @@ test.describe("Admin Role Tests", () => {
 
   test("admin page has management UI elements", async ({ page }) => {
     await page.goto("/admin");
-    // Admin should have navigation/management elements
     const navElements = page.locator("nav, aside, [role='navigation']");
     const links = page.locator("a[href]");
     const totalCount =
