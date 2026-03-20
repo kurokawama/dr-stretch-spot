@@ -218,6 +218,21 @@ export async function sendLineShiftConfirmation(input: {
   startTime: string;
   endTime: string;
 }): Promise<ActionResult> {
+  // Authentication check: verify caller is authenticated and has appropriate role
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "認証が必要です" };
+
+  const { data: callerProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!callerProfile || !["store_manager", "hr", "area_manager", "admin"].includes(callerProfile.role)) {
+    return { success: false, error: "権限がありません" };
+  }
+
   const admin = createAdminClient();
 
   // Get trainer's LINE userId
@@ -292,6 +307,21 @@ export async function sendLineShiftConfirmation(input: {
 export async function sendLineOfferNotification(
   offerId: string
 ): Promise<ActionResult> {
+  // Authentication check: verify caller is authenticated and has appropriate role
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "認証が必要です" };
+
+  const { data: callerProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!callerProfile || !["store_manager", "hr", "area_manager", "admin"].includes(callerProfile.role)) {
+    return { success: false, error: "権限がありません" };
+  }
+
   const admin = createAdminClient();
 
   // Get offer with store and trainer info

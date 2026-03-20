@@ -15,6 +15,7 @@ import {
 import { ChevronLeft, ChevronRight, Download, Search } from "lucide-react";
 import { approveShiftRequest, rejectShiftRequest } from "@/actions/shifts";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { getTodayJST, getTomorrowJST } from "@/lib/date";
 
@@ -352,7 +353,7 @@ export default async function HRDashboardPage() {
                                   formAction={async () => {
                                     "use server";
                                     await approveShiftRequest(row.shiftId);
-                                    redirect("/hr");
+                                    revalidatePath("/hr");
                                   }}
                                 >
                                   承認
@@ -366,7 +367,7 @@ export default async function HRDashboardPage() {
                                   formAction={async () => {
                                     "use server";
                                     await rejectShiftRequest(row.shiftId);
-                                    redirect("/hr");
+                                    revalidatePath("/hr");
                                   }}
                                 >
                                   却下
