@@ -6,6 +6,6 @@
     "test:list": "playwright test --reporter=list"
   },
   "devDependencies": {
-    "@playwright/test": "^1.52.0"
+    "@playwright/test": "1.52.0"
   }
 }
