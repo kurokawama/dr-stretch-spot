@@ -1,0 +1,160 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Dr.stretch SPOT Dr.stretch SPOT" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img "Dr.stretch SPOT" [ref=e6]
+          - generic [ref=e7]: Dr.stretch
+          - generic [ref=e8]: SPOT
+        - generic [ref=e9]:
+          - link "notifications" [ref=e10] [cursor=pointer]:
+            - /url: /notifications
+            - img
+          - generic [ref=e11]: 人事部
+          - button "EH" [ref=e12]:
+            - generic [ref=e14]: EH
+    - generic [ref=e15]:
+      - complementary [ref=e16]:
+        - navigation [ref=e17]:
+          - link "ダッシュボード" [ref=e18] [cursor=pointer]:
+            - /url: /hr
+            - img [ref=e19]
+            - text: ダッシュボード
+          - link "トレーナー管理" [ref=e24] [cursor=pointer]:
+            - /url: /hr/trainers
+            - img [ref=e25]
+            - text: トレーナー管理
+          - link "シフトオファー" [ref=e37] [cursor=pointer]:
+            - /url: /hr/shift-offers
+            - img [ref=e38]
+            - text: シフトオファー
+          - link "マッチング管理" [ref=e41] [cursor=pointer]:
+            - /url: /hr/matchings
+            - img [ref=e42]
+            - text: マッチング管理
+          - link "出勤管理" [ref=e47] [cursor=pointer]:
+            - /url: /hr/attendance
+            - img [ref=e48]
+            - text: 出勤管理
+          - link "退職意向管理" [ref=e52] [cursor=pointer]:
+            - /url: /hr/resignations
+            - img [ref=e53]
+            - text: 退職意向管理
+          - link "時給テーブル" [ref=e56] [cursor=pointer]:
+            - /url: /hr/rates
+            - img [ref=e57]
+            - text: 時給テーブル
+          - link "シミュレーション" [ref=e59] [cursor=pointer]:
+            - /url: /hr/simulation
+            - img [ref=e60]
+            - text: シミュレーション
+          - link "変更履歴" [ref=e62] [cursor=pointer]:
+            - /url: /hr/audit-log
+            - img [ref=e63]
+            - text: 変更履歴
+          - link "ブランクルール" [ref=e66] [cursor=pointer]:
+            - /url: /hr/blank-rules
+            - img [ref=e67]
+            - text: ブランクルール
+          - link "コスト上限" [ref=e69] [cursor=pointer]:
+            - /url: /hr/cost-ceiling
+            - img [ref=e70]
+            - text: コスト上限
+          - link "ロールバック" [ref=e73] [cursor=pointer]:
+            - /url: /hr/rollback
+            - img [ref=e74]
+            - text: ロールバック
+      - main [ref=e77]:
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - heading "人事部 ダッシュボード" [level=1] [ref=e81]
+            - paragraph [ref=e82]: 全店舗のシフト・マッチング・出勤状況を管理
+          - generic [ref=e83]:
+            - generic [ref=e85]:
+              - paragraph [ref=e86]: 本日のマッチング
+              - paragraph [ref=e87]: "0"
+              - paragraph [ref=e88]: 確定 0 / 完了 0（全11件）
+            - generic [ref=e90]:
+              - paragraph [ref=e92]: 承認待ちシフト
+              - paragraph [ref=e93]: "0"
+              - paragraph [ref=e94]: 店舗からの申請
+            - generic [ref=e96]:
+              - paragraph [ref=e97]: 本日の出勤状況
+              - paragraph [ref=e98]: "0"
+              - paragraph [ref=e99]: 出勤中 0 / 完了 0 / 待機 0
+            - generic [ref=e101]:
+              - paragraph [ref=e102]: 明日の予定
+              - paragraph [ref=e103]: "0"
+              - paragraph [ref=e104]: 前日未確認 0 / シフト希望 0
+          - generic [ref=e107]:
+            - combobox [ref=e108]:
+              - option "ステータス" [selected]
+              - option "承認待ち"
+              - option "承認済"
+              - option "完了"
+              - option "キャンセル"
+            - combobox [ref=e109]:
+              - option "エリア" [selected]
+              - option "Kansai"
+            - combobox [ref=e110]:
+              - option "期間" [selected]
+              - option "今日"
+              - option "明日"
+              - option "今週"
+            - generic [ref=e111]:
+              - img
+              - textbox "検索" [ref=e112]
+            - button "エクスポート" [ref=e113]:
+              - img
+              - text: エクスポート
+          - generic [ref=e114]:
+            - generic [ref=e116]: 本日のマッチング・シフト一覧
+            - generic [ref=e117]:
+              - table [ref=e120]:
+                - rowgroup [ref=e121]:
+                  - row "トレーナー名 店舗名 シフト日 時間 時給 ステータス アクション" [ref=e122]:
+                    - columnheader "トレーナー名" [ref=e123]
+                    - columnheader "店舗名" [ref=e124]
+                    - columnheader "シフト日" [ref=e125]
+                    - columnheader "時間" [ref=e126]
+                    - columnheader "時給" [ref=e127]
+                    - columnheader "ステータス" [ref=e128]
+                    - columnheader "アクション" [ref=e129]
+                - rowgroup [ref=e130]:
+                  - row "Suzuki Ren Dr.stretch SPOT Demo Store 2026-03-22 10:00〜19:00 ¥1,800 承認済 詳細" [ref=e131]:
+                    - cell "Suzuki Ren" [ref=e132]
+                    - cell "Dr.stretch SPOT Demo Store" [ref=e133]
+                    - cell "2026-03-22" [ref=e134]
+                    - cell "10:00〜19:00" [ref=e135]
+                    - cell "¥1,800" [ref=e136]
+                    - cell "承認済" [ref=e137]:
+                      - generic [ref=e138]: 承認済
+                    - cell "詳細" [ref=e139]:
+                      - link "詳細" [ref=e141] [cursor=pointer]:
+                        - /url: /hr/matchings
+                  - row "黒川 Dr.stretch SPOT Demo Store 2026-03-24 10:00〜19:00 ¥1,400 承認済 詳細" [ref=e142]:
+                    - cell "黒川" [ref=e143]
+                    - cell "Dr.stretch SPOT Demo Store" [ref=e144]
+                    - cell "2026-03-24" [ref=e145]
+                    - cell "10:00〜19:00" [ref=e146]
+                    - cell "¥1,400" [ref=e147]
+                    - cell "承認済" [ref=e148]:
+                      - generic [ref=e149]: 承認済
+                    - cell "詳細" [ref=e150]:
+                      - link "詳細" [ref=e152] [cursor=pointer]:
+                        - /url: /hr/matchings
+              - generic [ref=e153]:
+                - paragraph [ref=e154]: 1-2 / 2件
+                - generic [ref=e155]:
+                  - button [disabled]:
+                    - img
+                  - button "1" [ref=e156]
+                  - button [disabled]:
+                    - img
+  - region "Notifications alt+T"
+  - alert [ref=e157]
+```

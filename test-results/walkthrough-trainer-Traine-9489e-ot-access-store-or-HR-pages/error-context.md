@@ -1,0 +1,100 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Dr.stretch SPOT Dr.stretch SPOT" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img "Dr.stretch SPOT" [ref=e6]
+          - generic [ref=e7]: Dr.stretch
+          - generic [ref=e8]: SPOT
+        - generic [ref=e9]:
+          - link "notifications" [ref=e10] [cursor=pointer]:
+            - /url: /notifications
+            - img
+          - generic [ref=e11]: トレーナー
+          - button "ET" [ref=e12]:
+            - generic [ref=e14]: ET
+    - generic [ref=e15]:
+      - complementary [ref=e16]:
+        - navigation [ref=e17]:
+          - link "ホーム" [ref=e18] [cursor=pointer]:
+            - /url: /home
+            - img [ref=e19]
+            - text: ホーム
+          - link "シフト検索" [ref=e22] [cursor=pointer]:
+            - /url: /shifts
+            - img [ref=e23]
+            - text: シフト検索
+          - link "マイシフト" [ref=e26] [cursor=pointer]:
+            - /url: /my-shifts
+            - img [ref=e27]
+            - text: マイシフト
+          - link "打刻" [ref=e29] [cursor=pointer]:
+            - /url: /clock
+            - img [ref=e30]
+            - text: 打刻
+          - link "収入" [ref=e33] [cursor=pointer]:
+            - /url: /earnings
+            - img [ref=e34]
+            - text: 収入
+          - link "出勤可能日" [ref=e37] [cursor=pointer]:
+            - /url: /availability
+            - img [ref=e38]
+            - text: 出勤可能日
+          - link "評価履歴" [ref=e40] [cursor=pointer]:
+            - /url: /evaluation-history
+            - img [ref=e41]
+            - text: 評価履歴
+          - link "通知" [ref=e43] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e44]
+            - text: 通知
+          - link "設定" [ref=e47] [cursor=pointer]:
+            - /url: /profile
+            - img [ref=e48]
+            - text: 設定
+      - main [ref=e51]:
+        - generic [ref=e53]:
+          - generic [ref=e55]:
+            - heading "おかえりなさい、E2Eテストトレーナーさん 👋" [level=1] [ref=e56]
+            - generic [ref=e57]:
+              - paragraph [ref=e58]: 本日のシフト
+              - paragraph [ref=e59]: 本日のシフト
+              - paragraph [ref=e60]: "--:-- - --:--"
+              - link "打刻する" [ref=e61] [cursor=pointer]:
+                - /url: /clock
+          - generic [ref=e62]:
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - img [ref=e66]
+                - paragraph [ref=e68]: 次のシフト
+              - paragraph [ref=e69]: 未定
+              - paragraph
+            - generic [ref=e71]:
+              - generic [ref=e72]:
+                - img [ref=e73]
+                - paragraph [ref=e76]: 今月の収入
+              - paragraph [ref=e77]: ¥0
+              - paragraph [ref=e78]: 直近5件
+            - generic [ref=e80]:
+              - generic [ref=e81]:
+                - img [ref=e82]
+                - paragraph [ref=e88]: ランク
+              - paragraph [ref=e89]: シルバー
+              - paragraph [ref=e90]: 3年
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - heading "募集中のシフト" [level=2] [ref=e93]
+              - link "すべて見る >" [ref=e94] [cursor=pointer]:
+                - /url: /shifts
+            - generic [ref=e96]:
+              - img [ref=e97]
+              - paragraph [ref=e99]: 現在募集中のシフトはありません
+              - link "シフト検索で探す" [ref=e100] [cursor=pointer]:
+                - /url: /shifts
+  - region "Notifications alt+T"
+  - alert [ref=e101]
+```

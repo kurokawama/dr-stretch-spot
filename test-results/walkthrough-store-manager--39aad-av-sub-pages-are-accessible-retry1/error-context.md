@@ -1,0 +1,96 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Dr.stretch SPOT Dr.stretch SPOT" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img "Dr.stretch SPOT" [ref=e6]
+          - generic [ref=e7]: Dr.stretch
+          - generic [ref=e8]: SPOT
+        - generic [ref=e9]:
+          - link "notifications" [ref=e10] [cursor=pointer]:
+            - /url: /store/notifications
+            - img
+          - generic [ref=e11]: 店舗管理者
+          - button "ES" [ref=e12]:
+            - generic [ref=e14]: ES
+    - generic [ref=e15]:
+      - complementary [ref=e16]:
+        - navigation [ref=e17]:
+          - link "ダッシュボード" [ref=e18] [cursor=pointer]:
+            - /url: /store
+            - img [ref=e19]
+            - text: ダッシュボード
+          - link "シフト募集" [ref=e24] [cursor=pointer]:
+            - /url: /store/shifts
+            - img [ref=e25]
+            - text: シフト募集
+          - link "応募者" [ref=e27] [cursor=pointer]:
+            - /url: /store/applications
+            - img [ref=e28]
+            - text: 応募者
+          - link "出勤管理" [ref=e33] [cursor=pointer]:
+            - /url: /store/attendance
+            - img [ref=e34]
+            - text: 出勤管理
+          - link "シフト希望" [ref=e38] [cursor=pointer]:
+            - /url: /store/availability
+            - img [ref=e39]
+            - text: シフト希望
+          - link "評価" [ref=e41] [cursor=pointer]:
+            - /url: /store/evaluations
+            - img [ref=e42]
+            - text: 評価
+          - link "テンプレート" [ref=e44] [cursor=pointer]:
+            - /url: /store/templates
+            - img [ref=e45]
+            - text: テンプレート
+          - link "利用実績" [ref=e48] [cursor=pointer]:
+            - /url: /store/usage
+            - img [ref=e49]
+            - text: 利用実績
+          - link "通知" [ref=e51] [cursor=pointer]:
+            - /url: /store/notifications
+            - img [ref=e52]
+            - text: 通知
+      - main [ref=e55]:
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - heading "ダッシュボード" [level=1] [ref=e59]
+            - generic [ref=e60]:
+              - paragraph [ref=e61]: E2Eテスト店舗
+              - paragraph [ref=e62]:
+                - img [ref=e63]
+                - text: 東京都渋谷区
+              - generic [ref=e66]: 関東エリア
+          - generic [ref=e67]:
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - paragraph [ref=e71]: 本日のカバー率
+                - paragraph [ref=e72]: 0%
+                - paragraph [ref=e73]: 0/0名
+              - img [ref=e75]
+            - generic [ref=e80]:
+              - paragraph [ref=e81]: 未対応の応募
+              - paragraph [ref=e82]: "0"
+            - generic [ref=e93]:
+              - paragraph [ref=e94]: 今月の利用回数
+              - paragraph [ref=e95]: "0"
+              - paragraph [ref=e96]: シフト数 0
+          - generic [ref=e106]:
+            - generic [ref=e108]:
+              - generic [ref=e109]: 今週のシフト
+              - link "新規作成" [ref=e110] [cursor=pointer]:
+                - /url: /store/shifts
+                - img
+                - text: 新規作成
+            - paragraph [ref=e112]: 今後7日間の予定はありません
+          - generic [ref=e113]:
+            - generic [ref=e115]: 最近のアクティビティ
+            - paragraph [ref=e117]: 今後7日間の予定はありません
+  - region "Notifications alt+T"
+  - alert [ref=e118]
+```
