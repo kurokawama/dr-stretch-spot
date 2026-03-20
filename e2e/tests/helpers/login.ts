@@ -29,7 +29,8 @@ const TEST_ACCOUNTS: Record<string, { email: string; password: string; loginPath
 };
 
 /**
- * Login as a specific role using email + password form
+ * Login as a specific role using email + password form.
+ * Verifies successful login by checking redirect away from login page.
  */
 export async function loginAsRole(page: Page, role: string): Promise<void> {
   const account = TEST_ACCOUNTS[role];
@@ -38,20 +39,16 @@ export async function loginAsRole(page: Page, role: string): Promise<void> {
   await page.goto(account.loginPath);
   await page.waitForLoadState("networkidle");
 
-  // Fill email
   const emailInput = page.locator("input[type='email']");
   await emailInput.waitFor({ state: "visible", timeout: 10000 });
   await emailInput.fill(account.email);
 
-  // Fill password
   const passwordInput = page.locator("input[type='password']");
   await passwordInput.waitFor({ state: "visible", timeout: 5000 });
   await passwordInput.fill(account.password);
 
-  // Submit
   await page.locator("button[type='submit']").click();
 
-  // Wait for navigation away from login page
   await page.waitForURL((url) => !url.pathname.includes("/login"), {
     timeout: 15000,
   });
